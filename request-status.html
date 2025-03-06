@@ -1,0 +1,290 @@
+<!-- /onestopbeolcho/request-status.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 캐시 방지 메타 태그 -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>신청 현황 - 벌초 서비스</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- 스타일 분리 -->
+  <link rel="stylesheet" href="/styles/theme.css">
+  <link rel="stylesheet" href="/styles/components.css">
+  <link rel="stylesheet" href="/styles/footer.css">
+  <!-- Firebase JavaScript SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script>
+    // Firebase 초기화
+    const firebaseConfig = {
+      apiKey: "AIzaSyDuWpcxhSucn5jRdzsQOcdN-TgnY586kIo",
+      authDomain: "onestopbeolcho-d2bca.firebaseapp.com",
+      projectId: "onestopbeolcho-d2bca",
+      storageBucket: "onestopbeolcho-d2bca.firebasestorage.app",
+      messagingSenderId: "378817329836",
+      appId: "1:378817329836:web:d3c2a06bf705cb5e943d09",
+      measurementId: "G-9CX7J4Z578"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+  <!-- 전용 스타일 -->
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100%;
+      font-family: 'Noto Sans KR', sans-serif;
+      background: linear-gradient(135deg, #a5d6a7 0%, #c8e6c9 100%);
+    }
+
+    .status-container {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      margin: 60px auto;
+      max-width: 800px;
+    }
+
+    .status-container h2 {
+      font-size: 1.8em;
+      color: #0a4119;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .lookup-form {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .lookup-form label {
+      font-weight: 500;
+      margin-right: 10px;
+      font-size: 1em;
+      color: #555;
+    }
+
+    .lookup-form input {
+      padding: 8px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1em;
+      background: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      width: 200px;
+    }
+
+    .lookup-form input:focus {
+      border-color: #0a4119;
+      box-shadow: 0 0 8px rgba(10, 65, 25, 0.3);
+      outline: none;
+    }
+
+    .lookup-form button {
+      background: linear-gradient(135deg, #0a4119, #4caf50);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 1em;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      margin-left: 10px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .lookup-form button:hover {
+      background: linear-gradient(135deg, #4caf50, #0f5e28);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9em;
+    }
+
+    table thead {
+      background: #0a4119;
+      color: #fff;
+    }
+
+    table th, table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    table tbody tr.pending {
+      background: rgba(255, 235, 59, 0.2);
+    }
+
+    table tbody tr.completed {
+      background: rgba(76, 175, 80, 0.2);
+    }
+
+    table tbody tr:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .clickable {
+      cursor: pointer;
+      color: #0a4119;
+      font-weight: 500;
+    }
+
+    .clickable:hover {
+      text-decoration: underline;
+    }
+
+    .action-btn {
+      background: #4caf50;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9em;
+      margin-right: 5px;
+    }
+
+    .action-btn:hover {
+      background: #388e3c;
+    }
+
+    .photos-list img {
+      max-width: 100px;
+      margin: 5px;
+      border: 1px solid #e0e0e0;
+      border-radius: 5px;
+    }
+
+    nav {
+      height: 60px;
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+
+  <div class="status-container">
+    <h2>신청 현황</h2>
+    <div class="lookup-form">
+      <label for="customer-name">고객명</label>
+      <input type="text" id="customer-name" placeholder="고객명 입력" required>
+      <label for="customer-password">비밀번호</label>
+      <input type="password" id="customer-password" placeholder="비밀번호 입력" required>
+      <button id="lookup-btn">조회</button>
+    </div>
+
+    <table id="status-table">
+      <thead>
+        <tr>
+          <th>고객명</th>
+          <th>서비스 유형</th>
+          <th>주소</th>
+          <th>신청 날짜</th>
+          <th>상태</th>
+          <th>작업 상태</th>
+          <th>작업 사진</th>
+          <th>작업자 메모</th>
+          <th>작업 재신청</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div id="footer-container"></div>
+
+  <script src="/components/nav.js" type="text/javascript" defer></script>
+  <script src="/components/footer.js" type="text/javascript" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const db = firebase.firestore();
+      const tableBody = document.querySelector('#status-table tbody');
+      const lookupBtn = document.getElementById('lookup-btn');
+      const customerNameInput = document.getElementById('customer-name');
+      const customerPasswordInput = document.getElementById('customer-password');
+
+      lookupBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        const customerName = customerNameInput.value.trim();
+        const customerPassword = customerPasswordInput.value.trim();
+
+        if (!customerName || !customerPassword) {
+          alert('고객명과 비밀번호를 입력해주세요.');
+          return;
+        }
+
+        try {
+          const querySnapshot = await db.collection('serviceRequests')
+            .where('customerName', '==', customerName)
+            .where('customerPassword', '==', customerPassword)
+            .where('createdBy', '==', 'anonymous')
+            .get();
+
+          tableBody.innerHTML = '';
+          if (querySnapshot.empty) {
+            tableBody.innerHTML = '<tr><td colspan="9">신청 내역이 없습니다.</td></tr>';
+            return;
+          }
+
+          querySnapshot.forEach(doc => {
+            const request = doc.data();
+            request.id = doc.id;
+            const createdAt = request.createdAt ? new Date(request.createdAt.toDate()).toISOString().split('T')[0] : '미지정';
+            const row = document.createElement('tr');
+            row.classList.add(request.status === 'pending' ? 'pending' : 'completed');
+            row.innerHTML = `
+              <td class="clickable">${request.customerName}</td>
+              <td class="clickable">${request.serviceType}</td>
+              <td>${request.address}</td>
+              <td>${createdAt}</td>
+              <td>${request.status === 'pending' ? '대기중' : '완료'}</td>
+              <td>${request.workerStatus === 'not_started' ? '작업 시작 전' :
+                    request.workerStatus === 'started' ? '작업 시작' :
+                    request.workerStatus === 'in_progress' ? '작업 중' :
+                    request.workerStatus === 'completed' ? '작업 완료' : '미지정'}</td>
+              <td class="photos-list">
+                ${request.beforePhotos?.length > 0 ? request.beforePhotos.map(url => `<img src="${url}" alt="작업 전 사진">`).join('') : ''}
+                ${request.duringPhotos?.length > 0 ? request.duringPhotos.map(url => `<img src="${url}" alt="작업 중 사진">`).join('') : ''}
+                ${request.afterPhotos?.length > 0 ? request.afterPhotos.map(url => `<img src="${url}" alt="작업 후 사진">`).join('') : ''}
+              </td>
+              <td>${request.workerNotes || '없음'}</td>
+              <td>
+                <button class="action-btn resubmit-btn" data-id="${request.id}">재신청</button>
+              </td>
+            `;
+
+            row.querySelectorAll('.clickable').forEach(cell => {
+              cell.addEventListener('click', () => {
+                window.open(`/view-request.html?requestId=${request.id}`, 'RequestDetails', 'width=650,height=700,scrollbars=yes');
+              });
+            });
+
+            row.querySelector('.resubmit-btn').addEventListener('click', () => {
+              window.location.href = `/request.html?resubmit=${request.id}`;
+            });
+
+            tableBody.appendChild(row);
+          });
+        } catch (error) {
+          console.error('신청 조회 오류:', error);
+          alert('신청 내역 조회에 실패했습니다: ' + error.message);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

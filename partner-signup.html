@@ -1,0 +1,311 @@
+<!-- /onestopbeolcho/partner-signup.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 캐시 방지 메타 태그 -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>파트너 가입신청 - 벌초 서비스</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- 스타일 분리 -->
+  <link rel="stylesheet" href="/styles/theme.css">
+  <link rel="stylesheet" href="/styles/components.css">
+  <link rel="stylesheet" href="/styles/footer.css">
+  <!-- Firebase JavaScript SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script>
+    // Firebase 초기화
+    const firebaseConfig = {
+      apiKey: "AIzaSyDuWpcxhSucn5jRdzsQOcdN-TgnY586kIo",
+      authDomain: "onestopbeolcho.com",
+      projectId: "onestopbeolcho-d2bca",
+      storageBucket: "onestopbeolcho-d2bca.firebasestorage.app",
+      messagingSenderId: "378817329836",
+      appId: "1:378817329836:web:d3c2a06bf705cb5e943d09",
+      measurementId: "G-9CX7J4Z578"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+  </script>
+  <!-- 전용 스타일 -->
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100%;
+      font-family: 'Noto Sans KR', sans-serif;
+      background: linear-gradient(135deg, #a5d6a7 0%, #c8e6c9 100%);
+    }
+
+    .signup-container {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      margin: 60px auto;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .signup-container h2 {
+      font-size: 1.8em;
+      color: #0a4119;
+      margin-bottom: 20px;
+    }
+
+    .signup-container label {
+      font-weight: 500;
+      margin-top: 10px;
+      margin-bottom: 5px;
+      display: block;
+      font-size: 1em;
+      color: #555;
+    }
+
+    .signup-container input,
+    .signup-container select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1em;
+      background: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+    }
+
+    .signup-container input:focus,
+    .signup-container select:focus {
+      border-color: #0a4119;
+      box-shadow: 0 0 8px rgba(10, 65, 25, 0.3);
+      outline: none;
+    }
+
+    .signup-container button {
+      background: linear-gradient(135deg, #0a4119, #4caf50);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 1.1em;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      margin-top: 15px;
+      width: 100%;
+      border: none;
+      cursor: pointer;
+    }
+
+    .signup-container button:hover {
+      background: linear-gradient(135deg, #4caf50, #0f5e28);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .signup-container button:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .signup-container .link {
+      display: block;
+      margin-top: 15px;
+      color: #0a4119;
+      text-decoration: none;
+      font-size: 0.9em;
+    }
+
+    .signup-container .link:hover {
+      text-decoration: underline;
+    }
+
+    .signup-container .checkbox-group {
+      text-align: left;
+      margin-bottom: 15px;
+    }
+
+    .signup-container .checkbox-group label {
+      display: inline-block;
+      margin-right: 10px;
+      font-size: 0.9em;
+    }
+
+    nav {
+      height: 60px;
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+
+  <div class="signup-container">
+    <h2>파트너 가입신청</h2>
+    <form id="partner-signup-form">
+      <label for="email">이메일</label>
+      <input type="email" id="email" placeholder="이메일 입력" required>
+
+      <label for="password">비밀번호</label>
+      <input type="password" id="password" placeholder="비밀번호 입력 (6자 이상)" required>
+
+      <label for="name">이름</label>
+      <input type="text" id="name" placeholder="이름 입력" required>
+
+      <label for="phone">전화번호</label>
+      <input type="tel" id="phone" placeholder="01012345678" maxlength="13" required>
+      <small style="color: #555; display: block; margin-bottom: 10px;">숫자만 입력하세요 (예: 01012345678)</small>
+
+      <label for="role">파트너 유형</label>
+      <select id="role" required>
+        <option value="">유형 선택</option>
+        <option value="worker">작업자</option>
+        <option value="admin">관리자</option>
+      </select>
+
+      <label>작업 가능 범위 (최소 1개 선택)</label>
+      <div class="checkbox-group">
+        <label><input type="checkbox" name="serviceRange" value="벌초"> 벌초</label>
+        <label><input type="checkbox" name="serviceRange" value="예초"> 예초</label>
+        <label><input type="checkbox" name="serviceRange" value="태양광 전문 예초"> 태양광 전문 예초</label>
+      </div>
+
+      <label for="taxId">사업자 등록번호 (선택)</label>
+      <input type="text" id="taxId" placeholder="123-45-67890">
+
+      <label for="bankAccount">정산 계좌번호 (선택)</label>
+      <input type="text" id="bankAccount" placeholder="계좌번호 입력 (예: 123-456-789)">
+
+      <label for="bankName">은행명 (선택)</label>
+      <input type="text" id="bankName" placeholder="은행명 입력 (예: 국민은행)">
+
+      <label for="desiredRegions">작업을 원하는 지역</label>
+      <input type="text" id="desiredRegions" placeholder="작업 희망 지역 입력 (예: 서울, 경기)" required>
+
+      <button type="submit">가입신청</button>
+    </form>
+    <a href="/signup.html" class="link">고객 회원가입으로 돌아가기</a>
+    <a href="/login.html" class="link" id="login-link">이미 계정이 있으신가요? 로그인</a>
+  </div>
+
+  <div id="footer-container"></div>
+
+  <script src="/components/nav.js" type="text/javascript" defer></script>
+  <script src="/components/footer.js" type="text/javascript" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+      const signupForm = document.getElementById('partner-signup-form');
+      const roleSelect = document.getElementById('role');
+      const loginLink = document.getElementById('login-link');
+      const phoneInput = document.getElementById('phone');
+
+      // 전화번호 입력 시 하이픈 자동 삽입
+      phoneInput.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 3 && value.length <= 7) {
+          value = `${value.slice(0, 3)}-${value.slice(3)}`;
+        } else if (value.length > 7) {
+          value = `${value.slice(0, 3)}-${value.slice(3, 7)}-${value.slice(7, 11)}`;
+        }
+        e.target.value = value;
+      });
+
+      // 로그인 링크 클릭 시 페이지 이동 보장
+      loginLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.href = '/login.html';
+      });
+
+      signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const name = document.getElementById('name').value;
+        const phone = document.getElementById('phone').value;
+        const role = document.getElementById('role').value;
+        const serviceRange = Array.from(document.querySelectorAll('input[name="serviceRange"]:checked')).map(cb => cb.value);
+        const taxId = document.getElementById('taxId').value;
+        const bankAccount = document.getElementById('bankAccount').value;
+        const bankName = document.getElementById('bankName').value;
+        const desiredRegions = document.getElementById('desiredRegions').value;
+
+        // 역할 검증
+        if (!role) {
+          alert('파트너 유형을 선택해주세요.');
+          return;
+        }
+
+        // 작업 가능 범위 최소 1개 선택 검증
+        if (serviceRange.length === 0) {
+          alert('최소 1개의 작업 가능 범위를 선택해주세요.');
+          return;
+        }
+
+        try {
+          // Firebase Authentication으로 사용자 생성
+          const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+          const user = userCredential.user;
+
+          // Firestore에 사용자 정보 저장
+          const userData = {
+            uid: user.uid,
+            email: email,
+            name: name,
+            phone: phone,
+            role: role,
+            serviceRange: serviceRange,
+            taxId: taxId || null,
+            bankAccount: bankAccount || null,
+            bankName: bankName || null,
+            desiredRegions: desiredRegions,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          };
+
+          await db.collection('users').doc(user.uid).set(userData);
+
+          // 작업자일 경우 workers 컬렉션에도 추가
+          if (role === 'worker') {
+            await db.collection('workers').doc(user.uid).set({
+              workerId: user.uid,
+              name: name,
+              phone: phone,
+              available: true,
+              serviceRange: serviceRange,
+              taxId: taxId || null,
+              bankAccount: bankAccount || null,
+              bankName: bankName || null,
+              desiredRegions: desiredRegions,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          }
+
+          // 가입 성공 후 로그아웃 처리
+          await auth.signOut();
+          alert('가입신청이 완료되었습니다! 로그인 페이지로 이동합니다.');
+          window.location.href = '/login.html';
+        } catch (error) {
+          console.error('가입신청 오류:', error);
+          if (error.code === 'auth/email-already-in-use') {
+            alert('이미 사용 중인 이메일입니다. 다른 이메일을 사용하거나 로그인해주세요.');
+          } else {
+            alert('가입신청에 실패했습니다: ' + error.message);
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

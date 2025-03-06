@@ -1,0 +1,929 @@
+<!-- /onestopbeolcho/admin.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 캐시 방지 메타 태그 -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>관리자 페이지 - 벌초 서비스</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- 스타일 분리 -->
+  <link rel="stylesheet" href="/styles/theme.css">
+  <link rel="stylesheet" href="/styles/components.css">
+  <link rel="stylesheet" href="/styles/footer.css">
+  <!-- 카카오맵 API 스크립트 (동기 로드) -->
+  <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef6b942fdad36e982c84eb0061d1d2ed&libraries=services"></script>
+  <!-- Firebase JavaScript SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+  <script>
+    // Firebase 초기화
+    const firebaseConfig = {
+      apiKey: "AIzaSyDuWpcxhSucn5jRdzsQOcdN-TgnY586kIo",
+      authDomain: "onestopbeolcho-d2bca.firebaseapp.com",
+      projectId: "onestopbeolcho-d2bca",
+      storageBucket: "onestopbeolcho-d2bca.firebasestorage.app",
+      messagingSenderId: "378817329836",
+      appId: "1:378817329836:web:d3c2a06bf705cb5e943d09",
+      measurementId: "G-9CX7J4Z578"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+  <!-- 전용 스타일 -->
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100%;
+      font-family: 'Noto Sans KR', sans-serif;
+      background: linear-gradient(135deg, #a5d6a7 0%, #c8e6c9 100%);
+    }
+
+    .admin-container {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 15px;
+      width: 100%;
+      height: calc(100vh - 60px - 60px);
+      padding: 0;
+      padding-bottom: 60px;
+      box-sizing: border-box;
+    }
+
+    .admin-list {
+      flex: 0 0 70%;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      min-width: 600px;
+      overflow-y: auto;
+      height: 100%;
+    }
+
+    .admin-map {
+      flex: 0 0 25%;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 10px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      min-width: 300px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      margin-right: 15px;
+      box-sizing: border-box;
+      display: none;
+    }
+
+    #admin-map {
+      flex: 1;
+      width: 100%;
+      min-height: 400px;
+      height: 100%;
+      border-radius: 10px;
+      border: 1px solid #e0e0e0;
+      box-sizing: border-box;
+    }
+
+    nav {
+      height: 60px;
+    }
+
+    .admin-list h2 {
+      font-size: 1.8em;
+      color: #0a4119;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    /* 버튼 그룹 -->
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    #toggle-map-btn,
+    #download-csv-btn {
+      display: inline-block;
+      padding: 8px 16px;
+      background: #0a4119;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background 0.3s ease;
+    }
+
+    #toggle-map-btn:hover,
+    #download-csv-btn:hover {
+      background: #4caf50;
+    }
+
+    /* 필터링 및 검색 UI */
+    .filter-search-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .filter-search-container select,
+    .filter-search-container input {
+      padding: 8px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1em;
+      background: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .filter-search-container select:focus,
+    .filter-search-container input:focus {
+      border-color: #0a4119;
+      box-shadow: 0 0 8px rgba(10, 65, 25, 0.3);
+      outline: none;
+    }
+
+    .filter-search-container input {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    /* 신청 목록 테이블 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9em;
+    }
+
+    table thead {
+      background: #0a4119;
+      color: #fff;
+    }
+
+    table th, table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    /* 정렬 가능한 헤더 스타일 */
+    th.sortable {
+      cursor: pointer;
+      position: relative;
+      padding-right: 20px;
+    }
+
+    th.sortable:hover {
+      background: #0f5e28;
+    }
+
+    th.sortable .sort-icon {
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.8em;
+    }
+
+    table tbody tr.pending {
+      background: rgba(255, 235, 59, 0.2);
+    }
+
+    table tbody tr.completed {
+      background: rgba(76, 175, 80, 0.2);
+    }
+
+    table tbody tr:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    /* 특정 셀 클릭 시만 상세 보기 표시 */
+    table tbody td.clickable {
+      cursor: pointer;
+    }
+
+    table button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.9em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    table .status-btn {
+      background: #4caf50;
+      color: #fff;
+    }
+
+    table .status-btn:hover {
+      background: #388e3c;
+    }
+
+    table .status-btn.pending {
+      background: #f44336;
+    }
+
+    table .status-btn.pending:hover {
+      background: #d32f2f;
+    }
+
+    table .delete-btn {
+      background: #f44336;
+      color: #fff;
+      margin-left: 5px;
+    }
+
+    table .delete-btn:hover {
+      background: #d32f2f;
+    }
+
+    table .row-share-btn {
+      background: #0a4119;
+      color: #fff;
+      margin-left: 5px;
+    }
+
+    table .row-share-btn:hover {
+      background: #4caf50;
+    }
+
+    /* 작업자 선택 드롭다운 스타일 */
+    .worker-select {
+      padding: 5px;
+      border: 1px solid #e0e0e0;
+      border-radius: 5px;
+      font-size: 0.9em;
+    }
+
+    /* 상세 보기 모달 */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: #fff;
+      width: 80%;
+      max-width: 600px;
+      margin: 100px auto;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      position: relative;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-content h3 {
+      margin-top: 0;
+      color: #0a4119;
+    }
+
+    .modal-content p {
+      margin: 5px 0;
+    }
+
+    .modal-content img {
+      max-width: 100%;
+      margin: 5px 0;
+    }
+
+    .modal-content .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #f44336;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    .modal-content .close-btn:hover {
+      background: #d32f2f;
+    }
+
+    .modal-content .share-btn {
+      display: block;
+      margin: 20px auto;
+      padding: 8px 16px;
+      background: #0a4119;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background 0.3s ease;
+    }
+
+    .modal-content .share-btn:hover {
+      background: #4caf50;
+    }
+
+    @media (max-width: 1000px) {
+      .admin-container {
+        flex-wrap: wrap;
+      }
+
+      .admin-list,
+      .admin-map {
+        flex: 0 0 100%;
+        min-width: 100%;
+      }
+
+      .admin-map {
+        margin-right: 0;
+      }
+
+      #admin-map {
+        min-height: 300px;
+        height: 400px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+
+  <div class="admin-container">
+    <div class="admin-list">
+      <h2>신청 목록 관리</h2>
+      <!-- 버튼 그룹 -->
+      <div class="button-group">
+        <button id="toggle-map-btn">지도 보기</button>
+        <button id="download-csv-btn">전체 CSV 다운로드</button>
+      </div>
+      <!-- 필터링 및 검색 UI -->
+      <div class="filter-search-container">
+        <select id="status-filter">
+          <option value="all">상태: 전체</option>
+          <option value="pending">대기중</option>
+          <option value="completed">완료</option>
+        </select>
+        <select id="service-type-filter">
+          <option value="all">서비스 유형: 전체</option>
+          <option value="벌초">벌초</option>
+          <option value="예초">예초</option>
+          <option value="태양광 전문 예초">태양광 전문 예초</option>
+        </select>
+        <input type="text" id="search-input" placeholder="고객명, 연락처, 주소로 검색">
+      </div>
+
+      <!-- 신청 목록 테이블 -->
+      <table id="request-table">
+        <thead>
+          <tr>
+            <th>고객명</th>
+            <th>서비스 유형</th>
+            <th>주소</th>
+            <th class="sortable" data-sort="createdAt">
+              신청 날짜
+              <span class="sort-icon"></span>
+            </th>
+            <th>상태</th>
+            <th>작업자</th>
+            <th>작업</th>
+            <th>공유</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="admin-map">
+      <div id="admin-map"></div>
+    </div>
+  </div>
+
+  <!-- 상세 보기 모달 -->
+  <div id="detail-modal" class="modal">
+    <div class="modal-content">
+      <button class="close-btn">닫기</button>
+      <h3>신청 상세 정보</h3>
+      <div id="detail-content"></div>
+      <button class="share-btn">링크 복사</button>
+    </div>
+  </div>
+
+  <div id="footer-container"></div>
+
+  <script src="/components/nav.js" type="text/javascript" defer></script>
+  <script src="/components/footer.js" type="text/javascript" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+      const storage = firebase.storage();
+      let map;
+      let markers = [];
+      let selectedMarker = null;
+      let workers = [];
+      let requests = [];
+      let filteredRequests = [];
+      let sortState = { field: null, direction: null };
+
+      // DOM 요소 참조
+      const tableBody = document.querySelector('#request-table tbody');
+      const adminMap = document.getElementById('admin-map');
+      const adminMapContainer = document.querySelector('.admin-map');
+      const toggleMapBtn = document.getElementById('toggle-map-btn');
+      const downloadCsvBtn = document.getElementById('download-csv-btn');
+      const statusFilter = document.getElementById('status-filter');
+      const serviceTypeFilter = document.getElementById('service-type-filter');
+      const searchInput = document.getElementById('search-input');
+      const detailModal = document.getElementById('detail-modal');
+      const detailContent = document.getElementById('detail-content');
+      const closeModalBtn = document.querySelector('#detail-modal .close-btn');
+      const modalShareBtn = document.querySelector('#detail-modal .share-btn');
+
+      // 로그인 상태 확인 및 리다이렉트
+      auth.onAuthStateChanged(async user => {
+        if (!user) {
+          window.location.href = '/login.html';
+          return;
+        }
+
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (!userDoc.exists || userDoc.data().role !== 'admin') {
+          alert('관리자 권한이 필요합니다.');
+          window.location.href = '/login.html';
+          return;
+        }
+
+        // 카카오맵 초기화
+        kakao.maps.load(() => {
+          const mapOption = {
+            center: new kakao.maps.LatLng(37.566826, 126.9786567),
+            level: 3
+          };
+          map = new kakao.maps.Map(adminMap, mapOption);
+          map.setMapTypeId(kakao.maps.MapTypeId.HYBRID);
+        });
+
+        // URL 쿼리 파라미터에서 초기 상태 로드
+        const urlParams = new URLSearchParams(window.location.search);
+        statusFilter.value = urlParams.get('status') || 'all';
+        serviceTypeFilter.value = urlParams.get('serviceType') || 'all';
+        searchInput.value = urlParams.get('search') || '';
+        const sortParam = urlParams.get('sort');
+        if (sortParam) {
+          const [field, direction] = sortParam.split('-');
+          sortState = { field, direction };
+          const sortHeader = document.querySelector(`th[data-sort="${field}"]`);
+          if (sortHeader) {
+            const sortIcon = sortHeader.querySelector('.sort-icon');
+            sortIcon.innerHTML = direction === 'asc' ? '<i class="fas fa-arrow-up"></i>' : '<i class="fas fa-arrow-down"></i>';
+          }
+        }
+
+        // URL에 requestId가 있으면 상세 보기 모달 표시
+        const requestId = urlParams.get('requestId');
+        if (requestId) {
+          db.collection('serviceRequests').doc(requestId).get().then(doc => {
+            if (doc.exists) {
+              const request = doc.data();
+              request.id = doc.id;
+              showDetailModal(request);
+            }
+          });
+        }
+
+        // 작업자 목록 로드
+        db.collection('workers').onSnapshot(snapshot => {
+          workers = [];
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            data.id = doc.id;
+            workers.push(data);
+          });
+          renderTable(filteredRequests);
+        });
+
+        // 신청 목록 로드 및 표시
+        db.collection('serviceRequests').onSnapshot(snapshot => {
+          requests = [];
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            data.id = doc.id;
+            requests.push(data);
+          });
+          filterAndSortRequests();
+
+          // 요청 데이터 로드 후 requestId가 있으면 상세 보기 표시
+          if (requestId) {
+            const request = requests.find(r => r.id === requestId);
+            if (request) showDetailModal(request);
+          }
+        });
+      });
+
+      // 지도 토글 버튼 이벤트
+      toggleMapBtn.addEventListener('click', () => {
+        if (adminMapContainer.style.display === 'none') {
+          adminMapContainer.style.display = 'flex';
+          toggleMapBtn.textContent = '지도 숨기기';
+          setTimeout(() => map.relayout(), 0);
+        } else {
+          adminMapContainer.style.display = 'none';
+          toggleMapBtn.textContent = '지도 보기';
+        }
+      });
+
+      // 전체 CSV 다운로드 버튼 이벤트
+      downloadCsvBtn.addEventListener('click', () => {
+        let csvContent = '\uFEFF';
+        const headers = ['고객명', '서비스 유형', '주소', '신청 날짜', '상태', '작업자'];
+        csvContent += headers.join(',') + '\n';
+
+        filteredRequests.forEach(request => {
+          const createdAt = request.createdAt ? new Date(request.createdAt.toDate()).toISOString().split('T')[0] : '미지정';
+          const workerName = workers.find(w => w.workerId === request.workerAssigned)?.name || '미배정';
+          const row = [
+            `"${request.customerName}"`,
+            `"${request.serviceType}"`,
+            `"${request.address}"`,
+            `"${createdAt}"`,
+            request.status === 'pending' ? '대기중' : '완료',
+            `"${workerName}"`
+          ];
+          csvContent += row.join(',') + '\n';
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `작업리스트_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+
+      // 테이블 렌더링
+      function renderTable(requestsToRender) {
+        tableBody.innerHTML = '';
+        requestsToRender.forEach(request => {
+          const createdAt = request.createdAt ? new Date(request.createdAt.toDate()).toISOString().split('T')[0] : '미지정';
+          const row = document.createElement('tr');
+          row.classList.add(request.status === 'pending' ? 'pending' : 'completed');
+          row.innerHTML = `
+            <td class="clickable">${request.customerName}</td>
+            <td class="clickable">${request.serviceType}</td>
+            <td>${request.address}</td>
+            <td>${createdAt}</td>
+            <td>${request.status === 'pending' ? '대기중' : '완료'}</td>
+            <td>
+              <select class="worker-select" data-id="${request.id}">
+                <option value="">미배정</option>
+                ${workers.map(worker => `
+                  <option value="${worker.workerId}" ${request.workerAssigned === worker.workerId ? 'selected' : ''}>
+                    ${worker.name}
+                  </option>
+                `).join('')}
+              </select>
+            </td>
+            <td>
+              <button class="status-btn ${request.status}" data-id="${request.id}">
+                ${request.status === 'pending' ? '완료 처리' : '대기 처리'}
+              </button>
+              <button class="delete-btn" data-id="${request.id}">삭제</button>
+            </td>
+            <td>
+              <button class="row-share-btn" data-id="${request.id}">링크 복사</button>
+            </td>
+          `;
+
+          row.querySelectorAll('.clickable').forEach(cell => {
+            cell.addEventListener('click', () => showDetailModal(request));
+          });
+
+          tableBody.appendChild(row);
+        });
+
+        // 상태 변경 버튼 이벤트
+        document.querySelectorAll('.status-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const id = btn.getAttribute('data-id');
+            const request = requests.find(r => r.id === id);
+            const newStatus = request.status === 'pending' ? 'completed' : 'pending';
+            db.collection('serviceRequests').doc(id).update({ status: newStatus });
+          });
+        });
+
+        // 삭제 버튼 이벤트
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (confirm('이 신청을 삭제하시겠습니까?')) {
+              const id = btn.getAttribute('data-id');
+              db.collection('serviceRequests').doc(id).delete();
+            }
+          });
+        });
+
+        // 작업자 배정 이벤트
+        document.querySelectorAll('.worker-select').forEach(select => {
+          select.addEventListener('change', (e) => {
+            e.stopPropagation();
+            const id = select.getAttribute('data-id');
+            const workerId = e.target.value;
+            db.collection('serviceRequests').doc(id).update({ 
+              workerAssigned: workerId,
+              workerAcceptance: 'pending' // 작업자 배정 시 수락 상태 초기화
+            });
+          });
+        });
+
+        // 개별 신청 링크 복사 이벤트
+        document.querySelectorAll('.row-share-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const id = btn.getAttribute('data-id');
+            shareRequestLink(id);
+          });
+        });
+      }
+
+      // 모든 마커 표시
+      function renderAllMarkers(requestsToRender) {
+        markers.forEach(marker => marker.setMap(null));
+        markers = [];
+
+        requestsToRender.forEach(request => {
+          if (request.latitude && request.longitude) {
+            const position = new kakao.maps.LatLng(request.latitude, request.longitude);
+            const marker = new kakao.maps.Marker({
+              position: position,
+              map: map
+            });
+
+            const infowindow = new kakao.maps.InfoWindow({
+              content: `
+                <div style="padding:5px; font-size:12px;">
+                  <strong>${request.customerName}</strong><br>
+                  ${request.serviceType} | ${request.status === 'pending' ? '대기중' : '완료'}<br>
+                  작업자: ${workers.find(w => w.workerId === request.workerAssigned)?.name || '미배정'}
+                </div>
+              `
+            });
+            kakao.maps.event.addListener(marker, 'click', () => {
+              if (selectedMarker && selectedMarker.infowindow) {
+                selectedMarker.infowindow.close();
+              }
+              infowindow.open(map, marker);
+              map.panTo(position);
+              selectedMarker = { marker, infowindow };
+            });
+
+            markers.push(marker);
+          }
+        });
+      }
+
+      // 링크 공유 함수
+      function shareRequestLink(requestId) {
+        const shareUrl = `${window.location.origin}/view-request.html?requestId=${requestId}`;
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          alert('신청 링크가 클립보드에 복사되었습니다!');
+        }).catch(err => {
+          console.error('링크 복사 실패:', err);
+          alert('링크 복사에 실패했습니다. 브라우저 설정을 확인해주세요.');
+        });
+      }
+
+      // 필터링 및 정렬 기능
+      function filterAndSortRequests() {
+        const status = statusFilter.value;
+        const serviceType = serviceTypeFilter.value;
+        const searchText = searchInput.value.toLowerCase();
+
+        filteredRequests = [...requests];
+
+        if (status !== 'all') {
+          filteredRequests = filteredRequests.filter(request => request.status === status);
+        }
+
+        if (serviceType !== 'all') {
+          filteredRequests = filteredRequests.filter(request => request.serviceType === serviceType);
+        }
+
+        if (searchText) {
+          filteredRequests = filteredRequests.filter(request =>
+            request.customerName.toLowerCase().includes(searchText) ||
+            request.customerPhone?.toLowerCase().includes(searchText) ||
+            request.address.toLowerCase().includes(searchText)
+          );
+        }
+
+        if (sortState.field === 'createdAt') {
+          filteredRequests.sort((a, b) => {
+            const aDate = a.createdAt ? a.createdAt.toDate() : new Date(0);
+            const bDate = b.createdAt ? b.createdAt.toDate() : new Date(0);
+            return sortState.direction === 'asc' ? aDate - bDate : bDate - aDate;
+          });
+        }
+
+        renderTable(filteredRequests);
+        renderAllMarkers(filteredRequests);
+
+        const params = new URLSearchParams();
+        if (statusFilter.value !== 'all') params.set('status', statusFilter.value);
+        if (serviceTypeFilter.value !== 'all') params.set('serviceType', statusFilter.value);
+        if (searchInput.value) params.set('search', searchInput.value);
+        if (sortState.field) params.set('sort', `${sortState.field}-${sortState.direction}`);
+        window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+      }
+
+      // 정렬 이벤트 리스너
+      document.querySelectorAll('th.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+          const field = th.getAttribute('data-sort');
+          const sortIcon = th.querySelector('.sort-icon');
+
+          if (sortState.field !== field) {
+            sortState = { field, direction: 'desc' };
+            sortIcon.innerHTML = '<i class="fas fa-arrow-down"></i>';
+          } else if (sortState.direction === 'desc') {
+            sortState.direction = 'asc';
+            sortIcon.innerHTML = '<i class="fas fa-arrow-up"></i>';
+          } else {
+            sortState = { field: null, direction: null };
+            sortIcon.innerHTML = '';
+          }
+
+          document.querySelectorAll('th.sortable .sort-icon').forEach(icon => {
+            if (icon !== sortIcon) icon.innerHTML = '';
+          });
+
+          filterAndSortRequests();
+        });
+      });
+
+      // 필터링 및 검색 이벤트 리스너
+      statusFilter.addEventListener('change', filterAndSortRequests);
+      serviceTypeFilter.addEventListener('change', filterAndSortRequests);
+      searchInput.addEventListener('input', filterAndSortRequests);
+
+      // 상세 보기 모달 표시
+      function showDetailModal(request) {
+        const createdAt = request.createdAt ? new Date(request.createdAt.toDate()).toISOString().split('T')[0] : '미지정';
+        let areaSizeDisplay = '평수 미지정';
+        if (request.serviceType === '벌초' && request.beolchoAreaSize) {
+          areaSizeDisplay = `${request.beolchoAreaSize} 평`;
+        } else if (request.serviceType === '예초' && request.areaSize) {
+          areaSizeDisplay = `${request.areaSize} 평`;
+        } else if (request.serviceType === '태양광 전문 예초' && request.solarAreaSize) {
+          areaSizeDisplay = `${request.solarAreaSize} 평`;
+        }
+
+        detailContent.innerHTML = `
+          <p><strong>고객명:</strong> ${request.customerName}</p>
+          <p><strong>연락처:</strong> ${request.customerPhone}</p>
+          <p><strong>주소:</strong> ${request.address}</p>
+          <p><strong>서비스 유형:</strong> ${request.serviceType}</p>
+          ${request.serviceType === '벌초' ? `
+            <p><strong>봉분 종류:</strong> ${request.graveType || '미지정'}</p>
+            <p><strong>분묘 수:</strong> ${request.graveCount || '미지정'}</p>
+            <p><strong>평수:</strong> ${areaSizeDisplay}</p>
+          ` : ''}
+          ${request.serviceType === '예초' ? `
+            <p><strong>평수:</strong> ${areaSizeDisplay}</p>
+            <p><strong>자른 풀 처리 방법:</strong> ${request.grassDisposalMethod === 'multiple' ? '여러 곳에 모아놓기' : request.grassDisposalMethod === 'single' ? '한 곳으로 모아놓기' : request.grassDisposalMethod === 'complete' ? '완전 배출' : '선택 안 함'}</p>
+          ` : ''}
+          ${request.serviceType === '태양광 전문 예초' ? `
+            <p><strong>평수:</strong> ${areaSizeDisplay}</p>
+            <p><strong>자른 풀 처리 방법:</strong> ${request.grassDisposalMethod === 'multiple' ? '여러 곳에 모아놓기' : request.grassDisposalMethod === 'single' ? '한 곳으로 모아놓기' : request.grassDisposalMethod === 'complete' ? '완전 배출' : '선택 안 함'}</p>
+          ` : ''}
+          <p><strong>희망 작업 날짜:</strong> ${request.workDate}</p>
+          <p><strong>신청 날짜:</strong> ${createdAt}</p>
+          <p><strong>작업자:</strong> ${workers.find(w => w.workerId === request.workerAssigned)?.name || '미배정'}</p>
+          <p><strong>요청사항:</strong> ${request.workerRequest}</p>
+          <p><strong>예상 견적 비용:</strong> ${request.estimatedCost ? request.estimatedCost.toLocaleString('ko-KR') + '원' : '비용 미지정'}</p>
+          <p><strong>상태:</strong> ${request.status === 'pending' ? '대기중' : '완료'}</p>
+          <p><strong>작업 상태:</strong> ${request.workerStatus === 'not_started' ? '작업 시작 전' :
+                                       request.workerStatus === 'started' ? '작업 시작' :
+                                       request.workerStatus === 'in_progress' ? '작업 중' :
+                                       request.workerStatus === 'completed' ? '작업 완료' : '미지정'}</p>
+          <p><strong>작업자 메모:</strong> ${request.workerNotes || '없음'}</p>
+        `;
+
+        if (request.fileUrls && request.fileUrls.length > 0) {
+          const fileSection = document.createElement('div');
+          fileSection.innerHTML = '<strong>첨부파일:</strong>';
+          request.fileUrls.forEach(url => {
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = '첨부파일';
+            fileSection.appendChild(img);
+          });
+          detailContent.appendChild(fileSection);
+        }
+
+        if (request.beforePhotos && request.beforePhotos.length > 0) {
+          const beforeSection = document.createElement('div');
+          beforeSection.innerHTML = '<strong>작업 전 사진:</strong>';
+          request.beforePhotos.forEach(url => {
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = '작업 전 사진';
+            beforeSection.appendChild(img);
+          });
+          detailContent.appendChild(beforeSection);
+        }
+
+        if (request.duringPhotos && request.duringPhotos.length > 0) {
+          const duringSection = document.createElement('div');
+          duringSection.innerHTML = '<strong>작업 중 사진:</strong>';
+          request.duringPhotos.forEach(url => {
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = '작업 중 사진';
+            duringSection.appendChild(img);
+          });
+          detailContent.appendChild(duringSection);
+        }
+
+        if (request.afterPhotos && request.afterPhotos.length > 0) {
+          const afterSection = document.createElement('div');
+          afterSection.innerHTML = '<strong>작업 후 사진:</strong>';
+          request.afterPhotos.forEach(url => {
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = '작업 후 사진';
+            afterSection.appendChild(img);
+          });
+          detailContent.appendChild(afterSection);
+        }
+
+        detailModal.style.display = 'block';
+
+        if (request.latitude && request.longitude) {
+          const position = new kakao.maps.LatLng(request.latitude, request.longitude);
+          map.panTo(position);
+
+          if (selectedMarker && selectedMarker.infowindow) {
+            selectedMarker.infowindow.close();
+          }
+
+          const marker = markers.find(m => m.getPosition().getLat() === request.latitude && m.getPosition().getLng() === request.longitude);
+          if (marker) {
+            const infowindow = new kakao.maps.InfoWindow({
+              content: `
+                <div style="padding:5px; font-size:12px;">
+                  <strong>${request.customerName}</strong><br>
+                  ${request.serviceType} | ${request.status === 'pending' ? '대기중' : '완료'}<br>
+                  작업자: ${workers.find(w => w.workerId === request.workerAssigned)?.name || '미배정'}
+                </div>
+              `
+            });
+            infowindow.open(map, marker);
+            selectedMarker = { marker, infowindow };
+          }
+        }
+
+        // 모달에서 링크 복사 버튼 이벤트 등록
+        modalShareBtn.onclick = () => shareRequestLink(request.id);
+      }
+
+      closeModalBtn.addEventListener('click', () => {
+        detailModal.style.display = 'none';
+        if (selectedMarker && selectedMarker.infowindow) {
+          selectedMarker.infowindow.close();
+        }
+      });
+
+      window.addEventListener('click', (e) => {
+        if (e.target === detailModal) {
+          detailModal.style.display = 'none';
+          if (selectedMarker && selectedMarker.infowindow) {
+            selectedMarker.infowindow.close();
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

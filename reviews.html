@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 캐시 방지 메타 태그 -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>고객 후기 - 벌초 서비스</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- 스타일 분리 -->
+  <link rel="stylesheet" href="/styles/theme.css">
+  <link rel="stylesheet" href="/styles/components.css">
+  <link rel="stylesheet" href="/styles/footer.css">
+  <!-- Firebase JavaScript SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDuWpcxhSucn5jRdzsQOcdN-TgnY586kIo",
+      authDomain: "onestopbeolcho.com",
+      projectId: "onestopbeolcho-d2bca",
+      storageBucket: "onestopbeolcho-d2bca.firebasestorage.app",
+      messagingSenderId: "378817329836",
+      appId: "1:378817329836:web:d3c2a06bf705cb5e943d09",
+      measurementId: "G-9CX7J4Z578"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+</head>
+<body>
+  <!-- 내비게이션 바 (컴포넌트로 삽입) -->
+  <div id="nav-container"></div>
+
+  <!-- 고객 후기 섹션 -->
+  <section class="reviews">
+    <h2>고객 후기</h2>
+    <p>아직 후기가 없습니다.</p>
+    <!-- 나중에 동적으로 후기 추가 가능 -->
+    <div id="reviews-list">
+      <!-- 후기 목록이 여기에 추가될 예정 -->
+    </div>
+  </section>
+
+  <!-- 푸터 (컴포넌트로 삽입) -->
+  <div id="footer-container"></div>
+
+  <!-- 컴포넌트 JS -->
+  <script src="/components/nav.js" type="text/javascript" defer></script>
+  <script src="/components/footer.js" type="text/javascript" defer></script>
+  <!-- 메인 JS -->
+  <script type="module" src="/app.js" defer></script>
+</body>
+</html>

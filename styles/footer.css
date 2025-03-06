@@ -1,0 +1,33 @@
+/* /styles/footer.css */
+footer {
+  height: auto;
+  background-color: #E3F2FD;
+  text-align: center;
+  padding: 10px 0;
+  box-shadow: 0 -2px 5px var(--shadow);
+}
+
+footer p {
+  margin: 5px 0;
+  font-size: var(--font-small);
+  color: var(--text-color);
+}
+
+footer a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  footer {
+    padding-bottom: 70px; /* 모바일 탭 바와 겹치지 않도록 */
+  }
+
+  footer p {
+    font-size: 0.8em;
+  }
+}

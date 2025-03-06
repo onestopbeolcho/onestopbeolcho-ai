@@ -1,0 +1,612 @@
+<!-- /onestopbeolcho/worker.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>작업자 페이지 - 벌초 서비스</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- 네비게이션 스타일을 위한 theme.css 로드 -->
+  <link rel="stylesheet" href="/styles/theme.css">
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <!-- 카카오맵 API 스크립트 추가 -->
+  <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef6b942fdad36e982c84eb0061d1d2ed&libraries=services"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDuWpcxhSucn5jRdzsQOcdN-TgnY586kIo",
+      authDomain: "onestopbeolcho.com",
+      projectId: "onestopbeolcho-d2bca",
+      storageBucket: "onestopbeolcho-d2bca.firebasestorage.app",
+      messagingSenderId: "378817329836",
+      appId: "1:378817329836:web:d3c2a06bf705cb5e943d09",
+      measurementId: "G-9CX7J4Z578"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #fafafa;
+      color: #424242;
+    }
+
+    .worker-container {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 40px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .worker-container h2 {
+      font-size: 2.2em;
+      color: #1E88E5;
+      margin-bottom: 40px;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .request-list {
+      display: grid;
+      gap: 20px;
+    }
+
+    .request-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeIn 0.5s ease forwards;
+      animation-delay: calc(var(--delay) * 0.1s);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .request-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .request-card .fields {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .field {
+      padding-bottom: 10px;
+      border-bottom: 1px dashed #e0e0e0;
+    }
+
+    .field label {
+      font-size: 0.9em;
+      color: #757575;
+      font-weight: 500;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .field span {
+      font-size: 1.1em;
+      color: #424242;
+      font-weight: 500;
+    }
+
+    .photo-gallery {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 10px 0;
+      margin-top: 10px;
+    }
+
+    .photo-gallery img {
+      max-width: 150px;
+      max-height: 150px;
+      border-radius: 8px;
+      object-fit: cover;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .photo-gallery img:hover {
+      transform: scale(1.05);
+    }
+
+    .location-section {
+      margin-top: 20px;
+    }
+
+    .location-section h4 {
+      font-size: 1.1em;
+      color: #1E88E5;
+      margin-bottom: 10px;
+    }
+
+    .location-section .coords {
+      font-size: 0.9em;
+      color: #424242;
+      margin-bottom: 10px;
+    }
+
+    .location-map {
+      width: 100%;
+      height: 200px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+    }
+
+    .status-update {
+      margin-top: 20px;
+    }
+
+    .status-update label {
+      font-size: 1em;
+      color: #424242;
+      font-weight: 500;
+      margin-right: 10px;
+    }
+
+    .status-update select {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #e0e0e0;
+      font-size: 1em;
+      margin-right: 10px;
+    }
+
+    .status-update button {
+      background: #1E88E5;
+      color: #fff;
+      padding: 8px 15px;
+      border-radius: 6px;
+      font-size: 0.9em;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .status-update button:hover {
+      background: #1565C0;
+      transform: translateY(-2px);
+    }
+
+    .additional-cost-form {
+      margin-top: 20px;
+      background: #FFF3E0;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #F57C00;
+    }
+
+    .additional-cost-form label {
+      display: block;
+      font-size: 1em;
+      color: #424242;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .additional-cost-form input, .additional-cost-form textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 1em;
+      box-sizing: border-box;
+    }
+
+    .additional-cost-form button {
+      background: #F57C00;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 0.9em;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .additional-cost-form button:hover {
+      background: #EF6C00;
+      transform: translateY(-2px);
+    }
+
+    .additional-cost-status {
+      margin-top: 10px;
+      font-size: 0.9em;
+      color: #EF6C00;
+    }
+
+    /* 검색 및 필터링 UI 스타일 */
+    .filter-controls {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .filter-controls input {
+      padding: 8px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 1em;
+      width: 200px;
+    }
+
+    .filter-controls select, .filter-controls button {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #e0e0e0;
+      font-size: 1em;
+      cursor: pointer;
+    }
+
+    .filter-controls button {
+      background: #1E88E5;
+      color: #fff;
+      border: none;
+      transition: all 0.3s ease;
+    }
+
+    .filter-controls button:hover {
+      background: #1565C0;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+      .worker-container {
+        margin: 20px;
+        padding: 15px;
+      }
+
+      .request-card .fields {
+        grid-template-columns: 1fr;
+      }
+
+      .photo-gallery img {
+        max-width: 120px;
+        max-height: 120px;
+      }
+
+      .status-update {
+        text-align: center;
+      }
+
+      .status-update select, .status-update button {
+        width: 100%;
+        margin: 5px 0;
+      }
+
+      .location-map {
+        height: 150px;
+      }
+
+      .filter-controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filter-controls input, .filter-controls select, .filter-controls button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+
+  <div class="worker-container">
+    <h2 id="page-title">원스톱벌초 파트너스</h2>
+    <!-- 검색 및 필터링 UI 추가 -->
+    <div class="filter-controls">
+      <input type="text" id="search-input" placeholder="주소 또는 별명으로 검색">
+      <select id="sort-order">
+        <option value="desc">최신순</option>
+        <option value="asc">오래된순</option>
+      </select>
+      <select id="status-filter">
+        <option value="all">모두 보기</option>
+        <option value="incomplete">작업 미완료</option>
+        <option value="completed">작업 완료</option>
+      </select>
+      <button onclick="applyFilters()">필터 적용</button>
+    </div>
+    <div class="request-list" id="request-list"></div>
+  </div>
+
+  <div id="footer-container"></div>
+
+  <script src="/components/nav.js" type="text/javascript" defer></script>
+  <script src="/components/footer.js" type="text/javascript" defer></script>
+  <script>
+    let allRequests = []; // 모든 신청 내역을 저장할 배열
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+      const requestList = document.getElementById('request-list');
+      const pageTitle = document.getElementById('page-title');
+
+      auth.onAuthStateChanged(async user => {
+        if (user) {
+          console.log('로그인 상태:', user.uid);
+          try {
+            // 사용자 정보 로드
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (!userDoc.exists) {
+              requestList.innerHTML = '<p style="text-align: center; color: #757575;">사용자 정보를 불러올 수 없습니다.</p>';
+              return;
+            }
+
+            const userData = userDoc.data();
+            const role = userData.role || 'worker';
+            const regions = userData.regions || [];
+
+            // 역할에 따라 신청 내역 로드
+            let query = db.collection('serviceRequests').orderBy('createdAt', 'desc');
+            if (role !== 'admin') {
+              // 작업자는 자신이 담당한 지역의 신청 내역만 조회
+              if (regions.length === 0) {
+                requestList.innerHTML = '<p style="text-align: center; color: #757575;">담당 지역이 설정되지 않았습니다. 관리자에게 문의해주세요.</p>';
+                return;
+              }
+              query = query.where('region', 'in', regions);
+            }
+
+            console.log(role === 'admin' ? '모든 신청 내역 조회' : `담당 지역 신청 내역 조회 (${regions.join(', ')})`);
+            const requestsSnapshot = await query.get();
+            console.log('Requests snapshot:', requestsSnapshot);
+            requestList.innerHTML = '';
+            if (requestsSnapshot.empty) {
+              console.log('No service requests found');
+              requestList.innerHTML = `<p style="text-align: center; color: #757575;">${role === 'admin' ? '신청 내역이 없습니다.' : '담당 지역의 신청 내역이 없습니다.'}</p>`;
+            } else {
+              console.log('Service requests found:', requestsSnapshot.size);
+              allRequests = []; // 모든 신청 내역을 저장
+              requestsSnapshot.forEach(doc => {
+                allRequests.push({ id: doc.id, data: doc.data() });
+              });
+              renderRequests(allRequests); // 초기 렌더링
+            }
+          } catch (error) {
+            console.error('데이터 로드 오류:', error);
+            requestList.innerHTML = '<p style="text-align: center; color: #757575;">신청 내역을 불러올 수 없습니다: ' + error.message + '</p>';
+          }
+        } else {
+          console.log('로그인되어 있지 않습니다.');
+          window.location.href = '/login.html';
+        }
+      });
+    });
+
+    function renderRequests(requests) {
+      const requestList = document.getElementById('request-list');
+      requestList.innerHTML = '';
+      if (requests.length === 0) {
+        requestList.innerHTML = '<p style="text-align: center; color: #757575;">검색 조건에 맞는 신청 내역이 없습니다.</p>';
+        return;
+      }
+
+      requests.forEach((requestItem, index) => {
+        const docId = requestItem.id;
+        const request = requestItem.data;
+        const status = request.status || 'pending';
+        const statusText = {
+          'pending': '접수완료',
+          'confirmed': '작업확인',
+          'in-progress': '작업중',
+          'completed': '작업완료'
+        }[status];
+        const hasAdditionalCost = request.additionalCost && request.additionalCostStatus;
+
+        const card = document.createElement('div');
+        card.className = 'request-card';
+        card.style.setProperty('--delay', index);
+        card.innerHTML = `
+          <div class="fields">
+            <div class="field">
+              <label>별명</label>
+              <span>${request.nickname || '설정 안됨'}</span>
+            </div>
+            <div class="field">
+              <label>작업자 요청</label>
+              <span>${request.workerRequest || '없음'}</span>
+            </div>
+            <div class="field">
+              <label>서비스 유형</label>
+              <span>${request.serviceType}</span>
+            </div>
+            <div class="field">
+              <label>주소</label>
+              <span>${request.address}</span>
+            </div>
+            <div class="field">
+              <label>지역</label>
+              <span>${request.region || '미설정'}</span>
+            </div>
+            <div class="field">
+              <label>희망 작업 날짜</label>
+              <span>${request.workDate}</span>
+            </div>
+            <div class="field">
+              <label>예상 비용</label>
+              <span>${(request.estimatedCost || 0).toLocaleString('ko-KR')}원</span>
+            </div>
+            <div class="field">
+              <label>묘지 유형</label>
+              <span>${request.graveType || '없음'}</span>
+            </div>
+            <div class="field">
+              <label>묘지 개수</label>
+              <span>${request.graveCount || '없음'}</span>
+            </div>
+            <div class="field">
+              <label>벌초 면적</label>
+              <span>${request.beolchoAreaSize || '없음'} 평</span>
+            </div>
+          </div>
+          <!-- 고객 위치 정보 및 카카오맵 추가 -->
+          <div class="location-section">
+            <h4>고객 지정 위치</h4>
+            <div class="coords">
+              위도: ${request.latitude || '미설정'}, 경도: ${request.longitude || '미설정'}
+            </div>
+            <div id="map-${docId}" class="location-map"></div>
+          </div>
+          ${request.fileUrls && request.fileUrls.length > 0 ? `
+            <div class="photo-section">
+              <h4 style="font-size: 1.1em; color: #1E88E5; margin-bottom: 10px;">첨부 파일</h4>
+              <div class="photo-gallery">
+                ${request.fileUrls.map(url => `<img src="${url}" alt="첨부 파일">`).join('')}
+              </div>
+            </div>
+          ` : ''}
+          <div class="status-update">
+            <label>작업 상태:</label>
+            <select id="status-${docId}">
+              <option value="pending" ${status === 'pending' ? 'selected' : ''}>접수완료</option>
+              <option value="confirmed" ${status === 'confirmed' ? 'selected' : ''}>작업확인</option>
+              <option value="in-progress" ${status === 'in-progress' ? 'selected' : ''}>작업중</option>
+              <option value="completed" ${status === 'completed' ? 'selected' : ''}>작업완료</option>
+            </select>
+            <button class="update-status-btn" data-id="${docId}">상태 업데이트</button>
+          </div>
+          ${hasAdditionalCost ? `
+            <div class="additional-cost-status">
+              추가 비용 상태: ${request.additionalCost.toLocaleString('ko-KR')}원 (${request.additionalCostStatus === 'pending' ? '사용자 승인 대기 중' : request.additionalCostStatus === 'approved' ? '승인됨' : '거절됨'})
+            </div>
+          ` : `
+            <form class="additional-cost-form" id="additional-cost-form-${docId}">
+              <label>추가 비용 요청</label>
+              <input type="number" id="additional-cost-${docId}" placeholder="추가 비용 (원)" required>
+              <textarea id="additional-cost-reason-${docId}" placeholder="추가 비용 사유" required></textarea>
+              <button type="submit">추가 비용 요청</button>
+            </form>
+          `}
+        `;
+        requestList.appendChild(card);
+
+        // 카카오맵 초기화 (위성사진 모드 설정)
+        if (request.latitude && request.longitude) {
+          const mapContainer = document.getElementById(`map-${docId}`);
+          const mapOption = {
+            center: new kakao.maps.LatLng(request.latitude, request.longitude),
+            level: 3
+          };
+          const map = new kakao.maps.Map(mapContainer, mapOption);
+          map.addOverlayMapTypeId(kakao.maps.MapTypeId.HYBRID); // 위성사진 모드 적용
+          const marker = new kakao.maps.Marker({
+            position: new kakao.maps.LatLng(request.latitude, request.longitude)
+          });
+          marker.setMap(map);
+        }
+
+        // 상태 업데이트 이벤트
+        const updateStatusBtn = card.querySelector('.update-status-btn');
+        updateStatusBtn.addEventListener('click', async () => {
+          const newStatus = document.getElementById(`status-${docId}`).value;
+          try {
+            await db.collection('serviceRequests').doc(docId).update({
+              status: newStatus
+            });
+            alert('작업 상태가 업데이트되었습니다!');
+            window.location.reload();
+          } catch (error) {
+            console.error('상태 업데이트 오류:', error);
+            alert('상태 업데이트 실패: ' + error.message);
+          }
+        });
+
+        // 추가 비용 요청 이벤트
+        if (!hasAdditionalCost) {
+          const additionalCostForm = card.querySelector(`#additional-cost-form-${docId}`);
+          additionalCostForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const additionalCost = parseInt(document.getElementById(`additional-cost-${docId}`).value);
+            const additionalCostReason = document.getElementById(`additional-cost-reason-${docId}`).value;
+            if (!additionalCost || !additionalCostReason) {
+              alert('추가 비용과 사유를 입력해주세요.');
+              return;
+            }
+            try {
+              await db.collection('serviceRequests').doc(docId).update({
+                additionalCost: additionalCost,
+                additionalCostReason: additionalCostReason,
+                additionalCostStatus: 'pending',
+                additionalCostRequestedAt: firebase.firestore.FieldValue.serverTimestamp()
+              });
+              alert('추가 비용 요청이 제출되었습니다!');
+              window.location.reload();
+            } catch (error) {
+              console.error('추가 비용 요청 오류:', error);
+              alert('추가 비용 요청 실패: ' + error.message);
+            }
+          });
+        }
+      });
+    }
+
+    function applyFilters() {
+      const searchInput = document.getElementById('search-input').value.toLowerCase();
+      const sortOrder = document.getElementById('sort-order').value;
+      const statusFilter = document.getElementById('status-filter').value;
+
+      // 검색 필터링
+      let filteredRequests = allRequests.filter(requestItem => {
+        const request = requestItem.data;
+        const nickname = (request.nickname || '').toLowerCase();
+        const address = (request.address || '').toLowerCase();
+        return nickname.includes(searchInput) || address.includes(searchInput);
+      });
+
+      // 상태 필터링
+      if (statusFilter !== 'all') {
+        filteredRequests = filteredRequests.filter(requestItem => {
+          const status = requestItem.data.status || 'pending';
+          if (statusFilter === 'completed') {
+            return status === 'completed';
+          } else if (statusFilter === 'incomplete') {
+            return status !== 'completed';
+          }
+          return true;
+        });
+      }
+
+      // 정렬
+      filteredRequests.sort((a, b) => {
+        const timestampA = a.data.createdAt ? a.data.createdAt.toDate().getTime() : 0;
+        const timestampB = b.data.createdAt ? b.data.createdAt.toDate().getTime() : 0;
+        return sortOrder === 'desc' ? timestampB - timestampA : timestampA - timestampB;
+      });
+
+      // 필터링된 결과 렌더링
+      renderRequests(filteredRequests);
+    }
+  </script>
+</body>
+</html>

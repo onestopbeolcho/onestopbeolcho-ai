@@ -1,0 +1,213 @@
+<!-- /onestopbeolcho/view-request.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 캐시 방지 메타 태그 -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>신청 상세 보기 - 벌초 서비스</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- 스타일 분리 -->
+  <link rel="stylesheet" href="/styles/theme.css">
+  <link rel="stylesheet" href="/styles/components.css">
+  <link rel="stylesheet" href="/styles/footer.css">
+  <!-- Firebase JavaScript SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+  <script>
+    // Firebase 초기화
+    const firebaseConfig = {
+      apiKey: "AIzaSyDuWpcxhSucn5jRdzsQOcdN-TgnY586kIo",
+      authDomain: "onestopbeolcho-d2bca.firebaseapp.com",
+      projectId: "onestopbeolcho-d2bca",
+      storageBucket: "onestopbeolcho-d2bca.firebasestorage.app",
+      messagingSenderId: "378817329836",
+      appId: "1:378817329836:web:d3c2a06bf705cb5e943d09",
+      measurementId: "G-9CX7J4Z578"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+  <!-- 전용 스타일 -->
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100%;
+      font-family: 'Noto Sans KR', sans-serif;
+      background: linear-gradient(135deg, #a5d6a7 0%, #c8e6c9 100%);
+    }
+
+    .request-details {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      margin: 20px auto;
+      max-width: 600px;
+      height: calc(100vh - 60px - 60px);
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+
+    .request-details h2 {
+      font-size: 1.8em;
+      color: #0a4119;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .request-details p {
+      margin: 5px 0;
+      font-size: 1em;
+      color: #333;
+    }
+
+    .request-details img {
+      max-width: 100%;
+      margin: 5px 0;
+    }
+
+    #share-btn {
+      display: block;
+      margin: 20px auto;
+      padding: 8px 16px;
+      background: #0a4119;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background 0.3s ease;
+    }
+
+    #share-btn:hover {
+      background: #4caf50;
+    }
+
+    nav {
+      height: 60px;
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+
+  <div class="request-details" id="request-details">
+    <h2>신청 상세 정보</h2>
+    <div id="detail-content"></div>
+    <button id="share-btn">링크 복사</button>
+  </div>
+
+  <div id="footer-container"></div>
+
+  <script src="/components/nav.js" type="text/javascript" defer></script>
+  <script src="/components/footer.js" type="text/javascript" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const db = firebase.firestore();
+      const detailContent = document.getElementById('detail-content');
+      const shareBtn = document.getElementById('share-btn');
+
+      // URL에서 requestId 추출
+      const urlParams = new URLSearchParams(window.location.search);
+      const requestId = urlParams.get('requestId');
+
+      if (!requestId) {
+        detailContent.innerHTML = '<p>잘못된 요청입니다. 신청 ID를 확인해주세요.</p>';
+        return;
+      }
+
+      // Firestore에서 신청 데이터 로드
+      db.collection('serviceRequests').doc(requestId).get().then(doc => {
+        if (!doc.exists) {
+          detailContent.innerHTML = '<p>해당 신청을 찾을 수 없습니다.</p>';
+          return;
+        }
+
+        const request = doc.data();
+        request.id = doc.id;
+
+        // 작업자 이름 로드
+        db.collection('workers').get().then(snapshot => {
+          const workers = [];
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            data.id = doc.id;
+            workers.push(data);
+          });
+
+          const createdAt = request.createdAt ? new Date(request.createdAt.toDate()).toISOString().split('T')[0] : '미지정';
+          let areaSizeDisplay = '평수 미지정';
+          if (request.serviceType === '벌초' && request.beolchoAreaSize) {
+            areaSizeDisplay = `${request.beolchoAreaSize} 평`;
+          } else if (request.serviceType === '예초' && request.areaSize) {
+            areaSizeDisplay = `${request.areaSize} 평`;
+          } else if (request.serviceType === '태양광 전문 예초' && request.solarAreaSize) {
+            areaSizeDisplay = `${request.solarAreaSize} 평`;
+          }
+
+          detailContent.innerHTML = `
+            <p><strong>고객명:</strong> ${request.customerName}</p>
+            <p><strong>연락처:</strong> ${request.customerPhone}</p>
+            <p><strong>주소:</strong> ${request.address}</p>
+            <p><strong>서비스 유형:</strong> ${request.serviceType}</p>
+            ${request.serviceType === '벌초' ? `
+              <p><strong>봉분 종류:</strong> ${request.graveType || '미지정'}</p>
+              <p><strong>분묘 수:</strong> ${request.graveCount || '미지정'}</p>
+              <p><strong>평수:</strong> ${areaSizeDisplay}</p>
+            ` : ''}
+            ${request.serviceType === '예초' ? `
+              <p><strong>평수:</strong> ${areaSizeDisplay}</p>
+              <p><strong>자른 풀 처리 방법:</strong> ${request.grassDisposalMethod === 'multiple' ? '여러 곳에 모아놓기' : request.grassDisposalMethod === 'single' ? '한 곳으로 모아놓기' : request.grassDisposalMethod === 'complete' ? '완전 배출' : '선택 안 함'}</p>
+            ` : ''}
+            ${request.serviceType === '태양광 전문 예초' ? `
+              <p><strong>평수:</strong> ${areaSizeDisplay}</p>
+              <p><strong>자른 풀 처리 방법:</strong> ${request.grassDisposalMethod === 'multiple' ? '여러 곳에 모아놓기' : request.grassDisposalMethod === 'single' ? '한 곳으로 모아놓기' : request.grassDisposalMethod === 'complete' ? '완전 배출' : '선택 안 함'}</p>
+            ` : ''}
+            <p><strong>희망 작업 날짜:</strong> ${request.workDate}</p>
+            <p><strong>신청 날짜:</strong> ${createdAt}</p>
+            <p><strong>작업자:</strong> ${workers.find(w => w.workerId === request.workerAssigned)?.name || '미배정'}</p>
+            <p><strong>요청사항:</strong> ${request.workerRequest}</p>
+            <p><strong>예상 견적 비용:</strong> ${request.estimatedCost ? request.estimatedCost.toLocaleString('ko-KR') + '원' : '비용 미지정'}</p>
+            <p><strong>상태:</strong> ${request.status === 'pending' ? '대기중' : '완료'}</p>
+          `;
+
+          if (request.fileUrls && request.fileUrls.length > 0) {
+            const fileSection = document.createElement('div');
+            fileSection.innerHTML = '<strong>첨부파일:</strong>';
+            request.fileUrls.forEach(url => {
+              const img = document.createElement('img');
+              img.src = url;
+              img.alt = '첨부파일';
+              fileSection.appendChild(img);
+            });
+            detailContent.appendChild(fileSection);
+          }
+        });
+      }).catch(error => {
+        console.error('Error loading request:', error);
+        detailContent.innerHTML = '<p>신청 정보를 로드하는 중 오류가 발생했습니다.</p>';
+      });
+
+      // 링크 복사 버튼 이벤트
+      shareBtn.addEventListener('click', () => {
+        const shareUrl = window.location.href;
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          alert('신청 링크가 클립보드에 복사되었습니다!');
+        }).catch(err => {
+          console.error('링크 복사 실패:', err);
+          alert('링크 복사에 실패했습니다. 브라우저 설정을 확인해주세요.');
+        });
+      });
+    });
+  </script>
+</body>
+</html>

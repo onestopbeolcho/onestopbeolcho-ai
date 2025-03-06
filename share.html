@@ -1,0 +1,241 @@
+<!-- /onestopbeolcho/share.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>신청 내역 공유 - 벌초 서비스</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDuWpcxhSucn5jRdzsQOcdN-TgnY586kIo",
+      authDomain: "onestopbeolcho.com",
+      projectId: "onestopbeolcho-d2bca",
+      storageBucket: "onestopbeolcho-d2bca.firebasestorage.app",
+      messagingSenderId: "378817329836",
+      appId: "1:378817329836:web:d3c2a06bf705cb5e943d09",
+      measurementId: "G-9CX7J4Z578"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #fafafa;
+      color: #424242;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 30px;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    h2 {
+      font-size: 2em;
+      color: #1E88E5;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .request-details .field {
+      padding-bottom: 10px;
+      border-bottom: 1px dashed #e0e0e0;
+      margin-bottom: 10px;
+    }
+
+    .request-details .field label {
+      font-size: 0.9em;
+      color: #757575;
+      font-weight: 500;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .request-details .field span {
+      font-size: 1.1em;
+      color: #424242;
+      font-weight: 500;
+    }
+
+    .photo-section {
+      margin-top: 20px;
+    }
+
+    .photo-section h4 {
+      font-size: 1.3em;
+      color: #1E88E5;
+      margin-bottom: 15px;
+    }
+
+    .photo-gallery {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .photo-gallery img {
+      max-width: 150px;
+      max-height: 150px;
+      border-radius: 8px;
+      object-fit: cover;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .additional-cost-info {
+      background: #FFF3E0;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #F57C00;
+    }
+
+    .additional-cost-info p {
+      margin: 0;
+      font-size: 1em;
+      color: #EF6C00;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        margin: 20px;
+        padding: 15px;
+      }
+
+      .photo-gallery img {
+        max-width: 120px;
+        max-height: 120px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>신청 내역 공유</h2>
+    <div id="request-details" class="request-details"></div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const requestId = urlParams.get('requestId');
+      const requestDetailsDiv = document.getElementById('request-details');
+
+      if (!requestId) {
+        requestDetailsDiv.innerHTML = '<p>잘못된 접근입니다. 신청 내역 ID가 필요합니다.</p>';
+        return;
+      }
+
+      try {
+        const doc = await firebase.firestore().collection('serviceRequests').doc(requestId).get();
+        if (doc.exists) {
+          const request = doc.data();
+          const hasAdditionalCost = request.additionalCost && request.additionalCostStatus;
+          requestDetailsDiv.innerHTML = `
+            ${hasAdditionalCost ? `
+              <div class="additional-cost-info">
+                <p>추가 비용: ${request.additionalCost.toLocaleString('ko-KR')}원 (${request.additionalCostStatus === 'pending' ? '승인 대기 중' : request.additionalCostStatus === 'approved' ? '승인됨' : '거절됨'})</p>
+                <p>사유: ${request.additionalCostReason}</p>
+              </div>
+            ` : ''}
+            <div class="field">
+              <label>별명</label>
+              <span>${request.nickname || '설정 안됨'}</span>
+            </div>
+            <div class="field">
+              <label>작업자 요청</label>
+              <span>${request.workerRequest || '없음'}</span>
+            </div>
+            <div class="field">
+              <label>서비스 유형</label>
+              <span>${request.serviceType}</span>
+            </div>
+            <div class="field">
+              <label>주소</label>
+              <span>${request.address}</span>
+            </div>
+            <div class="field">
+              <label>희망 작업 날짜</label>
+              <span>${request.workDate}</span>
+            </div>
+            <div class="field">
+              <label>예상 비용</label>
+              <span>${(request.estimatedCost || 0).toLocaleString('ko-KR')}원</span>
+            </div>
+            ${request.serviceType === '벌초' ? `
+              <div class="field">
+                <label>묘지 유형</label>
+                <span>${request.graveType || '없음'}</span>
+              </div>
+              <div class="field">
+                <label>묘지 개수</label>
+                <span>${request.graveCount || '없음'}</span>
+              </div>
+              <div class="field">
+                <label>벌초 면적</label>
+                <span>${request.beolchoAreaSize || '없음'} 평</span>
+              </div>
+            ` : request.serviceType === '예초' ? `
+              <div class="field">
+                <label>예초 면적</label>
+                <span>${request.areaSize || '없음'} 평</span>
+              </div>
+              <div class="field">
+                <label>잔디 처리 방법</label>
+                <span>${request.grassDisposalMethod || '없음'}</span>
+              </div>
+            ` : request.serviceType === '태양광 전문 예초' ? `
+              <div class="field">
+                <label>태양광 예초 면적</label>
+                <span>${request.solarAreaSize || '없음'} 평</span>
+              </div>
+              <div class="field">
+                <label>잔디 처리 방법</label>
+                <span>${request.grassDisposalMethod || '없음'}</span>
+              </div>
+            ` : ''}
+            <div class="field">
+              <label>진행 상태</label>
+              <span>${{
+                'pending': '접수완료',
+                'confirmed': '작업확인',
+                'in-progress': '작업중',
+                'completed': '작업완료'
+              }[request.status || 'pending']}</span>
+            </div>
+            ${request.beforePhotos && request.beforePhotos.length > 0 ? `
+              <div class="photo-section">
+                <h4>작업 전 사진</h4>
+                <div class="photo-gallery">
+                  ${request.beforePhotos.map(url => `<img src="${url}" alt="작업 전 사진">`).join('')}
+                </div>
+              </div>
+            ` : ''}
+            ${request.afterPhotos && request.afterPhotos.length > 0 ? `
+              <div class="photo-section">
+                <h4>작업 후 사진</h4>
+                <div class="photo-gallery">
+                  ${request.afterPhotos.map(url => `<img src="${url}" alt="작업 후 사진">`).join('')}
+                </div>
+              </div>
+            ` : ''}
+          `;
+        } else {
+          requestDetailsDiv.innerHTML = '<p>해당 신청 내역을 찾을 수 없습니다.</p>';
+        }
+      } catch (error) {
+        console.error('신청 내역 로드 오류:', error);
+        requestDetailsDiv.innerHTML = '<p>신청 내역을 로드하는 중 오류가 발생했습니다.</p>';
+      }
+    });
+  </script>
+</body>
+</html>

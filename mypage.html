@@ -1,0 +1,570 @@
+<!-- /onestopbeolcho/mypage.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>마이페이지 - 벌초 서비스</title>
+  <!-- SEO 최적화 -->
+  <meta name="description" content="마이페이지에서 벌초 서비스 신청 내역을 확인하고 관리하세요. 원스톱 벌초 서비스로 간편하게!">
+  <meta name="keywords" content="벌초 서비스, 마이페이지, 신청 내역, 원스톱 벌초">
+  <!-- PWA 설정 -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1E88E5">
+  <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- 스타일 -->
+  <link rel="stylesheet" href="/styles/theme.css">
+  <link rel="stylesheet" href="/styles/footer.css">
+  <!-- Kakao Maps SDK -->
+  <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef6b942fdad36e982c84eb0061d1d2ed&libraries=services"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDuWpcxhSucn5jRdzsQOcdN-TgnY586kIo",
+      authDomain: "onestopbeolcho.com",
+      projectId: "onestopbeolcho-d2bca",
+      storageBucket: "onestopbeolcho-d2bca.firebasestorage.app",
+      messagingSenderId: "378817329836",
+      appId: "1:378817329836:web:d3c2a06bf705cb5e943d09",
+      measurementId: "G-9CX7J4Z578"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+</head>
+<body>
+  <!-- 데스크톱 상단 네비게이션 -->
+  <div id="nav-container" class="desktop-nav"></div>
+    <a href="/" class="tab-item">
+      <svg class="tab-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11H3V9zm2 9h14V9.5L12 4.5 5 9.5V18z"/></svg>
+      <span>홈</span>
+    </a>
+    <a href="/request" class="tab-item">
+      <svg class="tab-icon" viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+      <span>서비스 신청</span>
+    </a>
+    <a href="/reviews" class="tab-item">
+      <svg class="tab-icon" viewBox="0 0 24 24"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z"/></svg>
+      <span>고객 후기</span>
+    </a>
+    <a href="/mypage" class="tab-item active" id="profile-tab">
+      <svg class="tab-icon" viewBox="0 0 24 24"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      <span>마이페이지</span>
+    </a>
+  </nav>
+  <!-- 콘텐츠 -->
+  <div class="container mypage-container">
+    <h2>마이페이지</h2>
+    <div class="user-info">
+      <div class="fields" id="user-info-fields"></div>
+    </div>
+    <div class="change-password-card">
+      <form class="change-password-form" id="change-password-form">
+        <label for="new-password">새 비밀번호</label>
+        <input type="password" id="new-password" placeholder="새 비밀번호 입력 (6자 이상)" required>
+        <button type="submit">비밀번호 변경</button>
+      </form>
+      <div id="feedback-message" class="feedback-message"></div>
+    </div>
+    <h3>서비스 신청 내역</h3>
+    <div class="request-list" id="request-list"></div>
+    <div class="account-info">
+      <h3>입금 계좌 안내</h3>
+      <p>계좌번호: 123-456-789012</p>
+      <p>예금주: 벌초 서비스</p>
+      <p>은행명: 국민은행</p>
+    </div>
+  </div>
+  <!-- 지도 모달 -->
+  <div id="map-modal" class="map-modal">
+    <div class="map-modal-content">
+      <span class="close-btn">×</span>
+      <div id="map"></div>
+    </div>
+  </div>
+  <!-- 현금영수증 신청 모달 -->
+  <div id="cash-receipt-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">×</span>
+      <h3>현금영수증 신청</h3>
+      <form id="cash-receipt-form">
+        <label for="phone-number">휴대폰 번호</label>
+        <input type="tel" id="phone-number" placeholder="010-1234-5678" required>
+        <button type="submit">신청</button>
+      </form>
+    </div>
+  </div>
+  <!-- 세금계산서 신청 모달 -->
+  <div id="tax-invoice-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">×</span>
+      <h3>세금계산서 신청</h3>
+      <form id="tax-invoice-form">
+        <label for="business-number">사업자 번호</label>
+        <input type="text" id="business-number" placeholder="123-45-67890" required>
+        <label for="email">이메일 주소</label>
+        <input type="email" id="email" placeholder="example@email.com" required>
+        <button type="submit">신청</button>
+      </form>
+    </div>
+  </div>
+  <!-- 재신청 모달 -->
+  <div id="re-request-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">×</span>
+      <h3>재신청</h3>
+      <form id="re-request-form">
+        <label for="new-work-date">새 희망 작업 날짜</label>
+        <input type="date" id="new-work-date" required>
+        <label for="new-worker-request">새 작업자 요청</label>
+        <input type="text" id="new-worker-request" placeholder="작업자 요청 입력">
+        <button type="submit">재신청</button>
+      </form>
+    </div>
+  </div>
+  <div id="footer-container"></div>
+  <script src="/components/nav.js" type="text/javascript" defer></script>
+  <script src="/components/footer.js" type="text/javascript" defer></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(() => console.log('Service Worker 등록 성공'))
+        .catch((error) => console.log('Service Worker 등록 실패:', error));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+      const userInfoFields = document.getElementById('user-info-fields');
+      const changePasswordForm = document.getElementById('change-password-form');
+      const feedbackMessage = document.getElementById('feedback-message');
+      const requestList = document.getElementById('request-list');
+      const cashReceiptModal = document.getElementById('cash-receipt-modal');
+      const taxInvoiceModal = document.getElementById('tax-invoice-modal');
+      const reRequestModal = document.getElementById('re-request-modal');
+      const mapModal = document.getElementById('map-modal');
+      const cashReceiptForm = document.getElementById('cash-receipt-form');
+      const taxInvoiceForm = document.getElementById('tax-invoice-form');
+      const reRequestForm = document.getElementById('re-request-form');
+      const profileTab = document.getElementById('profile-tab');
+      let currentRequestId = null;
+
+      document.querySelectorAll('.close-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          cashReceiptModal.style.display = 'none';
+          taxInvoiceModal.style.display = 'none';
+          reRequestModal.style.display = 'none';
+          mapModal.style.display = 'none';
+        });
+      });
+
+      auth.onAuthStateChanged(async user => {
+        if (user) {
+          console.log('사용자 로그인 상태:', user.uid);
+          profileTab.style.display = 'flex';
+          try {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (userDoc.exists) {
+              const userData = userDoc.data();
+              userInfoFields.innerHTML = `
+                <div class="field" data-field="email">
+                  <label>이메일</label>
+                  <span>${userData.email}</span>
+                </div>
+                <div class="field" data-field="name">
+                  <label>이름</label>
+                  <span>${userData.name || '미등록'}</span>
+                  <input type="text" value="${userData.name || ''}" style="display: none;">
+                  <button class="edit-btn">수정</button>
+                </div>
+                <div class="field" data-field="phone">
+                  <label>전화번호</label>
+                  <span>${userData.phone || '미등록'}</span>
+                  <input type="tel" value="${userData.phone || ''}" style="display: none;">
+                  <button class="edit-btn">수정</button>
+                </div>
+              `;
+
+              userInfoFields.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                  const fieldDiv = btn.parentElement;
+                  const field = fieldDiv.getAttribute('data-field');
+                  const span = fieldDiv.querySelector('span');
+                  const input = fieldDiv.querySelector('input');
+                  const isEditing = fieldDiv.classList.contains('editing');
+
+                  if (isEditing) {
+                    const newValue = input.value.trim();
+                    if (newValue) {
+                      try {
+                        await db.collection('users').doc(user.uid).update({
+                          [field]: newValue
+                        });
+                        span.textContent = newValue;
+                        fieldDiv.classList.remove('editing');
+                        btn.textContent = '수정';
+                        feedbackMessage.textContent = `${field === 'name' ? '이름' : '전화번호'}이 성공적으로 수정되었습니다!`;
+                        feedbackMessage.classList.add('visible');
+                        setTimeout(() => feedbackMessage.classList.remove('visible'), 2000);
+                      } catch (error) {
+                        console.error('사용자 정보 수정 오류:', error);
+                        feedbackMessage.textContent = '수정 실패: ' + error.message;
+                        feedbackMessage.classList.add('visible');
+                        setTimeout(() => feedbackMessage.classList.remove('visible'), 2000);
+                      }
+                    }
+                  } else {
+                    fieldDiv.classList.add('editing');
+                    btn.textContent = '저장';
+                  }
+                });
+              });
+            } else {
+              userInfoFields.innerHTML = '<p>사용자 정보를 불러올 수 없습니다.</p>';
+            }
+
+            console.log('Fetching service requests for userId:', user.uid);
+            const requestsSnapshot = await db.collection('serviceRequests')
+              .where('userId', '==', user.uid)
+              .orderBy('createdAt', 'desc')
+              .get();
+            requestList.innerHTML = '';
+            if (requestsSnapshot.empty) {
+              console.log('No service requests found for userId:', user.uid);
+              requestList.innerHTML = '<p style="text-align: center; color: #757575;">신청 내역이 없습니다.</p>';
+            } else {
+              console.log('Service requests found:', requestsSnapshot.size);
+              requestsSnapshot.forEach((doc, index) => {
+                const request = doc.data();
+                const status = request.status || 'pending';
+                const statusText = {
+                  'pending': '접수완료',
+                  'confirmed': '작업확인',
+                  'in-progress': '작업중',
+                  'completed': '작업완료'
+                }[status];
+                const statusIndex = ['pending', 'confirmed', 'in-progress', 'completed'].indexOf(status);
+                const progressWidth = statusIndex * 33.33;
+                const hasAdditionalCost = request.additionalCost && request.additionalCostStatus;
+
+                const card = document.createElement('div');
+                card.className = 'request-card';
+                card.style.setProperty('--delay', index);
+                card.innerHTML = `
+                  ${hasAdditionalCost ? `
+                    <div class="status-tag ${request.additionalCostStatus}">
+                      ${request.additionalCostStatus === 'pending' ? '추가 비용 요청 중' : request.additionalCostStatus === 'approved' ? '추가 비용 승인' : '추가 비용 거절'}
+                    </div>
+                  ` : ''}
+                  ${hasAdditionalCost && request.additionalCostStatus === 'pending' ? `
+                    <div class="additional-cost-alert">
+                      <p>추가 비용 요청: ${request.additionalCost.toLocaleString('ko-KR')}원, 사유: ${request.additionalCostReason}</p>
+                      <div class="additional-cost-actions">
+                        <button class="approve-btn" data-id="${doc.id}">동의</button>
+                        <button class="reject-btn" data-id="${doc.id}">거절</button>
+                      </div>
+                    </div>
+                  ` : hasAdditionalCost && request.additionalCostStatus !== 'pending' ? `
+                    <div class="additional-cost-alert">
+                      <p>추가 비용: ${request.additionalCost.toLocaleString('ko-KR')}원 (${request.additionalCostStatus === 'approved' ? '승인됨' : '거절됨'})</p>
+                    </div>
+                  ` : ''}
+                  <div class="fields">
+                    <div class="field">
+                      <label>별명</label>
+                      <span>${request.nickname || '설정 안됨'} <button class="nickname-btn" data-id="${doc.id}">수정</button></span>
+                    </div>
+                    <div class="field">
+                      <label>작업자 요청</label>
+                      <span>${request.workerRequest || '없음'}</span>
+                    </div>
+                    <div class="field">
+                      <label>서비스 유형</label>
+                      <span>${request.serviceType}</span>
+                    </div>
+                    <div class="field">
+                      <label>주소</label>
+                      <span>${request.address}</span>
+                      <button class="map-btn" data-lat="${request.latitude}" data-lng="${request.longitude}">지도 보기</button>
+                    </div>
+                    <div class="field">
+                      <label>희망 작업 날짜</label>
+                      <span>${request.workDate}</span>
+                    </div>
+                    <div class="field">
+                      <label>예상 비용</label>
+                      <span>${(request.estimatedCost || 0).toLocaleString('ko-KR')}원</span>
+                    </div>
+                    ${request.additionalCost ? `
+                      <div class="field">
+                        <label>추가 비용</label>
+                        <span>${request.additionalCost.toLocaleString('ko-KR')}원</span>
+                      </div>
+                      <div class="field">
+                        <label>총 비용</label>
+                        <span>${((request.estimatedCost || 0) + request.additionalCost).toLocaleString('ko-KR')}원</span>
+                      </div>
+                    ` : ''}
+                    <div class="field">
+                      <label>묘지 유형</label>
+                      <span>${request.graveType || '없음'}</span>
+                    </div>
+                    <div class="field">
+                      <label>묘지 개수</label>
+                      <span>${request.graveCount || '없음'}</span>
+                    </div>
+                    <div class="field">
+                      <label>벌초 면적</label>
+                      <span>${request.beolchoAreaSize || '없음'} 평</span>
+                    </div>
+                  </div>
+                  ${request.beforePhotos && request.beforePhotos.length > 0 ? `
+                    <div class="photo-section">
+                      <h4 style="font-size: 1.1em; color: #1E88E5; margin-bottom: 10px;">작업 전 사진</h4>
+                      <div class="photo-gallery">
+                        ${request.beforePhotos.map(url => `<img src="${url}" alt="작업 전 사진">`).join('')}
+                      </div>
+                    </div>
+                  ` : ''}
+                  ${request.afterPhotos && request.afterPhotos.length > 0 ? `
+                    <div class="photo-section">
+                      <h4 style="font-size: 1.1em; color: #1E88E5; margin-bottom: 10px;">작업 후 사진</h4>
+                      <div class="photo-gallery">
+                        ${request.afterPhotos.map(url => `<img src="${url}" alt="작업 후 사진">`).join('')}
+                      </div>
+                    </div>
+                  ` : ''}
+                  <div class="progress-timeline">
+                    <div class="progress-fill" style="width: ${progressWidth}%"></div>
+                    <div class="progress-step ${statusIndex >= 0 ? 'completed' : ''} ${status === 'pending' ? 'active' : ''}">
+                      <div class="step-circle">1</div>
+                      <div class="step-label">접수완료</div>
+                    </div>
+                    <div class="progress-step ${statusIndex >= 1 ? 'completed' : ''} ${status === 'confirmed' ? 'active' : ''}">
+                      <div class="step-circle">2</div>
+                      <div class="step-label">작업확인</div>
+                    </div>
+                    <div class="progress-step ${statusIndex >= 2 ? 'completed' : ''} ${status === 'in-progress' ? 'active' : ''}">
+                      <div class="step-circle">3</div>
+                      <div class="step-label">작업중</div>
+                    </div>
+                    <div class="progress-step ${statusIndex >= 3 ? 'completed' : ''} ${status === 'completed' ? 'active' : ''}">
+                      <div class="step-circle">4</div>
+                      <div class="step-label">작업완료</div>
+                    </div>
+                  </div>
+                  <div style="text-align: center; margin-top: 10px; font-size: 0.9em; color: #757575;">
+                    현재 상태: ${statusText}
+                  </div>
+                  <div class="action-buttons">
+                    <button class="re-request-btn" data-id="${doc.id}">원클릭 재신청 접수</button>
+                    <button class="cash-receipt-btn" data-id="${doc.id}">현금영수증 신청</button>
+                    <button class="tax-invoice-btn" data-id="${doc.id}">세금계산서 신청</button>
+                    <button class="share-btn" data-id="${doc.id}">내역 공유</button>
+                  </div>
+                `;
+                requestList.appendChild(card);
+
+                const mapBtn = card.querySelector('.map-btn');
+                mapBtn.addEventListener('click', () => {
+                  const lat = mapBtn.getAttribute('data-lat');
+                  const lng = mapBtn.getAttribute('data-lng');
+                  if (lat && lng) {
+                    showMap(lat, lng);
+                  } else {
+                    alert('위치 정보가 없습니다.');
+                  }
+                });
+
+                if (hasAdditionalCost && request.additionalCostStatus === 'pending') {
+                  const approveBtn = card.querySelector('.approve-btn');
+                  const rejectBtn = card.querySelector('.reject-btn');
+
+                  approveBtn.addEventListener('click', async () => {
+                    try {
+                      await db.collection('serviceRequests').doc(doc.id).update({
+                        additionalCostStatus: 'approved'
+                      });
+                      alert('추가 비용 요청에 동의하였습니다.');
+                      window.location.reload();
+                    } catch (error) {
+                      console.error('추가 비용 동의 오류:', error);
+                      alert('처리 실패: ' + error.message);
+                    }
+                  });
+
+                  rejectBtn.addEventListener('click', async () => {
+                    try {
+                      await db.collection('serviceRequests').doc(doc.id).update({
+                        additionalCostStatus: 'rejected'
+                      });
+                      alert('추가 비용 요청을 거절하였습니다.');
+                      console.log('관리자에게 알림 전송: 추가 비용 거절 - 사용자: ' + user.uid + ', 신청 ID: ' + doc.id);
+                      window.location.reload();
+                    } catch (error) {
+                      console.error('추가 비용 거절 오류:', error);
+                      alert('처리 실패: ' + error.message);
+                    }
+                  });
+                }
+
+                const nicknameBtn = card.querySelector('.nickname-btn');
+                nicknameBtn.addEventListener('click', async () => {
+                  const newNickname = prompt('신청 내역의 별명을 입력하세요:', request.nickname || '');
+                  if (newNickname !== null) {
+                    try {
+                      await db.collection('serviceRequests').doc(doc.id).update({
+                        nickname: newNickname
+                      });
+                      alert('별명이 수정되었습니다!');
+                      window.location.reload();
+                    } catch (error) {
+                      console.error('별명 수정 오류:', error);
+                      alert('별명 수정 실패: ' + error.message);
+                    }
+                  }
+                });
+
+                const reRequestBtn = card.querySelector('.re-request-btn');
+                reRequestBtn.addEventListener('click', () => {
+                  currentRequestId = doc.id;
+                  document.getElementById('new-work-date').value = request.workDate;
+                  document.getElementById('new-worker-request').value = request.workerRequest || '';
+                  reRequestModal.style.display = 'flex';
+                });
+
+                reRequestForm.addEventListener('submit', async (e) => {
+                  e.preventDefault();
+                  const newWorkDate = document.getElementById('new-work-date').value;
+                  const newWorkerRequest = document.getElementById('new-worker-request').value;
+                  const doc = await db.collection('serviceRequests').doc(currentRequestId).get();
+                  const originalData = doc.data();
+
+                  const newRequest = {
+                    ...originalData,
+                    workDate: newWorkDate,
+                    workerRequest: newWorkerRequest || '',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'pending',
+                    workerAssigned: '',
+                    beforePhotos: [],
+                    afterPhotos: [],
+                    nickname: originalData.nickname || '',
+                    additionalCost: null,
+                    additionalCostReason: null,
+                    additionalCostStatus: null,
+                    additionalCostRequestedAt: null
+                  };
+                  delete newRequest.createdAt;
+
+                  try {
+                    await db.collection('serviceRequests').add(newRequest);
+                    alert('재신청이 완료되었습니다!');
+                    reRequestModal.style.display = 'none';
+                    window.location.reload();
+                  } catch (error) {
+                    console.error('재신청 오류:', error);
+                    alert('재신청 실패: ' + error.message);
+                  }
+                });
+
+                const cashReceiptBtn = card.querySelector('.cash-receipt-btn');
+                cashReceiptBtn.addEventListener('click', () => {
+                  currentRequestId = doc.id;
+                  cashReceiptModal.style.display = 'flex';
+                });
+
+                const taxInvoiceBtn = card.querySelector('.tax-invoice-btn');
+                taxInvoiceBtn.addEventListener('click', () => {
+                  currentRequestId = doc.id;
+                  taxInvoiceModal.style.display = 'flex';
+                });
+
+                const shareBtn = card.querySelector('.share-btn');
+                shareBtn.addEventListener('click', async () => {
+                  const shareUrl = `${window.location.origin}/share.html?requestId=${doc.id}`;
+                  try {
+                    if (navigator.share) {
+                      await navigator.share({
+                        title: '벌초 서비스 신청 내역',
+                        text: `벌초 서비스 신청 내역을 확인하세요: ${request.nickname || '신청 내역'}`,
+                        url: shareUrl
+                      });
+                    } else {
+                      await navigator.clipboard.writeText(shareUrl);
+                      alert('공유 링크가 클립보드에 복사되었습니다: ' + shareUrl);
+                    }
+                  } catch (error) {
+                    console.error('공유 오류:', error);
+                    alert('공유 링크: ' + shareUrl + '\n링크를 복사하여 공유해주세요.');
+                  }
+                });
+              });
+            }
+          } catch (error) {
+            console.error('사용자 정보 또는 데이터 로드 오류:', error);
+            userInfoFields.innerHTML = '<p>사용자 정보를 불러올 수 없습니다.</p>';
+            requestList.innerHTML = '<p style="text-align: center; color: #757575;">신청 내역을 불러올 수 없습니다.</p>';
+          }
+        } else {
+          window.location.href = '/login.html';
+        }
+      });
+
+      function showMap(lat, lng) {
+        const mapContainer = document.getElementById('map');
+        const mapOption = {
+          center: new kakao.maps.LatLng(lat, lng),
+          level: 3
+        };
+        const map = new kakao.maps.Map(mapContainer, mapOption);
+        const marker = new kakao.maps.Marker({
+          position: new kakao.maps.LatLng(lat, lng)
+        });
+        marker.setMap(map);
+        document.getElementById('map-modal').style.display = 'flex';
+      }
+
+      changePasswordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const newPassword = document.getElementById('new-password').value;
+        const user = auth.currentUser;
+
+        if (newPassword.length < 6) {
+          feedbackMessage.textContent = '비밀번호는 6자 이상이어야 합니다.';
+          feedbackMessage.classList.add('visible');
+          setTimeout(() => feedbackMessage.classList.remove('visible'), 2000);
+          return;
+        }
+
+        if (user) {
+          try {
+            await user.updatePassword(newPassword);
+            feedbackMessage.textContent = '비밀번호가 성공적으로 변경되었습니다. 다시 로그인해주세요.';
+            feedbackMessage.classList.add('visible');
+            setTimeout(async () => {
+              await auth.signOut();
+              window.location.href = '/login.html';
+            }, 2000);
+          } catch (error) {
+            console.error('비밀번호 변경 오류:', error);
+            feedbackMessage.textContent = '비밀번호 변경 실패: ' + error.message;
+            feedbackMessage.classList.add('visible');
+            setTimeout(() => feedbackMessage.classList.remove('visible'), 2000);
+          }
+        } else {
+          feedbackMessage.textContent = '사용자가 로그인되어 있지 않습니다.';
+          feedbackMessage.classList.add('visible');
+          setTimeout(() => window.location.href = '/login.html', 2000);
+        }
+      });
+
+     
+    });
+  </script>
+</body>
+</html>

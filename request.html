@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 캐시 방지 메타 태그 -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>서비스 신청 - 벌초 서비스</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- 스타일 분리 -->
+  <link rel="stylesheet" href="/styles/theme.css">
+  <link rel="stylesheet" href="/styles/components.css">
+  <link rel="stylesheet" href="/styles/footer.css">
+  <!-- 카카오맵 API 스크립트 (동기 로드) -->
+  <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef6b942fdad36e982c84eb0061d1d2ed&libraries=services"></script>
+  <!-- Daum Postcode API 스크립트 -->
+  <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+  <!-- Firebase JavaScript SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+  <script>
+    // Firebase 초기화
+    const firebaseConfig = {
+      apiKey: "AIzaSyDuWpcxhSucn5jRdzsQOcdN-TgnY586kIo",
+      authDomain: "onestopbeolcho-d2bca.firebaseapp.com",
+      projectId: "onestopbeolcho-d2bca",
+      storageBucket: "onestopbeolcho-d2bca.firebasestorage.app",
+      messagingSenderId: "378817329836",
+      appId: "1:378817329836:web:d3c2a06bf705cb5e943d09",
+      measurementId: "G-9CX7J4Z578"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+  <!-- 전용 스타일 (기존 스타일 유지) -->
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100%;
+      font-family: 'Noto Sans KR', sans-serif;
+      background: linear-gradient(135deg, #a5d6a7 0%, #c8e6c9 100%);
+    }
+    .request-container {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 15px;
+      width: 100%;
+      height: calc(100vh - 60px - 60px);
+      padding: 0;
+      padding-bottom: 60px;
+      box-sizing: border-box;
+    }
+    .request-form {
+      flex: 0 0 30%;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      min-width: 280px;
+      overflow-y: auto;
+      height: 100%;
+    }
+    .request-map {
+      flex: 0 0 65%;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 10px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      min-width: 500px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      margin-right: 15px;
+      box-sizing: border-box;
+    }
+    #nv-map {
+      flex: 1;
+      width: 100%;
+      min-height: 600px;
+      height: 100%;
+      border-radius: 10px;
+      border: 1px solid #e0e0e0;
+      box-sizing: border-box;
+    }
+    #map-address-info {
+      padding: 10px;
+      background: #f5f5f5;
+      border-top: 1px solid #e0e0e0;
+      font-size: 0.9em;
+      color: #333;
+      border-radius: 0 0 10px 10px;
+    }
+    nav {
+      height: 60px;
+    }
+    .request-form h2 {
+      font-size: 1.8em;
+      color: #0a4119;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .request-form label {
+      font-weight: 500;
+      margin-top: 10px;
+      margin-bottom: 5px;
+      display: block;
+      font-size: 1em;
+      color: #555;
+    }
+    .request-form input,
+    .request-form select,
+    .request-form textarea {
+      padding: 10px;
+      margin-bottom: 5px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1em;
+      background: #fff;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+    }
+    .request-form input[type="text"],
+    .request-form input[type="tel"],
+    .request-form input[type="password"],
+    .request-form input[type="number"] {
+      width: 100%;
+      max-width: 200px;
+    }
+    .request-form input[type="text"][id="address"],
+    .request-form textarea,
+    .request-form input[type="file"] {
+      width: 100%;
+      max-width: none;
+    }
+    .request-form input:focus,
+    .request-form select:focus,
+    .request-form textarea:focus {
+      border-color: #0a4119;
+      box-shadow: 0 0 8px rgba(10, 65, 25, 0.3);
+      outline: none;
+    }
+    .request-form .hint {
+      font-size: 0.85em;
+      color: #333;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .request-form textarea {
+      height: 80px;
+    }
+    #service-type {
+      font-size: 1.2em;
+      padding: 12px;
+      background: linear-gradient(135deg, #a5d6a7, #81c784);
+      color: #333;
+      border: none;
+      border-radius: 8px;
+      width: 100%;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+    #service-type:hover {
+      transform: scale(1.02);
+      background: linear-gradient(135deg, #81c784, #a5d6a7);
+    }
+    .request-form button {
+      background: linear-gradient(135deg, #0a4119, #4caf50);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 1.1em;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      margin-top: 15px;
+      width: 100%;
+      border: none;
+      cursor: pointer;
+    }
+    .request-form button:hover {
+      background: linear-gradient(135deg, #4caf50, #0f5e28);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    .request-form button:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+    #estimated-cost {
+      margin-top: 15px;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      font-size: 1em;
+      color: #0a4119;
+      font-weight: 500;
+      text-align: center;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .request-form div[id$="-fields"] {
+      animation: fadeIn 0.3s ease forwards;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #fff;
+      width: 80%;
+      max-width: 500px;
+      margin: 100px auto;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
+    .modal-content button {
+      margin: 10px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .modal-content .confirm-btn {
+      background: #0a4119;
+      color: #fff;
+      border: none;
+    }
+    .modal-content .confirm-btn:hover {
+      background: #0f5e28;
+    }
+    .modal-content .confirm-btn:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+    }
+    .modal-content .cancel-btn {
+      background: #e0e0e0;
+      color: #333;
+      border: none;
+    }
+    .modal-content .cancel-btn:hover {
+      background: #bdbdbd;
+    }
+    @media (max-width: 1000px) {
+      .request-container {
+        flex-wrap: wrap;
+      }
+      .request-form,
+      .request-map {
+        flex: 0 0 100%;
+        min-width: 100%;
+      }
+      .request-map {
+        margin-right: 0;
+      }
+      #nv-map {
+        min-height: 300px;
+        height: 400px;
+      }
+      .request-form input[type="text"],
+      .request-form input[type="tel"],
+      .request-form input[type="password"],
+      .request-form input[type="number"] {
+        max-width: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-container"></div>
+
+  <div class="request-container">
+    <div class="request-form">
+      <h2>서비스 신청</h2>
+      <form id="service-form">
+        <label for="service-type">서비스 유형 (필수)</label>
+        <select id="service-type" required>
+          <option value="">선택하세요</option>
+          <option value="벌초">벌초 서비스</option>
+          <option value="예초">예초 서비스</option>
+          <option value="태양광 전문 예초">태양광 전문 예초 서비스</option>
+        </select>
+        <label for="customer-name">이름 (필수)</label>
+        <input type="text" id="customer-name" placeholder="이름" required>
+        <span class="hint">예: 홍길동 or 기업, 단체명</span>
+        
+        <label for="customer-phone">연락처 (필수)</label>
+        <input type="tel" id="customer-phone" placeholder="01012345678" maxlength="13" required>
+        <span class="hint">숫자만 입력하세요 (예: 01012345678) 연락처로 진행상황 조회 및 재신청 가능!</span>
+        
+        <label for="customer-password">비밀번호 (필수)</label>
+        <input type="password" id="customer-password" placeholder="비밀번호" required>
+        <span class="hint">신청 조회, 진행상황, 재신청 등에 사용되니 꼭 메모해주세요!</span>
+        
+        <label for="address">주소 검색 (필수)</label>
+        <button type="button" id="address-search-btn">주소 검색</button>
+        <input type="text" id="address" placeholder="주소를 검색하세요" readonly required>
+        <span class="hint">위성사진에서 산소 위치를 선택해주세요!</span>
+        
+        <!-- 서비스별 필드 -->
+        <div id="service-specific-fields">
+          <!-- 벌초 서비스 전용 필드 -->
+          <div id="beolcho-fields" style="display: none;">
+            <label for="grave-type">봉분 종류 (필수)</label>
+            <select id="grave-type" data-required="true">
+              <option value="">선택하세요</option>
+              <option value="일반 봉분묘">일반 봉분묘</option>
+              <option value="평장묘">평장묘</option>
+              <option value="공원묘지">공원묘지</option>
+            </select>
+            
+            <label for="grave-count">분묘 수 (필수)</label>
+            <select id="grave-count" data-required="true">
+              <option value="">선택하세요</option>
+              <option value="1기">1기</option>
+              <option value="2기">2기</option>
+              <option value="3기">3기</option>
+              <option value="4기">4기</option>
+              <option value="5기">5기</option>
+              <option value="6기">6기</option>
+              <option value="7기">7기</option>
+              <option value="8기">8기</option>
+              <option value="9기">9기</option>
+              <option value="10기">10기</option>
+              <option value="직접입력">직접 입력</option>
+            </select>
+            <input type="number" id="grave-count-custom" placeholder="분묘 수 입력" style="display: none;" data-required="true">
+
+            <label for="beolcho-area-size">평수(면적) (필수)</label>
+            <div style="display: flex; align-items: center;">
+              <input type="number" id="beolcho-area-size" placeholder="평수 입력" min="1" step="1" data-required="true">
+              <span style="margin-left: 10px;">평</span>
+            </div>
+            <span class="hint">면적 재는 방법 (네이버 지도에서 면적 재기를 사용해 예상 면적을 확인할 수 있습니다.)</span>
+          </div>
+
+          <!-- 예초 서비스 전용 필드 -->
+          <div id="yecho-fields" style="display: none;">
+            <label for="area-size">평수(면적) (필수)</label>
+            <div style="display: flex; align-items: center;">
+              <input type="number" id="area-size" placeholder="평수 입력" min="1" step="1" data-required="true">
+              <span style="margin-left: 10px;">평</span>
+            </div>
+            <span class="hint">면적 재는 방법 (네이버 지도에서 면적 재기를 사용해 예상 면적을 확인할 수 있습니다.)</span>
+
+            <label for="yecho-dispose-method">자른 풀 처리 방법</label>
+            <select id="yecho-dispose-method">
+              <option value="none">선택 안 함</option>
+              <option value="multiple">자른 풀 여러 곳에 모아놓기</option>
+              <option value="single">자른 풀 한 곳으로 모아놓기</option>
+              <option value="complete">자른 풀 완전 배출</option>
+            </select>
+            <span class="hint">※ 여러 곳에 모아놓기: 평당 300원, 한 곳으로 모아놓기: 평당 500원, 완전 배출: 평당 1,800원 추가</span>
+          </div>
+
+          <!-- 태양광 전문 예초 서비스 전용 필드 -->
+          <div id="solar-fields" style="display: none;">
+            <label for="solar-area-size">평수(면적) (필수)</label>
+            <div style="display: flex; align-items: center;">
+              <input type="number" id="solar-area-size" placeholder="평수 입력" min="1" step="1" data-required="true">
+              <span style="margin-left: 10px;">평</span>
+            </div>
+            <span class="hint">면적 재는 방법 (네이버 지도에서 면적 재기를 사용해 예상 면적을 확인할 수 있습니다.)</span>
+
+            <label for="solar-dispose-method">자른 풀 처리 방법</label>
+            <select id="solar-dispose-method">
+              <option value="none">선택 안 함</option>
+              <option value="multiple">자른 풀 여러 곳에 모아놓기</option>
+              <option value="single">자른 풀 한 곳으로 모아놓기</option>
+              <option value="complete">자른 풀 완전 배출</option>
+            </select>
+            <span class="hint">※ 여러 곳에 모아놓기: 평당 300원, 한 곳으로 모아놓기: 평당 500원, 완전 배출: 평당 1,800원 추가</span>
+          </div>
+        </div>
+
+        <!-- 예상 견적 비용 표시 -->
+        <div id="estimated-cost">
+          예상 견적 비용: 0원
+          <p style="font-size: 0.85em; color: #777; margin-top: 5px;">
+            ※ 예상 견적이며, 정확한 비용은 현장 확인 후 변동될 수 있습니다.
+          </p>
+        </div>
+
+        <label for="work-date">희망 작업 날짜 (필수)</label>
+        <input type="date" id="work-date" required>
+        <span class="hint">명절/추석은 작업 마감일만 선택 가능</span>
+        
+        <label for="worker-request">작업자에게 요청 및 전달사항</label>
+        <textarea id="worker-request" placeholder="요청 및 전달사항 입력" rows="4"></textarea>
+        <span class="hint">작업에 필요한 추가 정보를 입력하세요</span>
+        
+        <label for="request-files">현장 사진/첨부파일</label>
+        <input type="file" id="request-files" accept="image/*" multiple>
+        <span class="hint">사진 파일을 업로드하세요</span>
+        
+        <button type="button" id="submit-btn">신청 제출</button>
+      </form>
+    </div>
+
+    <div class="request-map">
+      <div id="nv-map"></div>
+      <div id="map-address-info"></div>
+    </div>
+  </div>
+
+  <div id="confirm-modal" class="modal">
+    <div class="modal-content">
+      <h3>신청 확인</h3>
+      <p>입력한 정보를 확인하셨습니까? 신청을 제출하시겠습니까?</p>
+      <button class="confirm-btn" id="confirm-submit-btn">확인</button>
+      <button class="cancel-btn" id="cancel-modal-btn">취소</button>
+    </div>
+  </div>
+
+  <div id="footer-container"></div>
+
+  <script src="/components/nav.js" type="text/javascript" defer></script>
+  <script src="/components/footer.js" type="text/javascript" defer></script>
+  <script>
+    // 주소에서 region을 추출하는 함수
+    function extractRegion(address) {
+      if (!address) return "미설정";
+      const parts = address.split(' ');
+      if (parts.length < 2) return "미설정";
+      const region = `${parts[0]} ${parts[1]}`;
+      return region;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+      const storage = firebase.storage();
+      const serviceForm = document.getElementById('service-form');
+      const serviceTypeSelect = document.getElementById('service-type');
+      const beolchoFields = document.getElementById('beolcho-fields');
+      const yechoFields = document.getElementById('yecho-fields');
+      const solarFields = document.getElementById('solar-fields');
+      const graveCountSelect = document.getElementById('grave-count');
+      const graveCountCustomInput = document.getElementById('grave-count-custom');
+      const addressSearchBtn = document.getElementById('address-search-btn');
+      const addressInput = document.getElementById('address');
+      const estimatedCostDiv = document.getElementById('estimated-cost');
+      const submitBtn = document.getElementById('submit-btn');
+      const confirmModal = document.getElementById('confirm-modal');
+      const confirmSubmitBtn = document.getElementById('confirm-submit-btn');
+      const cancelModalBtn = document.getElementById('cancel-modal-btn');
+      let latitude = null;
+      let longitude = null;
+      let map = null;
+      let marker = null;
+      let geocoder = new kakao.maps.services.Geocoder();
+
+      // 지도 초기화 (위성사진 모드, 초기 확대 설정)
+      const mapContainer = document.getElementById('nv-map');
+      const mapOption = {
+        center: new kakao.maps.LatLng(37.5665, 126.9780),
+        level: 3 // 초기 확대 레벨 설정 (1~14, 숫자가 작을수록 더 확대됨)
+      };
+      map = new kakao.maps.Map(mapContainer, mapOption);
+      map.addOverlayMapTypeId(kakao.maps.MapTypeId.HYBRID); // 위성사진 모드 적용
+      marker = new kakao.maps.Marker({
+        position: map.getCenter(),
+        draggable: true // 마커 드래그 가능하도록 설정
+      });
+      marker.setMap(map);
+
+      // 주소 검색 이벤트 (검색 후 지도 확대)
+      addressSearchBtn.addEventListener('click', () => {
+        new daum.Postcode({
+          oncomplete: function(data) {
+            addressInput.value = data.address;
+            geocoder.addressSearch(data.address, function(result, status) {
+              if (status === kakao.maps.services.Status.OK) {
+                const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                map.setCenter(coords);
+                map.setLevel(3); // 주소 검색 후 확대 레벨 설정
+                marker.setPosition(coords);
+                latitude = coords.getLat();
+                longitude = coords.getLng();
+                document.getElementById('map-address-info').innerText = `주소: ${data.address}\n위도: ${latitude}, 경도: ${longitude}`;
+              }
+            });
+          }
+        }).open();
+      });
+
+      // 지도 클릭 이벤트 (클릭 시 주소 업데이트)
+      kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+        const latlng = mouseEvent.latLng;
+        marker.setPosition(latlng);
+        updateAddress(latlng);
+      });
+
+      // 마커 드래그 종료 이벤트 (드래그 후 주소 업데이트)
+      kakao.maps.event.addListener(marker, 'dragend', function() {
+        const position = marker.getPosition();
+        updateAddress(position);
+      });
+
+      // 좌표를 주소로 변환하는 함수
+      function updateAddress(latlng) {
+        geocoder.coord2Address(latlng.getLng(), latlng.getLat(), function(result, status) {
+          if (status === kakao.maps.services.Status.OK) {
+            const address = result[0].address.address_name;
+            addressInput.value = address;
+            latitude = latlng.getLat();
+            longitude = latlng.getLng();
+            document.getElementById('map-address-info').innerText = `주소: ${address}\n위도: ${latitude}, 경도: ${longitude}`;
+          }
+        });
+      }
+
+      // 서비스 유형 변경 시 필드 표시/숨김
+      serviceTypeSelect.addEventListener('change', () => {
+        beolchoFields.style.display = 'none';
+        yechoFields.style.display = 'none';
+        solarFields.style.display = 'none';
+        resetRequiredFields(beolchoFields);
+        resetRequiredFields(yechoFields);
+        resetRequiredFields(solarFields);
+        updateEstimatedCost();
+
+        if (serviceTypeSelect.value === '벌초') {
+          beolchoFields.style.display = 'block';
+        } else if (serviceTypeSelect.value === '예초') {
+          yechoFields.style.display = 'block';
+        } else if (serviceTypeSelect.value === '태양광 전문 예초') {
+          solarFields.style.display = 'block';
+        }
+      });
+
+      // 분묘 수 선택 시 커스텀 입력 필드 표시/숨김
+      graveCountSelect.addEventListener('change', () => {
+        if (graveCountSelect.value === '직접입력') {
+          graveCountCustomInput.style.display = 'block';
+          graveCountCustomInput.setAttribute('required', 'true');
+        } else {
+          graveCountCustomInput.style.display = 'none';
+          graveCountCustomInput.removeAttribute('required');
+          graveCountCustomInput.value = '';
+          updateEstimatedCost();
+        }
+      });
+
+      // 예상 견적 비용 계산
+      function updateEstimatedCost() {
+        let baseCost = 0;
+        let areaSize = 0;
+        let disposeCost = 0;
+
+        if (serviceTypeSelect.value === '벌초') {
+          const graveCount = graveCountSelect.value === '직접입력' ? parseInt(graveCountCustomInput.value) || 0 : parseInt(graveCountSelect.value) || 0;
+          areaSize = parseInt(document.getElementById('beolcho-area-size').value) || 0;
+          baseCost = (graveCount * 50000) + (areaSize * 1000);
+        } else if (serviceTypeSelect.value === '예초') {
+          areaSize = parseInt(document.getElementById('area-size').value) || 0;
+          const disposeMethod = document.getElementById('yecho-dispose-method').value;
+          baseCost = areaSize * 1500;
+          if (disposeMethod === 'multiple') disposeCost = areaSize * 300;
+          else if (disposeMethod === 'single') disposeCost = areaSize * 500;
+          else if (disposeMethod === 'complete') disposeCost = areaSize * 1800;
+        } else if (serviceTypeSelect.value === '태양광 전문 예초') {
+          areaSize = parseInt(document.getElementById('solar-area-size').value) || 0;
+          const disposeMethod = document.getElementById('solar-dispose-method').value;
+          baseCost = areaSize * 2000;
+          if (disposeMethod === 'multiple') disposeCost = areaSize * 300;
+          else if (disposeMethod === 'single') disposeCost = areaSize * 500;
+          else if (disposeMethod === 'complete') disposeCost = areaSize * 1800;
+        }
+
+        const totalCost = baseCost + disposeCost;
+        estimatedCostDiv.innerHTML = `예상 견적 비용: ${totalCost.toLocaleString('ko-KR')}원
+          <p style="font-size: 0.85em; color: #777; margin-top: 5px;">
+            ※ 예상 견적이며, 정확한 비용은 현장 확인 후 변동될 수 있습니다.
+          </p>`;
+      }
+
+      ['beolcho-area-size', 'area-size', 'solar-area-size', 'yecho-dispose-method', 'solar-dispose-method', 'grave-count-custom'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.addEventListener('input', updateEstimatedCost);
+      });
+      graveCountSelect.addEventListener('change', updateEstimatedCost);
+
+      // 필수 필드 초기화
+      function resetRequiredFields(container) {
+        const requiredFields = container.querySelectorAll('[data-required="true"]');
+        requiredFields.forEach(field => {
+          field.removeAttribute('required');
+          if (field.tagName === 'SELECT') field.value = '';
+          else if (field.tagName === 'INPUT') field.value = '';
+        });
+      }
+
+      // 제출 버튼 이벤트
+      submitBtn.addEventListener('click', () => {
+        const requiredFields = serviceForm.querySelectorAll('[required]');
+        let allValid = true;
+
+        requiredFields.forEach(field => {
+          if (!field.value) {
+            allValid = false;
+            field.style.borderColor = '#ff0000';
+          } else {
+            field.style.borderColor = '#e0e0e0';
+          }
+        });
+
+        if (!latitude || !longitude) {
+          allValid = false;
+          alert('지도를 클릭하여 위치를 지정해주세요.');
+        }
+
+        if (allValid) {
+          confirmModal.style.display = 'block';
+        } else {
+          alert('모든 필수 항목을 입력해주세요.');
+        }
+      });
+
+      cancelModalBtn.addEventListener('click', () => {
+        confirmModal.style.display = 'none';
+      });
+
+      // 폼 제출 이벤트
+      confirmSubmitBtn.addEventListener('click', async () => {
+        confirmSubmitBtn.disabled = true;
+        const customerName = document.getElementById('customer-name').value;
+        const customerPhone = document.getElementById('customer-phone').value;
+        const customerPassword = document.getElementById('customer-password').value;
+        const address = document.getElementById('address').value;
+        const region = extractRegion(address);
+        const serviceType = serviceTypeSelect.value;
+        const workDate = document.getElementById('work-date').value;
+        const workerRequest = document.getElementById('worker-request').value;
+        const files = document.getElementById('request-files').files;
+        let estimatedCost = parseInt(estimatedCostDiv.innerText.match(/\d+/g).join('')) || 0;
+
+        let requestData = {
+          customerName,
+          customerPhone,
+          customerPassword,
+          address,
+          region,
+          serviceType,
+          workDate,
+          workerRequest: workerRequest || '없음',
+          latitude,
+          longitude,
+          estimatedCost,
+          status: 'pending',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          fileUrls: []
+        };
+
+        if (serviceType === '벌초') {
+          const graveType = document.getElementById('grave-type').value;
+          const graveCount = graveCountSelect.value === '직접입력' ? parseInt(graveCountCustomInput.value) : parseInt(graveCountSelect.value);
+          const beolchoAreaSize = parseInt(document.getElementById('beolcho-area-size').value);
+          requestData = {
+            ...requestData,
+            graveType,
+            graveCount,
+            beolchoAreaSize
+          };
+        } else if (serviceType === '예초') {
+          const areaSize = parseInt(document.getElementById('area-size').value);
+          const disposeMethod = document.getElementById('yecho-dispose-method').value;
+          requestData = {
+            ...requestData,
+            areaSize,
+            grassDisposalMethod: disposeMethod !== 'none' ? disposeMethod : null
+          };
+        } else if (serviceType === '태양광 전문 예초') {
+          const areaSize = parseInt(document.getElementById('solar-area-size').value);
+          const disposeMethod = document.getElementById('solar-dispose-method').value;
+          requestData = {
+            ...requestData,
+            solarAreaSize: areaSize,
+            grassDisposalMethod: disposeMethod !== 'none' ? disposeMethod : null
+          };
+        }
+
+        try {
+          const fileUrls = [];
+          for (let file of files) {
+            const storageRef = storage.ref(`requests/${Date.now()}_${file.name}`);
+            await storageRef.put(file);
+            const url = await storageRef.getDownloadURL();
+            fileUrls.push(url);
+          }
+          requestData.fileUrls = fileUrls;
+
+          await db.collection('serviceRequests').add(requestData);
+          alert('신청이 완료되었습니다!');
+          window.location.href = '/mypage.html';
+        } catch (error) {
+          console.error('신청 오류:', error);
+          alert('신청 실패: ' + error.message);
+        } finally {
+          confirmSubmitBtn.disabled = false;
+          confirmModal.style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

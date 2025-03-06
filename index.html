@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!-- 캐시 방지 -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>벌초 서비스 신청 플랫폼 - 원스톱 벌초 서비스</title>
+  <meta name="description" content="원스톱 벌초 서비스 신청 플랫폼에서 간편하게 벌초 서비스를 신청하세요. 전문 작업자와 함께하는 신뢰할 수 있는 벌초 서비스를 경험해 보세요.">
+  <meta name="keywords" content="벌초 서비스, 벌초 신청, 원스톱 벌초, 묘지 관리, 전문 작업자">
+  <meta name="author" content="원스톱 벌초 서비스">
+  <meta property="og:title" content="벌초 서비스 신청 플랫폼 - 원스톱 벌초 서비스">
+  <meta property="og:description" content="간편하게 벌초 서비스를 신청하세요. 전문 작업자와 함께하는 신뢰할 수 있는 서비스.">
+  <meta property="og:image" content="/assets/og-image.jpg">
+  <meta property="og:url" content="https://onestopbeolcho.com">
+  <meta property="og:type" content="website">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1E88E5">
+  <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles/theme.css?v=2.7">
+  <link rel="stylesheet" href="/styles/footer.css">
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDuWpcxhSucn5jRdzsQOcdN-TgnY586kIo",
+      authDomain: "onestopbeolcho.com",
+      projectId: "onestopbeolcho-d2bca",
+      storageBucket: "onestopbeolcho-d2bca.firebasestorage.app",
+      messagingSenderId: "378817329836",
+      appId: "1:378817329836:web:d3c2a06bf705cb5e943d09",
+      measurementId: "G-9CX7J4Z578"
+    };
+    firebase.initializeApp(firebaseConfig);
+    console.log('Firebase SDK 초기화 완료:', firebase);
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "벌초 서비스 비용은 어떻게 계산되나요?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "벌초 서비스 비용은 지역, 묘지 유형, 면적 등을 기준으로 계산됩니다."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "신청 후 작업자는 언제 배정되나요?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "신청 후 24시간 이내에 작업자가 배정되며, 작업 일정은 고객님과 협의 후 진행됩니다."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <nav class="upper-nav-container">
+    <ul class="upper-nav-menu">
+      <li><a href="/partner-signup" id="partner-signup-link">원스톱벌초 파트너스 신청</a></li>
+      <li><a href="/worker" id="worker-link">파트너스 관리자</a></li>
+      <li><a href="/admin" id="admin-link">원스톱벌초 관리자</a></li>
+      <li><a href="#" id="auth-link-upper">회원가입</a></li>
+    </ul>
+    <div class="nav-loading" style="display: none;">로딩 중...</div>
+  </nav>
+  <nav class="nav-container">
+    <div class="nav-brand">원스톱 벌초</div>
+    <ul class="nav-menu">
+      <li><a href="/index.html">홈</a></li>
+      <li><a href="/request.html">서비스 신청</a></li>
+      <li><a href="/share.html">고객 후기</a></li>
+      <li><a href="/mypage.html" id="profile-tab">마이페이지</a></li>
+    </ul>
+  </nav>
+  <div id="hero-container"></div>
+  <div class="container">
+    <div id="auth-section" style="display: none;">
+      <h2>로그인/회원가입</h2>
+      <input type="email" id="email" placeholder="이메일">
+      <input type="password" id="password" placeholder="비밀번호">
+      <button onclick="signUp()" aria-label="회원가입">회원가입</button>
+      <button onclick="signIn()" aria-label="로그인">로그인</button>
+    </div>
+    <section class="features">
+      <h2>왜 원스톱 벌초 서비스를 선택해야 할까요?</h2>
+      <div class="feature-list">
+        <div class="feature-card">
+          <img src="/assets/feature1.png" alt="전문 작업자" loading="lazy">
+          <h3>전문 작업자와 함께</h3>
+          <p>숙련된 작업자가 벌초 서비스를 제공합니다.</p>
+        </div>
+        <div class="feature-card">
+          <img src="/assets/feature2.png" alt="간편 신청" loading="lazy">
+          <h3>간편한 신청 절차</h3>
+          <p>몇 번의 클릭으로 벌초 서비스를 신청하세요.</p>
+        </div>
+        <div class="feature-card">
+          <img src="/assets/feature3.png" alt="투명한 비용" loading="lazy">
+          <h3>투명한 비용 계산</h3>
+          <p>예상 견적을 미리 확인하세요.</p>
+        </div>
+      </div>
+    </section>
+    <section class="recent-requests">
+      <h2>최근 서비스 신청 내역</h2>
+      <ul id="recent-request-list"></ul>
+    </section>
+    <section class="notices">
+      <h2>공지사항</h2>
+      <ul id="notice-list"></ul>
+    </section>
+    <section class="reviews">
+      <h2>고객 후기</h2>
+      <div class="review-slider">
+        <div class="review-slide active">
+          <p>"벌초 서비스 신청이 정말 간편했어요. 작업자분이 친절하게 잘 처리해 주셨어요!"</p>
+          <span>김** 고객님</span>
+        </div>
+        <div class="review-slide">
+          <p>"예상 비용을 미리 알 수 있어서 좋았습니다. 다음에도 이용할 예정입니다."</p>
+          <span>이** 고객님</span>
+        </div>
+      </div>
+    </section>
+    <section class="faq">
+      <h2>자주 묻는 질문 (FAQ)</h2>
+      <div class="faq-item">
+        <h3 class="faq-question" role="button" tabindex="0">벌초 서비스 비용은 어떻게 계산되나요?</h3>
+        <div class="faq-answer">
+          <p>벌초 서비스 비용은 지역, 묘지 유형, 면적 등을 기준으로 계산됩니다.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <h3 class="faq-question" role="button" tabindex="0">신청 후 작업자는 언제 배정되나요?</h3>
+        <div class="faq-answer">
+          <p>신청 후 24시간 이내에 작업자가 배정되며, 작업 일정은 고객님과 협의 후 진행됩니다.</p>
+        </div>
+      </div>
+    </section>
+    <div id="customer-history-section" style="display: none;">
+      <h2>신청 내역</h2>
+      <p>로그인 후 이전 신청 내역을 확인할 수 있습니다.</p>
+      <ul id="customer-request-list"></ul>
+    </div>
+  </div>
+  <div id="footer-container"></div>
+  <script src="/components/nav.js" defer></script>
+  <script src="/components/hero.js" defer></script>
+  <script src="/components/footer.js" defer></script>
+  <script type="module" src="/app.js" defer></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(() => console.log('Service Worker 등록 성공'))
+        .catch((error) => console.log('Service Worker 등록 실패:', error));
+    }
+
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const authSection = document.getElementById('auth-section');
+    const customerHistorySection = document.getElementById('customer-history-section');
+    const noticeList = document.getElementById('notice-list');
+    const recentRequestList = document.getElementById('recent-request-list');
+    const profileTab = document.getElementById('profile-tab');
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        console.log('사용자 로그인 상태:', user.uid, user.email, user.metadata);
+        authSection.style.display = 'none';
+        customerHistorySection.style.display = 'block';
+        if (profileTab) profileTab.style.display = 'inline-block';
+        loadCustomerRequests(user.uid);
+      } else {
+        console.log('로그인하지 않은 상태');
+        authSection.style.display = 'block';
+        customerHistorySection.style.display = 'none';
+        if (profileTab) profileTab.style.display = 'inline-block';
+      }
+    });
+
+    async function loadRecentRequests() {
+      try {
+        const requestsSnapshot = await db.collection('serviceRequests')
+          .orderBy('createdAt', 'desc')
+          .limit(5)
+          .get();
+        recentRequestList.innerHTML = '';
+        requestsSnapshot.forEach(doc => {
+          const request = doc.data();
+          const li = document.createElement('li');
+          li.textContent = `${request.serviceType} - ${request.address} (${request.status || 'pending'})`;
+          recentRequestList.appendChild(li);
+        });
+      } catch (error) {
+        console.error('최근 신청 내역 로드 오류:', error);
+        recentRequestList.innerHTML = '<li>최근 신청 내역을 불러올 수 없습니다.</li>';
+      }
+    }
+
+    async function loadNotices() {
+      try {
+        const noticesSnapshot = await db.collection('notices')
+          .orderBy('createdAt', 'desc')
+          .limit(5)
+          .get();
+        noticeList.innerHTML = '';
+        if (noticesSnapshot.empty) {
+          noticeList.innerHTML = '<li>공지사항이 없습니다.</li>';
+          return;
+        }
+        noticesSnapshot.forEach(doc => {
+          const notice = doc.data();
+          const li = document.createElement('li');
+          const createdAt = notice.createdAt ? notice.createdAt.toDate().toLocaleDateString('ko-KR') : '날짜 미정';
+          li.textContent = `${notice.title} (${createdAt})`;
+          noticeList.appendChild(li);
+        });
+      } catch (error) {
+        console.error('공지사항 로드 오류:', error);
+        noticeList.innerHTML = '<li>공지사항을 불러올 수 없습니다.</li>';
+      }
+    }
+
+    async function loadCustomerRequests(userId) {
+      try {
+        const requestsSnapshot = await db.collection('serviceRequests')
+          .where('userId', '==', userId)
+          .get();
+        const requestList = document.getElementById('customer-request-list');
+        requestList.innerHTML = '';
+        if (requestsSnapshot.empty) {
+          requestList.innerHTML = '<li>신청 내역이 없습니다.</li>';
+          return;
+        }
+        requestsSnapshot.forEach(doc => {
+          const request = doc.data();
+          const li = document.createElement('li');
+          li.textContent = `${request.serviceType} - ${request.address} (${request.status})`;
+          requestList.appendChild(li);
+        });
+      } catch (error) {
+        console.error('신청 내역 로드 오류:', error);
+        requestList.innerHTML = '<li>신청 내역을 불러올 수 없습니다.</li>';
+      }
+    }
+
+    window.signUp = async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      try {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+        await db.collection('users').doc(user.uid).set({
+          email: email,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        console.log('회원가입 성공');
+        alert('회원가입이 완료되었습니다!');
+      } catch (error) {
+        console.error('회원가입 오류:', error);
+        alert('회원가입 실패: ' + error.message);
+      }
+    };
+
+    window.signIn = async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        console.log('로그인 성공');
+      } catch (error) {
+        console.error('로그인 오류:', error);
+        alert('로그인 실패: ' + error.message);
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadRecentRequests();
+      loadNotices();
+
+      const faqQuestions = document.querySelectorAll('.faq-question');
+      faqQuestions.forEach(question => {
+        question.addEventListener('click', () => {
+          const answer = question.nextElementSibling;
+          answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+        });
+        question.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            const answer = question.nextElementSibling;
+            answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+          }
+        });
+      });
+
+      let currentReviewSlide = 0;
+      const reviewSlides = document.querySelectorAll('.review-slide');
+      if (reviewSlides.length > 0) {
+        setInterval(() => {
+          reviewSlides[currentReviewSlide].classList.remove('active');
+          currentReviewSlide = (currentReviewSlide + 1) % reviewSlides.length;
+          reviewSlides[currentReviewSlide].classList.add('active');
+        }, 5000);
+      }
+    });
+  </script>
+</body>
+</html>

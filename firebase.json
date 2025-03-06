@@ -1,0 +1,70 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/request",
+        "destination": "/request.html"
+      },
+      {
+        "source": "/admin",
+        "destination": "/admin.html"
+      },
+      {
+        "source": "/worker",
+        "destination": "/worker.html"
+      },
+      {
+        "source": "/view-request",
+        "destination": "/view-request.html"
+      },
+      {
+        "source": "/request-status",
+        "destination": "/request-status.html"
+      },
+      {
+        "source": "/signup",
+        "destination": "/signup.html"
+      },
+      {
+        "source": "/login",
+        "destination": "/login.html"
+      },
+      {
+        "source": "/partner-signup",
+        "destination": "/partner-signup.html"
+      },
+      {
+        "source": "/",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/reviews",
+        "destination": "/reviews.html"
+      },
+      {
+        "source": "/mypage",
+        "destination": "/mypage.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(js|html)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
+      }
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}
