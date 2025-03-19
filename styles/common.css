@@ -1,0 +1,213 @@
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #F5F7FA; /* 숨고의 밝은 배경 톤 */
+  color: #333;
+  padding-top: 56px; /* 네비게이션 기본 높이에 맞춘 초기 패딩 */
+}
+
+nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  overflow: visible; /* 네비게이션 메뉴가 잘리지 않도록 */
+}
+
+/* 네비게이션 스타일 */
+.navbar {
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  min-height: 25px; /* 고정 높이 설정 */
+  padding: 0.05rem 1rem;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  color: #6D4AFF !important; /* 숨고의 보라색 */
+  font-size: 1.1rem;
+}
+ 
+.navbar-nav .nav-link {
+  font-size: 0.9rem;
+  padding: 3px 8px;
+  color: #1E88E5 !important; /* 숨고의 파란색 */
+}
+
+.container {
+  padding: 15px; /* 모바일 친화적 패딩 */
+  flex: 1 0 auto;
+  position: relative; /* 본문 콘텐츠가 position: relative로 설정되어 body의 padding-top에 영향을 받도록 */
+  margin-top: 0px;
+}
+
+/* 본문 섹션에 네비게이션 아래 간격 제거 (body에 이미 처리) */
+.hero-section {
+  padding-top: 0; /* 이전 padding-top 제거, body로 이동 */
+  margin-top: 0px;
+
+/* 푸터 스타일 (높이 절반으로 조정, 숨고 스타일 반영) */
+.footer {
+  flex-shrink: 0;
+  background-color: #fff;
+  color: #333;
+  border-top: 1px solid #dee2e6;
+  box-shadow: 0 -3px 8px rgba(0, 0, 0, 0.1);
+  padding: 5px 0; /* 원래 10px 0 → 절반으로 조정 */
+  text-align: center;
+  border-radius: 10px 10px 0 0; /* 숨고 스타일의 둥근 상단 모서리 */
+}
+
+.footer .btn-outline-primary {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.footer a {
+  color: #1E88E5; /* 숨고의 파란색 링크 */
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: #6D4AFF; /* 숨고의 보라색 호버 효과 */
+}
+
+/* 다크 모드 스타일 */
+.dark-mode-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #6D4AFF;
+  color: #fff;
+  border: none;
+}
+
+.dark-mode {
+  background-color: #333;
+  color: #fff;
+}
+
+.dark-mode .navbar {
+  background-color: #444 !important;
+}
+
+.dark-mode .footer {
+  background-color: #333;
+  color: #bbb;
+  border-color: #555;
+}
+
+.dark-mode .footer a {
+  color: #1E88E5;
+}
+
+.dark-mode .footer a:hover {
+  color: #6D4AFF;
+}
+
+.dark-mode .text-muted {
+  color: #bbb !important;
+}
+
+.dark-mode .bg-light {
+  background-color: #444 !important;
+}
+
+/* 버튼 스타일 (숨고 스타일 반영) */
+.btn-primary {
+  background-color: #6D4AFF;
+  border-color: #6D4AFF;
+  border-radius: 20px; /* 둥근 버튼 */
+}
+
+.btn-primary:hover {
+  background-color: #5C3AD9;
+  border-color: #5C3AD9;
+}
+
+.btn-outline-secondary {
+  border-color: #1E88E5;
+  color: #1E88E5;
+  border-radius: 20px;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #E3F2FD; /* 숨고의 연한 파랑 */
+}
+
+/* 모바일 우선 반응형 스타일 */
+@media (max-width: 991px) {
+  /* 모바일 환경에서 네비게이션 바 스타일 */
+  .navbar {
+    min-height: 56px; /* 모바일에서 네비게이션 바 기본 높이 */
+  }
+
+  /* navbar-collapse 스타일 */
+  .navbar-collapse {
+    background-color: #444; /* 다크 모드와 일치 */
+    padding: 10px; /* 메뉴 항목 간격 조정 */
+    position: absolute;    
+    top: 25px; /* 네비게이션 바 높이에 맞춤 */
+    left: 0;
+    right: 0;
+    z-index: 999; /* 다른 요소 위에 표시 */
+    height: auto; /* 높이를 콘텐츠에 맞게 자동 조정 */
+  }
+
+  /* 본문 콘텐츠와 네비게이션 바 사이에 공백 추가 */
+  .container,
+  .hero-section,
+   body:has(.navbar-collapse.show){
+    margin-top: 20px; /* 기본 공백 */
+  }
+}
+
+@media (min-width: 992px) {
+  /* PC 환경에서 네비게이션 바 스타일 */
+  .navbar {
+    min-height: 56px; /* PC에서도 동일한 높이 유지 */
+  }
+
+  /* PC에서는 navbar-collapse가 기본적으로 표시됨 */
+  .navbar-collapse {
+    display: flex; /* Bootstrap 기본 스타일 유지 */
+    height: auto; /* 높이를 콘텐츠에 맞게 자동 조정 */
+  }
+
+  /* PC에서도 본문 콘텐츠와 네비게이션 바 사이에 공백 추가 */
+  .container,
+  .hero-section {
+    margin-top: 20px; /* 기본 공백 */
+  }
+}
+
+/* 기존 모바일 반응형 스타일 유지 */
+@media (max-width: 768px) {
+  .container {
+      padding: 10px; /* 더 좁은 화면에 맞춘 패딩 */
+  }
+  .navbar-brand {
+      font-size: 1.2rem; /* 모바일에서 텍스트 크기 감소 */
+  }
+
+  .navbar-nav .nav-link {
+      padding: 2px 8px; /* 모바일에서 패딩 조정 */
+  }
+
+  .card, .navbar-collapse {
+      border-radius: 15px; /* 숨고 스타일의 둥근 카드 */
+  }
+  .service-card {
+      border-radius: 15px;
+  }
+  .footer .btn-outline-primary {
+      padding: 0.2rem 0.4rem;
+      font-size: 0.7rem;
+  }
+}

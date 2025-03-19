@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ko" itemscope itemtype="http://schema.org/WebPage">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="온라인 원스톱 벌초 서비스">
+  <meta name="description" content="원스톱 벌초 - 벌초, 예초, 태양광 관리 서비스를 온라인으로 간편하게 신청하세요.">
+  <meta name="keywords" content="벌초, 예초, 태양광 관리, 원스톱 서비스">
+  <meta name="robots" content="index, follow">
+  <title>온라인 원스톱 벌초 서비스 - 간편한 벌초, 예초, 태양광 관리</title>
+
+  <!-- Open Graph 태그 -->
+  <meta property="og:title" content="온라인 원스톱 벌초 서비스 - 간편한 벌초, 예초, 태양광 관리">
+  <meta property="og:description" content="벌초, 예초, 태양광 관리 서비스를 온라인으로 간편하게 신청하세요.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://onestop-88b05.firebaseapp.com">
+  <meta property="og:image" content="https://onestop-88b05.firebaseapp.com/assets/images/hero-image.png">
+
+  <!-- Schema.org 마크업 -->
+  <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "Organization",
+      "name": "온라인 원스톱 벌초 서비스",
+      "url": "https://onestop-88b05.firebaseapp.com",
+      "logo": "https://onestop-88b05.firebaseapp.com/assets/images/logo.png",
+      "description": "벌초, 예초, 태양광 관리 서비스를 온라인으로 간편하게 신청하세요.",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+82-1555-1487",
+        "contactType": "customer service"
+      }
+    }
+  </script>
+
+  <!-- 외부 스타일 및 라이브러리 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="/styles/common.css">
+
+  <!-- PWA 설정 -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#6D4AFF">
+
+  <!-- 페이지별 스타일 -->
+  <style>
+    .hero-section {
+      background: linear-gradient(135deg, #6D4AFF 0%, #A78BFA 100%);
+      color: white;
+      padding: 4rem 0;
+      text-align: center;
+    }
+    .hero-section h1 {
+      font-weight: 700;
+      font-size: 2.5rem;
+    }
+    .hero-section p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+    .card {
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    .card.animate {
+      animation: fadeInUp 1s ease-out;
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .carousel-item img {
+      max-height: 300px;
+      object-fit: cover;
+      width: 100%;
+      border-radius: 10px;
+    }
+    .carousel-caption {
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 10px;
+      padding: 10px;
+    }
+    .portfolio-section .carousel-indicators {
+      bottom: -40px;
+    }
+    .portfolio-section .carousel-indicators button {
+      background-color: #6D4AFF;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .portfolio-section .carousel-control-prev,
+    .portfolio-section .carousel-control-next {
+      width: 10%;
+    }
+    .service-shortcuts {
+      background-color: #f1f3f5;
+      padding: 2rem 0;
+    }
+    .service-shortcuts .service-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 1rem;
+      justify-items: center;
+    }
+    .service-shortcuts .service-item {
+      text-align: center;
+    }
+    .service-shortcuts .service-item a {
+      text-decoration: none;
+      color: #333;
+      display: inline-block;
+      transition: transform 0.2s ease;
+    }
+    .service-shortcuts .service-item a:hover {
+      transform: scale(1.1);
+    }
+    .service-shortcuts i {
+      font-size: 2.5rem;
+      color: #6D4AFF;
+      margin-bottom: 0.5rem;
+    }
+    .service-shortcuts p {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+    .dark-mode .bg-light {
+      background-color: #444 !important;
+    }
+    .dark-mode .card {
+      background-color: #555;
+      color: #fff;
+    }
+    @media (max-width: 768px) {
+      .hero-section h1 {
+        font-size: 1.8rem;
+      }
+      .hero-section p {
+        font-size: 1rem;
+      }
+      .carousel-item img {
+        max-height: 200px;
+      }
+      .service-shortcuts {
+        padding: 1rem 0;
+      }
+      .service-shortcuts .service-grid {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 0.5rem;
+      }
+      .service-shortcuts i {
+        font-size: 2rem;
+      }
+      .service-shortcuts p {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body class="dark-mode" itemscope itemtype="http://schema.org/WebPage">
+  <nav id="nav-container"></nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container">
+      <h1 class="animate__animated animate__fadeIn">원스톱 벌초 서비스</h1>
+      <p class="animate__animated animate__fadeIn" data-delay="0.3s" itemprop="description">
+        벌초, 예초, 태양광 관리를 간편하게 신청하세요.
+      </p>
+      <div class="mt-4 animate__animated animate__fadeIn" data-delay="0.6s">
+        <a href="/request.html?type=벌초" class="btn btn-light mx-2"><i class="fas fa-cut"></i> 벌초 서비스</a>
+        <a href="/request.html?type=예초" class="btn btn-light mx-2"><i class="fas fa-leaf"></i> 예초 서비스</a>
+        <a href="/request.html?type=태양광 전문 예초" class="btn btn-success mx-2"><i class="fas fa-solar-panel"></i> 태양광 예초</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent Requests -->
+  <section class="recent-requests-section py-5">
+    <div class="container">
+      <h2 class="text-center mb-4 fw-bold">최신 신청 내역</h2>
+      <div class="row g-4" id="request-list" role="region" aria-labelledby="recent-requests-section"></div>
+    </div>
+  </section>
+
+  <!-- Service Shortcuts -->
+  <section class="service-shortcuts">
+    <div class="container">
+      <h2 class="text-center mb-4 fw-bold">바로가기 서비스</h2>
+      <div class="service-grid">
+        <div class="service-item">
+          <a href="/request.html?type=벌초&selected=true">
+            <i class="fas fa-cut"></i>
+            <p>벌초</p>
+          </a>
+        </div>
+        <div class="service-item">
+          <a href="/request.html?type=예초&selected=true">
+            <i class="fas fa-leaf"></i>
+            <p>예초</p>
+          </a>
+        </div>
+        <div class="service-item">
+          <a href="/request.html?type=태양광 전문 예초&selected=true">
+            <i class="fas fa-solar-panel"></i>
+            <p>태양광 예초</p>
+          </a>
+        </div>
+        <div class="service-item">
+          <a href="/request.html?type=가지치기&selected=true">
+            <i class="fas fa-tree"></i>
+            <p>가지치기</p>
+          </a>
+        </div>
+        <div class="service-item">
+          <a href="/request.html?type=벌목&selected=true">
+            <i class="fas fa-axe"></i>
+            <p>벌목</p>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Portfolio Section -->
+  <section class="portfolio-section py-5 bg-white">
+    <div class="container">
+      <h2 class="text-center mb-4 fw-bold">우리의 작업</h2>
+      <div id="portfolioCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+          <button type="button" data-bs-target="#portfolioCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="슬라이드 1"></button>
+          <button type="button" data-bs-target="#portfolioCarousel" data-bs-slide-to="1" aria-label="슬라이드 2"></button>
+          <button type="button" data-bs-target="#portfolioCarousel" data-bs-slide-to="2" aria-label="슬라이드 3"></button>
+        </div>
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <img src="https://images.unsplash.com/photo-1600585154347-3c97e7e7718d?w=800&auto=format&fit=crop&q=60" class="d-block w-100" alt="벌초 작업 예시">
+            <div class="carousel-caption d-block">
+              <h5 class="text-white">벌초 서비스</h5>
+              <p class="text-white">깔끔하게 정리된 묘지 관리</p>
+            </div>
+          </div>
+          <div class="carousel-item">
+            <img src="https://images.unsplash.com/photo-1621510714367-4f9a5b0e1f1a?w=800&auto=format&fit=crop&q=60" class="d-block w-100" alt="예초 작업 예시">
+            <div class="carousel-caption d-block">
+              <h5 class="text-white">예초 서비스</h5>
+              <p class="text-white">정돈된 풀 제거 작업</p>
+            </div>
+          </div>
+          <div class="carousel-item">
+            <img src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&auto=format&fit=crop&q=60" class="d-block w-100" alt="태양광 예초 작업 예시">
+            <div class="carousel-caption d-block">
+              <h5 class="text-white">태양광 예초</h5>
+              <p class="text-white">태양광 패널 주변 관리</p>
+            </div>
+          </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#portfolioCarousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">이전</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#portfolioCarousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">다음</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Re-request Section -->
+  <section class="re-request-section py-5 bg-light">
+    <div class="container">
+      <h2 class="text-center mb-4 fw-bold">비회원 재신청 및 조회</h2>
+      <div class="card mx-auto p-4" style="max-width: 500px;">
+        <p class="text-muted text-center mb-4">이전에 신청하셨던 정보를 입력하여 재신청하거나 신청 내역을 조회하세요.</p>
+        <form id="re-request-form">
+          <div class="mb-3">
+            <label for="re-request-name" class="form-label">이름</label>
+            <input type="text" id="re-request-name" class="form-control" placeholder="이름 입력" required>
+          </div>
+          <div class="mb-3">
+            <label for="re-request-phone" class="form-label">연락처</label>
+            <input type="tel" id="re-request-phone" class="form-control" placeholder="핸드폰 번호 입력" required>
+          </div>
+          <div class="mb-3">
+            <label for="re-request-password" class="form-label">비밀번호</label>
+            <input type="password" id="re-request-password" class="form-control" placeholder="비밀번호 입력" required>
+          </div>
+          <div class="d-flex justify-content-between">
+            <button type="button" id="check-request-btn" class="btn btn-outline-primary w-48">신청 조회</button>
+            <button type="submit" class="btn btn-primary w-48">재신청하기</button>
+          </div>
+        </form>
+        <div id="request-details" class="mt-3" style="display: none;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reviews Section -->
+  <section class="reviews-section py-5 bg-white">
+    <div class="container">
+      <h2 class="text-center mb-4 fw-bold">사용자 후기</h2>
+      <div class="row g-4" id="review-list" role="region" aria-labelledby="review-list"></div>
+      <div class="text-center mt-4">
+        <button id="more-reviews-button" class="btn btn-outline-primary">더보기</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats-section py-4 bg-primary text-white text-center">
+    <div class="container">
+      <p class="fs-5" id="stats-text" aria-live="polite">
+        지난 30일 동안 <span id="total-requests" class="fw-bold"></span>건의 서비스가 신청되었습니다!
+      </p>
+    </div>
+  </section>
+
+  <!-- Quick Links -->
+  <section class="quick-links-section py-5 bg-light">
+    <div class="container">
+      <h2 class="text-center mb-4 fw-bold">더 알아보기</h2>
+      <div class="row g-3 justify-content-center" role="navigation" aria-label="빠른 링크">
+        <div class="col-6 col-md-3"><a href="/pricing.html" class="btn btn-outline-secondary w-100">비용 안내</a></div>
+        <div class="col-6 col-md-3"><a href="/worker-signup.html" class="btn btn-outline-secondary w-100">작업자 가입</a></div>
+        <div class="col-6 col-md-3"><a href="/login.html" class="btn btn-outline-secondary w-100">로그인</a></div>
+        <div class="col-6 col-md-3"><a href="tel:15551487" class="btn btn-outline-secondary w-100">전화 상담</a></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="bg-white text-center py-2 shadow-sm" id="footer-container"></footer>
+
+  <!-- 다크 모드 토글 버튼 -->
+  <button id="toggleDarkModeButton" class="btn btn-outline-light dark-mode-btn"><i class="fas fa-moon"></i></button>
+
+  <!-- 외부 스크립트 -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="/scripts/nav.js" type="module" defer></script>
+  <script src="/scripts/footer.js" type="text/javascript" defer></script>
+  <script src="/scripts/common.js" defer></script>
+
+  <!-- JavaScript -->
+  <script type="module">
+    import { checkAuth } from './auth.js';
+    import { db } from '/scripts/firebase-config.js';
+    import { collection, query, orderBy, limit, onSnapshot, getDocs, where, Timestamp, addDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+    checkAuth(false);
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(() => console.log('Service Worker 등록 성공'))
+        .catch((error) => console.log('Service Worker 등록 실패:', error));
+    }
+
+    function anonymizeName(name) {
+      if (!name) return "";
+      if (name.length === 1) return `${name}O`;
+      return `${name[0]}O`;
+    }
+
+    // 비밀번호 해시 처리 (SHA-256 사용, 실제로는 bcrypt 추천)
+    async function hashPassword(password) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hash = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const reviewList = document.getElementById('review-list');
+      const requestList = document.getElementById('request-list');
+      const moreReviewsButton = document.getElementById('more-reviews-button');
+      const reRequestForm = document.getElementById('re-request-form');
+      const checkRequestBtn = document.getElementById('check-request-btn');
+      const requestDetails = document.getElementById('request-details');
+
+      // 리뷰 가져오기
+      const reviewQuery = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'), limit(3));
+      let currentReviews = [];
+      onSnapshot(reviewQuery, (snapshot) => {
+        currentReviews = [];
+        reviewList.innerHTML = '';
+        if (snapshot.empty) {
+          reviewList.innerHTML = '<p class="text-center text-muted">아직 후기가 없습니다.</p>';
+          return;
+        }
+        snapshot.forEach((doc) => {
+          const review = doc.data();
+          currentReviews.push({ id: doc.id, ...review });
+          const anonymizedName = anonymizeName(review.customerName || '이름 없음');
+          const stars = '★'.repeat(review.rating || 0) + '☆'.repeat(5 - (review.rating || 0));
+          reviewList.innerHTML += `
+            <div class="col-md-4">
+              <div class="card p-3">
+                <p class="mb-2">${anonymizedName}: ${review.comment || '후기 없음'}</p>
+                <div class="rating text-warning" aria-label="평점: ${review.rating || 0}점">${stars}</div>
+              </div>
+            </div>
+          `;
+        });
+      }, (error) => {
+        console.error('후기 가져오기 실패:', error);
+        reviewList.innerHTML = '<p class="text-center text-danger">후기를 불러오는 데 실패했습니다: ' + error.message + '</p>';
+      });
+
+      moreReviewsButton.addEventListener('click', () => {
+        const nextReviews = currentReviews.slice(reviewList.children.length);
+        if (nextReviews.length > 0) {
+          nextReviews.forEach((review) => {
+            const anonymizedName = anonymizeName(review.customerName || '이름 없음');
+            const stars = '★'.repeat(review.rating || 0) + '☆'.repeat(5 - (review.rating || 0));
+            reviewList.innerHTML += `
+              <div class="col-md-4">
+                <div class="card p-3">
+                  <p class="mb-2">${anonymizedName}: ${review.comment || '후기 없음'}</p>
+                  <div class="rating text-warning" aria-label="평점: ${review.rating || 0}점">${stars}</div>
+                </div>
+              </div>
+            `;
+          });
+        } else {
+          moreReviewsButton.textContent = '마지막 후기입니다.';
+          moreReviewsButton.disabled = true;
+        }
+      });
+
+      // 신청 내역 가져오기 (serviceRequests) with animation
+      const requestQuery = query(collection(db, 'serviceRequests'), orderBy('createdAt', 'desc'), limit(3));
+      onSnapshot(requestQuery, (snapshot) => {
+        requestList.innerHTML = '';
+        if (snapshot.empty) {
+          requestList.innerHTML = '<p class="text-center text-muted">아직 신청 내역이 없습니다.</p>';
+          return;
+        }
+        snapshot.forEach((doc, index) => {
+          const request = doc.data();
+          const anonymizedName = anonymizeName(request.customerName || '이름 없음');
+          const timeAgo = calculateTimeAgo(request.createdAt.toDate());
+          requestList.innerHTML += `
+            <div class="col-md-4">
+              <div class="card p-3 animate" style="animation-delay: ${index * 0.2}s;">
+                <p class="mb-1">${anonymizedName} - ${request.region || '지역 없음'}, ${request.serviceType || '서비스 없음'}</p>
+                <span class="text-muted small">${timeAgo}</span>
+              </div>
+            </div>
+          `;
+        });
+      }, (error) => {
+        console.error('신청 내역 가져오기 실패:', error);
+        requestList.innerHTML = '<p class="text-center text-danger">신청 내역을 불러오는 데 실패했습니다: ' + error.message + '</p>';
+      });
+
+      // 통계 가져오기
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      getDocs(query(collection(db, 'serviceRequests'), where('createdAt', '>', Timestamp.fromDate(thirtyDaysAgo))))
+        .then((querySnapshot) => {
+          document.getElementById('total-requests').textContent = querySnapshot.size;
+        })
+        .catch((error) => {
+          console.error('신청 건수 가져오기 실패:', error);
+          document.getElementById('total-requests').textContent = '0';
+        });
+
+      function calculateTimeAgo(date) {
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
+        if (diffInSeconds < 60) return '방금';
+        else if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}분 전`;
+        else if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}시간 전`;
+        else if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}일 전`;
+        else return `${Math.floor(diffInSeconds / 2592000)}달 전`;
+      }
+
+      // 비회원 신청 조회
+      checkRequestBtn.addEventListener('click', async () => {
+        const name = document.getElementById('re-request-name').value;
+        const phone = document.getElementById('re-request-phone').value;
+        const password = document.getElementById('re-request-password').value;
+
+        try {
+          const hashedPassword = await hashPassword(password);
+          const previousRequestQuery = query(
+            collection(db, 'serviceRequests'),
+            where('customerName', '==', name),
+            where('customerPhone', '==', phone),
+            where('customerPassword', '==', hashedPassword)
+          );
+          const previousRequestSnapshot = await getDocs(previousRequestQuery);
+
+          if (previousRequestSnapshot.empty) {
+            throw new Error('신청 내역을 찾을 수 없습니다. 입력 정보를 확인해주세요.');
+          }
+
+          requestDetails.style.display = 'block';
+          requestDetails.innerHTML = '<h5 class="mt-3">신청 내역</h5>';
+          previousRequestSnapshot.forEach(doc => {
+            const request = doc.data();
+            requestDetails.innerHTML += `
+              <div class="card p-3 mb-2">
+                <p class="mb-1">서비스: ${request.serviceType || '정보 없음'}</p>
+                <p class="mb-1">지역: ${request.region || '정보 없음'}</p>
+                <p class="mb-1">주소: ${request.address || '정보 없음'}</p>
+                <p class="mb-1">작업 날짜: ${request.workDate || '정보 없음'}</p>
+                <p class="mb-1">상태: ${request.status || '정보 없음'}</p>
+              </div>
+            `;
+          });
+        } catch (error) {
+          console.error('신청 조회 실패:', error);
+          alert('신청 조회에 실패했습니다: ' + error.message);
+        }
+      });
+
+      // 비회원 재신청 폼 제출
+      reRequestForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const name = document.getElementById('re-request-name').value;
+        const phone = document.getElementById('re-request-phone').value;
+        const password = document.getElementById('re-request-password').value;
+
+        try {
+          const hashedPassword = await hashPassword(password);
+          const previousRequestQuery = query(
+            collection(db, 'serviceRequests'),
+            where('customerName', '==', name),
+            where('customerPhone', '==', phone),
+            where('customerPassword', '==', hashedPassword)
+          );
+          const previousRequestSnapshot = await getDocs(previousRequestQuery);
+
+          if (previousRequestSnapshot.empty) {
+            throw new Error('이전에 신청한 정보를 찾을 수 없습니다. 입력 정보를 확인해주세요.');
+          }
+
+          const previousRequest = previousRequestSnapshot.docs[0].data();
+          const reRequestData = {
+            name: name,
+            phone: phone,
+            password: hashedPassword,
+            createdAt: Timestamp.fromDate(new Date()),
+            status: 'pending',
+            previousRequest: {
+              serviceType: previousRequest.serviceType || '정보 없음',
+              region: previousRequest.region || '정보 없음',
+              address: previousRequest.address || '정보 없음',
+              createdAt: previousRequest.createdAt || null,
+              estimatedCost: previousRequest.estimatedCost || null,
+              graveCount: previousRequest.graveCount || null,
+              graveType: previousRequest.graveType || '정보 없음',
+              latitude: previousRequest.latitude || null,
+              longitude: previousRequest.longitude || null,
+              workDate: previousRequest.workDate || '정보 없음',
+              workerRequest: previousRequest.workerRequest || '정보 없음'
+            }
+          };
+
+          await addDoc(collection(db, 're-requests'), reRequestData);
+          alert(`재신청이 완료되었습니다!\n이전 신청 정보:\n- 서비스: ${reRequestData.previousRequest.serviceType}\n- 지역: ${reRequestData.previousRequest.region}\n- 주소: ${reRequestData.previousRequest.address}`);
+          reRequestForm.reset();
+          requestDetails.style.display = 'none';
+        } catch (error) {
+          console.error('재신청 저장 실패:', error);
+          alert('재신청에 실패했습니다: ' + error.message);
+        }
+      });
+
+      // 애니메이션 지연 적용
+      document.querySelectorAll('[data-delay]').forEach(el => {
+        el.style.animationDelay = el.getAttribute('data-delay');
+      });
+    });
+  </script>
+</body>
+</html>

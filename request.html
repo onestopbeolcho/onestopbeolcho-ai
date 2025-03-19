@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>서비스 신청 - 원스톱 벌초</title>
+
+  <!-- Bootstrap 및 스타일 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1E88E5">
+
+  <!-- Kakao Maps API (동기 로드, 최초 방식 복원) -->
+  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ef6b942fdad36e982c84eb0061d1d2ed&libraries=services"></script>
+  <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+  <!-- 공통 스타일 로드 -->
+  <link rel="stylesheet" href="/styles/common.css">
+
+  <style>
+    .step-container {
+      display: none;
+    }
+    .step-container.active {
+      display: block;
+    }
+    .progress-container {
+      margin-bottom: 20px;
+    }
+    .progress-bar {
+      background-color: #6D4AFF; /* 숨고 스타일의 보라색 */
+    }
+    .progress-text {
+      color: #1E88E5; /* 숨고 스타일의 파란색 */
+      font-weight: 500;
+    }
+    .progress-arrow {
+      position: absolute;
+      top: -35px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.2rem;
+      color: #1E88E5;
+      animation: bounce 1s infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-10px); }
+    }
+    #nv-map {
+      width: 100%;
+      height: 500px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    .service-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 15px;
+    }
+    .service-card {
+      background-color: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative; /* 체크 아이콘 위치를 위해 */
+    }
+    .service-card:hover {
+      background-color: #1E88E5;
+      color: white;
+      border-color: #1E88E5;
+    }
+    .service-card input[type="radio"] {
+      display: none;
+    }
+    .service-card label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      cursor: pointer;
+      padding: 15px; /* 클릭 영역 확장 */
+    }
+    .service-card input[type="radio"]:checked + label {
+      background-color: #1E88E5;
+      color: white;
+      border-color: #1E88E5;
+    }
+    .service-card input[type="radio"]:checked + label .check-icon {
+      display: block; /* 체크 아이콘 표시 */
+    }
+    .check-icon {
+      display: none; /* 기본적으로 숨김 */
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      color: #fff;
+      font-size: 1rem;
+    }
+    .service-text {
+      display: block;
+      width: 100%;
+    }
+    .form-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .form-label i {
+      color: #6D4AFF;
+    }
+    .form-control {
+      border-radius: 10px; /* 둥근 입력창 */
+      padding: 0.75rem; /* 더 넉넉한 패딩 */
+      font-size: 1rem; /* 더 큰 글씨 */
+      border: 1px solid #1E88E5; /* 숨고 스타일의 파란색 테두리 */
+    }
+    .form-control:focus {
+      border-color: #6D4AFF; /* 포커스 시 보라색 */
+      box-shadow: 0 0 5px rgba(109, 74, 255, 0.3);
+    }
+    .btn-primary,
+    .btn-secondary {
+      padding: 0.5rem 1.5rem; /* 더 넉넉한 패딩 */
+      font-size: 1rem; /* 더 큰 글씨 */
+    }
+    #address-search-btn {
+      color: #1E88E5;
+      border-color: #1E88E5;
+      border-radius: 20px;
+      padding: 0.5rem 1rem; /* 더 넉넉한 패딩 */
+      font-size: 0.9rem;
+    }
+    #address-search-btn:hover {
+      background-color: #1E88E5;
+      color: white;
+      border-color: #1E88E5;
+    }
+    .dark-mode .card,
+    .dark-mode .service-card {
+      background-color: #444;
+      border-color: #555;
+    }
+    .dark-mode .service-card:hover {
+      background-color: #1E88E5;
+      color: white;
+    }
+    .dark-mode .form-control {
+      background-color: #444;
+      color: #fff;
+      border-color: #555;
+    }
+    @media (min-width: 768px) {
+      .service-cards {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      #nv-map {
+        height: 400px;
+      }
+    }
+    @media (max-width: 768px) {
+      .service-cards {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 10px;
+      }
+      .service-card {
+        padding: 10px;
+      }
+      .service-card label {
+        padding: 10px;
+      }
+      .check-icon {
+        font-size: 0.8rem;
+      }
+      .form-control {
+        padding: 0.6rem;
+        font-size: 0.9rem;
+      }
+      .btn-primary,
+      .btn-secondary {
+        padding: 0.4rem 1.2rem;
+        font-size: 0.9rem;
+      }
+      #address-search-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body class="dark-mode">
+  <nav id="nav-container"></nav>
+
+  <div class="container">
+    <h2 class="text-center mb-4 fw-bold">서비스 신청</h2>
+    <div class="progress-container">
+      <div class="progress">
+        <div class="progress-bar bg-primary" id="progressBar" style="width: 0%"></div>
+      </div>
+      <div class="progress-text text-center" id="progressText"></div>
+      <div class="progress-arrow">▼</div>
+    </div>
+
+    <div class="request-container">
+      <form id="service-form">
+        <!-- Step 1: 서비스 유형 선택 -->
+        <div class="step-container active" id="step1">
+          <div class="form-group">
+            <label class="form-label"><i class="fas fa-cut"></i> 서비스 유형 <span class="text-danger">*</span></label>
+            <div class="service-cards">
+              <div class="service-card">
+                <input type="radio" id="service-type1" name="service-type" value="벌초" required>
+                <label for="service-type1">
+                  <span class="service-text">벌초 서비스</span>
+                  <i class="fas fa-check check-icon"></i>
+                </label>
+              </div>
+              <div class="service-card">
+                <input type="radio" id="service-type2" name="service-type" value="예초">
+                <label for="service-type2">
+                  <span class="service-text">예초 서비스</span>
+                  <i class="fas fa-check check-icon"></i>
+                </label>
+              </div>
+              <div class="service-card">
+                <input type="radio" id="service-type3" name="service-type" value="태양광 예초 관리">
+                <label for="service-type3">
+                  <span class="service-text">태양광 예초 관리</span>
+                  <i class="fas fa-check check-icon"></i>
+                </label>
+              </div>
+              <div class="service-card">
+                <input type="radio" id="service-type4" name="service-type" value="가지치기">
+                <label for="service-type4">
+                  <span class="service-text">가지치기</span>
+                  <i class="fas fa-check check-icon"></i>
+                </label>
+              </div>
+              <div class="service-card">
+                <input type="radio" id="service-type5" name="service-type" value="제초제 살포">
+                <label for="service-type5">
+                  <span class="service-text">제초제 살포</span>
+                  <i class="fas fa-check check-icon"></i>
+                </label>
+              </div>
+              <div class="service-card">
+                <input type="radio" id="service-type6" name="service-type" value="나무 제거(벌목)">
+                <label for="service-type6">
+                  <span class="service-text">나무 제거(벌목)</span>
+                  <i class="fas fa-check check-icon"></i>
+                </label>
+              </div>
+              <div class="service-card">
+                <input type="radio" id="service-type7" name="service-type" value="기타">
+                <label for="service-type7">
+                  <span class="service-text">기타</span>
+                  <i class="fas fa-check check-icon"></i>
+                </label>
+              </div>
+            </div>
+            <small class="form-text text-muted">원하는 서비스를 선택하세요: 벌초(묘지 관리), 예초(일반 풀 제거), 태양광 예초 관리(패널 주변), 가지치기(나뭇가지 정리), 제초제 살포(잡초 제거), 나무 제거(벌목), 기타(직접 입력). <br>기타를 선택한 경우 아래 입력창에 구체적인 서비스 내용을 작성해 주세요.</small>
+            <input type="text" id="custom-service" class="form-control mt-2" placeholder="기타 서비스 입력" style="display: none;">
+          </div>
+          <div class="d-flex justify-content-between mt-3">
+            <button type="button" class="btn btn-secondary rounded-pill" disabled>이전</button>
+            <button type="button" class="btn btn-primary rounded-pill" id="next-step1">다음</button>
+          </div>
+        </div>
+
+        <!-- Step 2: 이름 입력 -->
+        <div class="step-container" id="step2">
+          <div class="form-group">
+            <label for="customer-name" class="form-label"><i class="fas fa-user"></i> 이름 <span class="text-danger">*</span></label>
+            <input type="text" id="customer-name" class="form-control" placeholder="예: 홍길동" required>
+            <small class="form-text text-muted">개인 또는 기업명을 입력하세요. 신청 확인 시 사용됩니다. <br>예: 홍길동, (주)메타아이엠</small>
+          </div>
+          <div class="d-flex justify-content-between mt-3">
+            <button type="button" class="btn btn-secondary rounded-pill" id="prev-step2">이전</button>
+            <button type="button" class="btn btn-primary rounded-pill" id="next-step2">다음</button>
+          </div>
+        </div>
+
+        <!-- Step 3: 연락처 입력 -->
+        <div class="step-container" id="step3">
+          <div class="form-group">
+            <label for="customer-phone" class="form-label"><i class="fas fa-phone"></i> 연락처 <span class="text-danger">*</span></label>
+            <input type="tel" id="customer-phone" class="form-control" placeholder="예: 01012345678" maxlength="13" required>
+            <small class="form-text text-muted">작업자와 연락 시 사용할 번호를 입력하세요. <br>형식: 01012345678 (하이픈 없이 입력)</small>
+          </div>
+          <div class="d-flex justify-content-between mt-3">
+            <button type="button" class="btn btn-secondary rounded-pill" id="prev-step3">이전</button>
+            <button type="button" class="btn btn-primary rounded-pill" id="next-step3">다음</button>
+          </div>
+        </div>
+
+        <!-- Step 4: 비밀번호 입력 -->
+        <div class="step-container" id="step4">
+          <div class="form-group">
+            <label for="customer-password" class="form-label"><i class="fas fa-lock"></i> 비밀번호 <span class="text-danger">*</span></label>
+            <input type="password" id="customer-password" class="form-control" placeholder="신청 조회용" required>
+            <small class="form-text text-muted">신청 내역 조회 시 사용할 비밀번호입니다. <br>4~8자리로 설정해 주세요. 나중에 비회원 재신청 시 필요합니다.</small>
+          </div>
+          <div class="d-flex justify-content-between mt-3">
+            <button type="button" class="btn btn-secondary rounded-pill" id="prev-step4">이전</button>
+            <button type="button" class="btn btn-primary rounded-pill" id="next-step4">다음</button>
+          </div>
+        </div>
+
+        <!-- Step 5: 위치 정보 -->
+        <div class="step-container" id="step5">
+          <div class="form-group">
+            <label class="form-label"><i class="fas fa-map-marker-alt"></i> 위치 정보 <span class="text-danger">*</span></label>
+            <button type="button" id="address-search-btn" class="btn btn-outline-primary btn-sm mb-2">주소 검색</button>
+            <input type="text" id="address" class="form-control" placeholder="주소를 검색하세요" readonly required>
+            <div id="nv-map"></div>
+            <small class="form-text text-muted">주소를 검색한 후 지도에서 정확한 위치를 선택하세요. <br>위성사진 모드에서 핀을 이동하여 작업 위치를 지정할 수 있습니다.</small>
+          </div>
+          <div class="d-flex justify-content-between mt-3">
+            <button type="button" class="btn btn-secondary rounded-pill" id="prev-step5">이전</button>
+            <button type="button" class="btn btn-primary rounded-pill" id="next-step5">다음</button>
+          </div>
+        </div>
+
+        <!-- Step 6: 세부 사항 입력 -->
+        <div class="step-container" id="step6">
+          <div class="form-group" id="service-details">
+            <label class="form-label"><i class="fas fa-info-circle"></i> 세부 사항</label>
+            <small class="form-text text-muted">선택한 서비스 유형에 따라 필요한 세부 정보를 입력하세요. <br>예: 벌초의 경우 묘지 종류와 분묘 수를 입력해야 합니다.</small>
+          </div>
+          <div class="d-flex justify-content-between mt-3">
+            <button type="button" class="btn btn-secondary rounded-pill" id="prev-step6">이전</button>
+            <button type="button" class="btn btn-primary rounded-pill" id="next-step6">다음</button>
+          </div>
+        </div>
+
+        <!-- Step 7: 희망 작업 날짜 -->
+        <div class="step-container" id="step7">
+          <div class="form-group">
+            <label for="work-date" class="form-label"><i class="fas fa-calendar-alt"></i> 희망 작업 날짜 <span class="text-danger">*</span></label>
+            <input type="date" id="work-date" class="form-control" required>
+            <small class="form-text text-muted">작업을 원하는 날짜를 선택하세요. <br>작업 가능 여부는 작업자와 상의 후 확정됩니다.</small>
+          </div>
+          <div class="d-flex justify-content-between mt-3">
+            <button type="button" class="btn btn-secondary rounded-pill" id="prev-step7">이전</button>
+            <button type="button" class="btn btn-primary rounded-pill" id="next-step7">다음</button>
+          </div>
+        </div>
+
+        <!-- Step 8: 요청 사항 및 제출 -->
+        <div class="step-container" id="step8">
+          <div class="form-group">
+            <label for="worker-request" class="form-label"><i class="fas fa-comment"></i> 요청 사항</label>
+            <textarea id="worker-request" class="form-control" placeholder="요청 사항 입력" rows="3"></textarea>
+            <small class="form-text text-muted">작업자에게 전달할 추가 요청 사항을 입력하세요. <br>예: 특정 시간대 요청, 추가 작업 지시 등</small>
+          </div>
+          <div class="form-group mt-3">
+            <label for="request-files" class="form-label"><i class="fas fa-camera"></i> 현장 사진</label>
+            <input type="file" id="request-files" class="form-control" accept="image/*" multiple>
+            <small class="form-text text-muted">현장 사진을 업로드하세요 (최대 5MB). <br>사진은 작업자가 작업 환경을 이해하는 데 도움을 줍니다.</small>
+          </div>
+          <div class="d-flex justify-content-between mt-3">
+            <button type="button" class="btn btn-secondary rounded-pill" id="prev-step8">이전</button>
+            <button type="submit" class="btn btn-primary rounded-pill" id="submit-btn">제출</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="bg-white text-center py-2 shadow-sm" id="footer-container"></footer>
+
+  <!-- 다크 모드 토글 버튼 -->
+  <button id="toggleDarkModeButton" class="btn btn-outline-light dark-mode-btn"><i class="fas fa-moon"></i></button>
+
+  <!-- 외부 스크립트 -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="/scripts/nav.js" type="module" defer></script>
+  <script src="/scripts/footer.js" type="text/javascript" defer></script>
+  <script src="/scripts/common.js" defer></script>
+
+  <!-- Firebase 및 Kakao Maps 스크립트 -->
+  <script type="module">
+    import { db } from '/scripts/firebase-config.js';
+    import { collection, addDoc, Timestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
+
+    const storage = getStorage();
+
+    let currentStep = 1;
+    const totalSteps = 8;
+    let latitude = null;
+    let longitude = null;
+    let map, marker, geocoder;
+
+    // 진행률 업데이트
+    function updateProgressBar() {
+      const progress = (currentStep / totalSteps) * 100;
+      document.getElementById('progressBar').style.width = `${progress}%`;
+      document.getElementById('progressText').textContent = `Step ${currentStep}/${totalSteps}: ${['서비스 유형 선택', '이름 입력', '연락처 입력', '비밀번호 입력', '위치 정보', '세부 사항 입력', '희망 작업 날짜', '요청 사항 및 제출'][currentStep - 1]}`;
+    }
+
+    // 단계 표시
+    function showStep(step) {
+      document.querySelectorAll('.step-container').forEach(container => container.classList.remove('active'));
+      document.getElementById(`step${step}`).classList.add('active');
+      currentStep = step;
+      updateProgressBar();
+      if (step === 5 && map) {
+        setTimeout(() => map.relayout(), 100);
+      }
+      window.scrollTo(0, 0);
+    }
+
+    // 지도 초기화
+    function initializeMap(containerId) {
+      const mapOptions = {
+        center: new kakao.maps.LatLng(37.5665, 126.9780),
+        level: 3,
+        mapTypeId: kakao.maps.MapTypeId.HYBRID // 위성사진 모드 설정
+      };
+      const map = new kakao.maps.Map(document.getElementById(containerId), mapOptions);
+      const marker = new kakao.maps.Marker({ position: map.getCenter(), draggable: true });
+      marker.setMap(map);
+      const geocoder = new kakao.maps.services.Geocoder();
+      return { map, marker, geocoder };
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // 지도 초기화
+      const { map: mobileMap, marker: mobileMarker, geocoder: mobileGeocoder } = initializeMap('nv-map');
+      map = mobileMap;
+      marker = mobileMarker;
+      geocoder = mobileGeocoder;
+
+      // 지도 이벤트
+      kakao.maps.event.addListener(map, 'click', (mouseEvent) => {
+        const latlng = mouseEvent.latLng;
+        marker.setPosition(latlng);
+        latitude = latlng.getLat();
+        longitude = latlng.getLng();
+        geocoder.coord2Address(latlng.getLng(), latlng.getLat(), (result, status) => {
+          if (status === kakao.maps.services.Status.OK) {
+            document.getElementById('address').value = result[0].address.address_name;
+          }
+        });
+      });
+
+      kakao.maps.event.addListener(marker, 'dragend', () => {
+        const latlng = marker.getPosition();
+        latitude = latlng.getLat();
+        longitude = latlng.getLng();
+        geocoder.coord2Address(latlng.getLng(), latlng.getLat(), (result, status) => {
+          if (status === kakao.maps.services.Status.OK) {
+            document.getElementById('address').value = result[0].address.address_name;
+          }
+        });
+      });
+
+      // 쿼리 파라미터 처리
+      const urlParams = new URLSearchParams(window.location.search);
+      const selectedType = decodeURIComponent(urlParams.get('type')); // URL 디코딩
+      const isSelected = urlParams.get('selected') === 'true';
+      console.log('Selected Type:', selectedType, 'Is Selected:', isSelected); // 디버깅 로그
+      if (selectedType && isSelected) {
+        const checkboxMap = {
+          '벌초': 'service-type1',
+          '예초': 'service-type2',
+          '태양광 예초 관리': 'service-type3',
+          '가지치기': 'service-type4',
+          '제초제 살포': 'service-type5',
+          '나무 제거(벌목)': 'service-type6',
+          '기타': 'service-type7'
+        };
+        const checkboxId = checkboxMap[selectedType];
+        console.log('Checkbox ID:', checkboxId); // 디버깅 로그
+        if (checkboxId) {
+          const checkbox = document.getElementById(checkboxId);
+          checkbox.checked = true;
+          // change 이벤트 트리거
+          const event = new Event('change', { bubbles: true });
+          checkbox.dispatchEvent(event);
+          if (checkboxId === 'service-type7') {
+            document.getElementById('custom-service').style.display = 'block';
+          }
+        }
+      }
+
+      // 단계 전환 이벤트
+      document.getElementById('next-step1').addEventListener('click', () => {
+        const selectedService = document.querySelector('input[name="service-type"]:checked');
+        console.log('Selected Service:', selectedService ? selectedService.value : 'None'); // 디버깅 로그
+        if (selectedService) {
+          const customServiceInput = document.getElementById('custom-service');
+          if (selectedService.value === '기타' && !customServiceInput.value) {
+            alert('기타 서비스 내용을 입력하세요.');
+            return;
+          }
+          showStep(2);
+        } else {
+          alert('서비스 유형을 선택하세요.');
+        }
+      });
+
+      document.getElementById('next-step2').addEventListener('click', () => {
+        if (document.getElementById('customer-name').value) showStep(3);
+        else alert('이름을 입력하세요.');
+      });
+
+      document.getElementById('next-step3').addEventListener('click', () => {
+        if (document.getElementById('customer-phone').value) showStep(4);
+        else alert('연락처를 입력하세요.');
+      });
+
+      document.getElementById('next-step4').addEventListener('click', () => {
+        if (document.getElementById('customer-password').value) showStep(5);
+        else alert('비밀번호를 입력하세요.');
+      });
+
+      document.getElementById('address-search-btn').addEventListener('click', () => {
+        if (!geocoder) {
+          console.error('Geocoder가 초기화되지 않았습니다. 지도 로드를 확인하세요.');
+          alert('지도 로드에 실패했습니다. 페이지를 새로고침해 주세요.');
+          return;
+        }
+        new daum.Postcode({
+          oncomplete: (data) => {
+            document.getElementById('address').value = data.address;
+            geocoder.addressSearch(data.address, (result, status) => {
+              if (status === kakao.maps.services.Status.OK) {
+                const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                map.setCenter(coords);
+                marker.setPosition(coords);
+                latitude = coords.getLat();
+                longitude = coords.getLng();
+                map.relayout();
+              }
+            });
+          }
+        }).open();
+      });
+
+      document.getElementById('next-step5').addEventListener('click', () => {
+        if (document.getElementById('address').value && latitude && longitude) {
+          showStep(6);
+          // Step 6 진입 시 즉시 세부 사항 로드
+          const serviceType = document.querySelector('input[name="service-type"]:checked').value;
+          const detailsDiv = document.getElementById('service-details');
+          detailsDiv.innerHTML = ''; // 기존 내용 초기화
+          if (serviceType === '벌초') {
+            detailsDiv.innerHTML = `
+              <label class="form-label"><i class="fas fa-tombstone"></i> 묘지 종류 <span class="text-danger">*</span></label>
+              <select class="form-select" id="grave-type" required>
+                <option value="">선택하세요</option>
+                <option value="일반 봉분묘">일반 봉분묘</option>
+                <option value="평장묘">평장묘</option>
+                <option value="공원묘지">공원묘지</option>
+              </select>
+              <label class="form-label mt-3"><i class="fas fa-tombstone"></i> 분묘 수 <span class="text-danger">*</span></label>
+              <input type="number" id="grave-count" class="form-control" min="1" required>
+              <label class="form-label mt-3"><i class="fas fa-ruler"></i> 평수 <span class="text-danger">*</span></label>
+              <input type="number" id="area-size" class="form-control" min="1" required>
+            `;
+          } else if (['예초', '태양광 예초 관리'].includes(serviceType)) {
+            detailsDiv.innerHTML = `
+              <label class="form-label"><i class="fas fa-ruler"></i> 평수 <span class="text-danger">*</span></label>
+              <input type="number" id="area-size" class="form-control" min="1" required>
+              <label class="form-label mt-3"><i class="fas fa-trash"></i> 풀 처리 방법</label>
+              <select class="form-select" id="grass-disposal">
+                <option value="none">선택 안 함</option>
+                <option value="multiple">여러 곳 모아놓기</option>
+                <option value="single">한 곳 모아놓기</option>
+                <option value="complete">완전 배출</option>
+              </select>
+            `;
+          } else if (serviceType === '가지치기') {
+            detailsDiv.innerHTML = `
+              <label class="form-label"><i class="fas fa-ruler"></i> 평수 <span class="text-danger">*</span></label>
+              <input type="number" id="area-size" class="form-control" min="1" required>
+              <label class="form-label mt-3"><i class="fas fa-ruler-vertical"></i> 가지치기 높이 (m) <span class="text-danger">*</span></label>
+              <input type="number" id="pruning-height" class="form-control" min="0" step="0.1" required>
+            `;
+          } else if (serviceType === '제초제 살포') {
+            detailsDiv.innerHTML = `
+              <label class="form-label"><i class="fas fa-ruler"></i> 평수 <span class="text-danger">*</span></label>
+              <input type="number" id="area-size" class="form-control" min="1" required>
+              <label class="form-label mt-3"><i class="fas fa-spray-can"></i> 제초제 종류 <span class="text-danger">*</span></label>
+              <select class="form-select" id="herbicide-type" required>
+                <option value="">선택하세요</option>
+                <option value="비선택성">비선택성 (모든 식물 제거)</option>
+                <option value="선택성">선택성 (특정 잡초 제거)</option>
+                <option value="친환경">친환경 제초제</option>
+              </select>
+            `;
+          } else if (serviceType === '나무 제거(벌목)') {
+            detailsDiv.innerHTML = `
+              <label class="form-label"><i class="fas fa-ruler"></i> 평수 <span class="text-danger">*</span></label>
+              <input type="number" id="area-size" class="form-control" min="1" required>
+              <label class="form-label mt-3"><i class="fas fa-tree"></i> 나무 개수 <span class="text-danger">*</span></label>
+              <input type="number" id="tree-count" class="form-control" min="1" required>
+            `;
+          } else if (serviceType === '기타') {
+            detailsDiv.innerHTML = `
+              <label class="form-label"><i class="fas fa-ruler"></i> 평수 <span class="text-danger">*</span></label>
+              <input type="number" id="area-size" class="form-control" min="1" required>
+              <label class="form-label mt-3"><i class="fas fa-info-circle"></i> 세부 요청 사항 <span class="text-danger">*</span></label>
+              <textarea id="custom-details" class="form-control" placeholder="세부 요청 사항 입력" rows="3" required></textarea>
+            `;
+          }
+        } else {
+          alert('주소를 검색하고 지도에서 위치를 선택하세요.');
+        }
+      });
+
+      document.getElementById('next-step6').addEventListener('click', () => {
+        const serviceType = document.querySelector('input[name="service-type"]:checked').value;
+        let isValid = true;
+
+        if (serviceType === '벌초') {
+          isValid = document.getElementById('grave-type').value && document.getElementById('grave-count').value && document.getElementById('area-size').value;
+        } else if (['예초', '태양광 예초 관리'].includes(serviceType)) {
+          isValid = document.getElementById('area-size').value;
+        } else if (serviceType === '가지치기') {
+          isValid = document.getElementById('area-size').value && document.getElementById('pruning-height').value;
+        } else if (serviceType === '제초제 살포') {
+          isValid = document.getElementById('area-size').value && document.getElementById('herbicide-type').value;
+        } else if (serviceType === '나무 제거(벌목)') {
+          isValid = document.getElementById('area-size').value && document.getElementById('tree-count').value;
+        } else if (serviceType === '기타') {
+          isValid = document.getElementById('area-size').value && document.getElementById('custom-details').value;
+        }
+
+        if (isValid) showStep(7);
+        else alert('모든 세부 사항을 입력하세요.');
+      });
+
+      document.getElementById('next-step7').addEventListener('click', () => {
+        if (document.getElementById('work-date').value) showStep(8);
+        else alert('희망 작업 날짜를 선택하세요.');
+      });
+
+      // 폼 제출 처리
+      document.getElementById('service-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const serviceType = document.querySelector('input[name="service-type"]:checked').value;
+        const customService = document.getElementById('custom-service').value || (serviceType === '기타' ? '' : null);
+        const customerName = document.getElementById('customer-name').value;
+        const customerPhone = document.getElementById('customer-phone').value;
+        const customerPassword = document.getElementById('customer-password').value;
+        const address = document.getElementById('address').value;
+        const workDate = document.getElementById('work-date').value;
+        const workerRequest = document.getElementById('worker-request').value;
+        const files = document.getElementById('request-files').files;
+
+        if (!customerName || !customerPhone || !customerPassword || !address || !workDate) {
+          alert('필수 입력 항목을 모두 작성해주세요.');
+          return;
+        }
+
+        try {
+          // 파일 업로드 (실패 시에도 진행되도록 예외 처리)
+          let fileUrls = [];
+          if (files.length > 0) {
+            try {
+              for (const file of files) {
+                const storageRef = ref(storage, `requests/${Date.now()}_${file.name}`);
+                await uploadBytes(storageRef, file);
+                const fileUrl = await getDownloadURL(storageRef);
+                fileUrls.push(fileUrl);
+              }
+            } catch (uploadError) {
+              console.error('파일 업로드 실패:', uploadError);
+              alert('파일 업로드에 실패했습니다. 하지만 서비스 신청은 진행됩니다.');
+            }
+          }
+
+          // 세부 사항 데이터 수집
+          let details = {};
+          if (serviceType === '벌초') {
+            details = {
+              graveType: document.getElementById('grave-type').value,
+              graveCount: document.getElementById('grave-count').value,
+              areaSize: document.getElementById('area-size').value
+            };
+          } else if (['예초', '태양광 예초 관리'].includes(serviceType)) {
+            details = {
+              areaSize: document.getElementById('area-size').value,
+              grassDisposal: document.getElementById('grass-disposal').value
+            };
+          } else if (serviceType === '가지치기') {
+            details = {
+              areaSize: document.getElementById('area-size').value,
+              pruningHeight: document.getElementById('pruning-height').value
+            };
+          } else if (serviceType === '제초제 살포') {
+            details = {
+              areaSize: document.getElementById('area-size').value,
+              herbicideType: document.getElementById('herbicide-type').value
+            };
+          } else if (serviceType === '나무 제거(벌목)') {
+            details = {
+              areaSize: document.getElementById('area-size').value,
+              treeCount: document.getElementById('tree-count').value
+            };
+          } else if (serviceType === '기타') {
+            details = {
+              areaSize: document.getElementById('area-size').value,
+              customDetails: document.getElementById('custom-details').value
+            };
+          }
+
+          // Firestore에 데이터 저장
+          const requestData = {
+            serviceType: customService || serviceType,
+            customerName: customerName,
+            customerPhone: customerPhone,
+            customerPassword: customerPassword,
+            address: address,
+            latitude: latitude,
+            longitude: longitude,
+            workDate: workDate,
+            workerRequest: workerRequest,
+            fileUrls: fileUrls.length > 0 ? fileUrls : [],
+            details: details,
+            createdAt: Timestamp.fromDate(new Date()),
+            status: 'pending'
+          };
+
+          await addDoc(collection(db, 'serviceRequests'), requestData);
+          alert('서비스 신청이 완료되었습니다!');
+          document.getElementById('service-form').reset();
+          showStep(1); // 처음 단계로 돌아감
+        } catch (error) {
+          console.error('서비스 신청 실패:', error);
+          alert('서비스 신청에 실패했습니다: ' + error.message);
+        }
+      });
+
+      // 이전 버튼 이벤트
+      [2, 3, 4, 5, 6, 7, 8].forEach(step => {
+        document.getElementById(`prev-step${step}`).addEventListener('click', () => showStep(step - 1));
+      });
+
+      updateProgressBar();
+    });
+  </script>
+</body>
+</html>

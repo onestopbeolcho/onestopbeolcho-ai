@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="ko" prefix="og: http://ogp.me/ns#">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>관리자 페이지 | 원스톱 벌초</title>
+  <meta name="description" content="원스톱 벌초 서비스 관리자 페이지입니다. 서비스 신청 내역 및 작업자 관리를 할 수 있습니다." />
+  <meta name="keywords" content="관리자, 원스톱 벌초, 신청 관리, 작업자 관리, 서비스 관리" />
+
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:title" content="관리자 페이지 | 원스톱 벌초">
+  <meta property="og:description" content="원스톱 벌초 서비스 관리자 페이지입니다. 서비스 신청 내역 및 작업자 관리를 할 수 있습니다.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://onestop.com/admin/admin.html">
+  <meta property="og:image" content="https://onestop.com/assets/images/main.png">
+  <meta property="og:image:alt" content="원스톱벌초 서비스 메인 이미지">
+
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#1E88E5" />
+  <link rel="apple-touch-icon" sizes="192x192" href="/assets/icons/icon-192x192.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/styles/theme.css">
+  <link rel="stylesheet" href="/styles/nav.css">
+
+  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ef6b942fdad36e982c84eb0061d1d2ed"></script>
+</head>
+<body><nav id="nav-container"></nav>
+  <div class="container mypage-container">
+    <h2 aria-level="1" role="heading">관리자 페이지</h2>
+    <div id="feedback-message" class="feedback-message"></div>
+    <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist" aria-label="관리 기능 탭">
+      <li class="nav-item" role="presentation" >
+        <button class="nav-link active" id="request-tab" data-bs-toggle="tab" data-bs-target="#request" type="button" role="tab" aria-selected="true" aria-controls="request">서비스 신청 내역</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="workers-tab" data-bs-toggle="tab" data-bs-target="#workers" type="button" role="tab" aria-selected="false" aria-controls="workers">작업자 리스트</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="worker-history-tab" data-bs-toggle="tab" data-bs-target="#worker-history" type="button" role="tab">작업자 내역</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="work-logs-tab" data-bs-toggle="tab" data-bs-target="#work-logs" type="button" role="tab">작업사항</button>
+      </li>
+
+    </ul>
+
+    <div class="tab-content" aria-live="polite">
+      <div class="tab-pane fade show active" id="request" role="tabpanel" aria-labelledby="request-tab">
+        <h3 aria-level="2" role="heading">서비스 신청 내역</h3>
+        <div class="mb-3" role="group" aria-labelledby="sort-options-label">
+          <label for="sortField" class="me-2" id="sort-options-label">정렬 기준:</label>
+          <select id="sortField" class="me-2" aria-label="정렬 기준">
+            <option value="createdAt">시간순</option>
+            <option value="region">지역순</option>
+          </select>
+          <select id="sortOrder" class="me-2" aria-label="정렬 순서">
+            <option value="desc">내림차순</option>
+            <option value="asc">오름차순</option>
+          </select>
+          <button id="applySort" class="btn btn-secondary btn-sm" aria-label="정렬 적용">정렬 적용</button>
+        </div>
+        <div class="mb-3" role="group" aria-labelledby="search-options-label">
+          <label for="searchField" class="me-2" id="search-options-label">검색 조건:</label>
+          <select id="searchField" class="me-2" aria-label="검색 조건 선택">
+            <option value="status">상태</option>
+            <option value="region">지역</option>
+            <option value="customerName">고객 이름</option>
+          </select>
+          <input type="text" id="searchValue" placeholder="검색어 입력" class="me-2" aria-label="검색어 입력">
+          <button id="applySearch" class="btn btn-secondary btn-sm" aria-label="검색 실행">검색</button>
+          <button id="resetSearch" class="btn btn-outline-secondary btn-sm" aria-label="검색 초기화">초기화</button>
+        </div>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>신청 ID</th>
+              <th>고객 이름</th>
+              <th>연락처</th>
+              <th>주소</th>
+              <th>지역</th>
+              <th>상태</th>
+              <th>작업 날짜</th>
+              <th>작업</th>
+            </tr>
+          </thead>
+          <tbody id="request-table"></tbody>
+        </table>
+      </div>          
+      <div class="tab-pane fade" id="workers" role="tabpanel" aria-labelledby="workers-tab">
+        <h3 aria-level="2" role="heading">작업자 리스트</h3>
+        <div class="mb-3" role="group" aria-labelledby="worker-search-filter-options-label">
+          <label for="workerSearchField" class="me-2" id="worker-search-filter-options-label">검색 조건:</label>
+          <select id="workerSearchField" class="me-2" aria-label="작업자 검색 조건">
+            <option value="name">이름</option>
+            <option value="email">이메일</option>
+            <option value="status">상태</option>
+          </select>
+          <input type="text" id="workerSearchValue" placeholder="검색어 입력" class="me-2" aria-label="작업자 검색어 입력">
+          <button id="workerSearchBtn" class="btn btn-secondary btn-sm" aria-label="작업자 검색">검색</button>
+          <button id="workerResetSearch" class="btn btn-outline-secondary btn-sm" aria-label="작업자 검색 초기화">초기화</button>
+          <select id="workerFilterStatus" class="ms-2" aria-label="작업자 상태 필터">
+            <option value="all">모두</option>
+            <option value="approved">승인됨</option>
+            <option value="pending">대기 중</option>
+          </select>
+          <button id="workerFilterBtn" class="btn btn-secondary btn-sm">필터 적용</button>
+        </div>
+        <div id="workers-container" class="row"></div>
+      </div>          
+      <div class="tab-pane fade" id="worker-history" role="tabpanel" aria-labelledby="worker-history-tab">
+        <h3>작업자 내역</h3>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>작업자</th>
+              <th>신청 ID</th>
+              <th>처리 날짜</th>
+              <th>상태</th>
+            </tr>
+          </thead>
+          <tbody id="worker-history-table"></tbody>
+        </table>
+      </div>          
+      <div class="tab-pane fade" id="work-logs" role="tabpanel" aria-labelledby="work-logs-tab">
+        <h3>작업사항</h3>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>신청 ID</th>
+              <th>작업자</th>
+              <th>상태</th>
+              <th>업데이트 날짜</th>
+              <th>작업</th>
+            </tr>
+          </thead>
+          <tbody id="work-logs-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="editRequestModal" tabindex="-1" aria-labelledby="editRequestModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="editRequestModalLabel">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editRequestModalLabel" role="heading" aria-level="2">신청 내역 수정</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editRequestForm">
+            <input type="hidden" id="editRequestId">
+            <div class="mb-3">
+              <label for="editCustomerName" class="form-label" aria-labelledby="editRequestModalLabel">고객 이름</label>
+              <input type="text" class="form-control" id="editCustomerName" aria-describedby="editCustomerName" required>
+            </div>
+            <div class="mb-3">
+              <label for="editCustomerPhone" class="form-label" aria-labelledby="editRequestModalLabel">연락처</label>
+              <input type="text" class="form-control" id="editCustomerPhone" aria-describedby="editCustomerPhone" required>
+            </div>
+            <div class="mb-3">
+              <label for="editAddress" class="form-label" aria-labelledby="editRequestModalLabel">주소</label>
+              <input type="text" class="form-control" id="editAddress" aria-describedby="editAddress" required>
+            </div>
+            <div class="mb-3">
+              <label for="editRegion" class="form-label" aria-labelledby="editRequestModalLabel">지역</label>
+              <input type="text" class="form-control" id="editRegion" aria-describedby="editRegion" required>
+            </div>
+            <div class="mb-3">
+              <label for="editStatus" class="form-label" aria-labelledby="editRequestModalLabel">상태</label>
+              <select class="form-control" id="editStatus" aria-describedby="editStatus" required>
+                <option value="pending">대기중</option>
+                <option value="confirmed">확인됨</option>
+                <option value="completed">완료</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="editWorkDate" class="form-label" aria-labelledby="editRequestModalLabel">작업 날짜</label>
+              <input type="date" class="form-control" id="editWorkDate" aria-describedby="editWorkDate" required>
+            </div>
+            <div class="mb-3">
+              <label for="editLatitude" class="form-label">위도</label>
+              <input type="number" class="form-control" id="editLatitude" step="any">
+            </div>
+            <div class="mb-3">
+              <label for="editLongitude" class="form-label">경도</label>
+              <input type="number" class="form-control" id="editLongitude" step="any">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="닫기">닫기</button>
+          <button type="button" class="btn btn-primary" id="saveRequestChanges" aria-label="변경사항 저장">저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true" >
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="mapModalLabel">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="mapModalLabel" role="heading" aria-level="2">위치 보기</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="map" style="height: 400px; width: 100%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="editWorkerRegionsModal" tabindex="-1" aria-labelledby="editWorkerRegionsModalLabel" aria-hidden="true" >
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="editWorkerRegionsModalLabel">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editWorkerRegionsModalLabel" role="heading" aria-level="2">작업자 지역 수정</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" >
+          <form id="editWorkerRegionsForm">
+            <input type="hidden" id="editWorkerId">
+            <div class="mb-3">
+              <label for="editRegions" class="form-label">배정 지역 (최대 3개 선택)</label>
+              <select multiple class="form-control" id="editRegions" size="5">
+                <!-- 동적으로 지역 목록 채움 -->
+              </select>
+              <small class="form-text text-muted">Ctrl 또는 Shift를 사용해 여러 지역을 선택하세요.</small>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="닫기">닫기</button>
+          <button type="button" class="btn btn-primary" id="saveWorkerRegions" aria-label="저장 및 배정">저장 및 배정</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer id="footer-container"></footer>
+
+  <script src="/scripts/nav.js" type="module" defer></script>
+  <script src="/scripts/footer.js" type="text/javascript" defer></script>
+
+  
+  <!--JSON-LD 스키마-->
+  <script type="application/ld+json" >
+    {
+      "@context": "http://schema.org",
+      "@type": "WebSite",
+      "name": "원스톱 벌초 관리자 페이지",
+      "url": "https://onestop.com/admin/admin.html",
+      "description": "원스톱 벌초 서비스 관리자 페이지",
+      "publisher": {
+        "@type": "Organization",
+        "name": "원스톱 벌초"
+      }
+    }
+  </script>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getAuth, setPersistence, browserLocalPersistence, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { getFirestore, collection, query, where, orderBy, updateDoc, doc, onSnapshot, serverTimestamp, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { firebaseConfig } from '/scripts/firebaseConfig.js';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+
+    let currentMap;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+      
+    document.addEventListener('DOMContentLoaded', () => {      
+      setPersistence(auth, browserLocalPersistence)
+      .then(() => console.log('세션 영속성 설정 완료'))
+      .catch(error => console.error('세션 영속성 설정 오류:', error));
+      
+      onAuthStateChanged(auth, async (user) => {
+          console.log('인증 상태 체크:', new Date(), 'UID:', user?.uid || '없음');
+          
+          if(!user) {
+            window.location.replace('/login.html');
+            return;
+          }
+        try {
+          console.log('Firestore getDoc 호출 시도');
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          console.log('Firestore 응답:', userDoc.exists(), userDoc.data());
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            console.log('사용자 데이터:', userData);
+            if (userData.isAdmin) {
+              console.log('관리자 확인 성공');
+              const tabs = document.querySelectorAll('#adminTabs .nav-link');
+              tabs.forEach(tab => {
+                tab.addEventListener('shown.bs.tab', () => {
+                  const target = tab.getAttribute('data-bs-target');
+                  console.log('탭 전환:', target);
+                  if (target === '#request') loadRequests();
+                  else if (target === '#workers') loadWorkers();
+                  else if (target === '#worker-history') loadWorkerHistory();
+                  else if (target === '#work-logs') loadWorkLogs();
+                });
+              });
+                loadRequests();
+            } else {
+              console.log('관리자 권한 없음');
+              window.location.replace('/login.html');
+            }
+          } else {
+            console.log('사용자 문서 없음');
+            window.location.replace('/login.html');
+          }
+        } catch (error) {
+          console.error('Firestore 오류:', error);
+          document.getElementById('feedback-message').textContent = 'Firestore 오류: ' + error.message;
+          document.getElementById('feedback-message').classList.add('error');
+          setTimeout(() => window.location.href = '/login.html', 2000);
+        }
+      });
+
+      function loadRequests() {
+        console.log('loadRequests 호출');
+        const requestTable = document.getElementById('request-table');
+        requestTable.innerHTML = '';
+        let q = query(collection(db, 'serviceRequests'), orderBy('createdAt', 'desc'));
+        let currentQuery = q;
+
+        document.getElementById('applySort').addEventListener('click', () => {
+          const sortField = document.getElementById('sortField').value;
+          const sortOrder = document.getElementById('sortOrder').value;
+          let newQuery = query(collection(db, 'serviceRequests'), orderBy(sortField, sortOrder));
+          const searchField = document.getElementById('searchField').value;
+          const searchValue = document.getElementById('searchValue').value.trim();
+          if (searchValue) {
+            newQuery = query(newQuery, where(searchField, '==', searchValue));
+          }
+          currentQuery = newQuery;
+          applyQuery();
+        });
+
+        document.getElementById('applySearch').addEventListener('click', () => {
+          const searchField = document.getElementById('searchField').value;
+          const searchValue = document.getElementById('searchValue').value.trim();
+          let newQuery = query(collection(db, 'serviceRequests'));
+          if (searchValue) {
+            newQuery = query(newQuery, where(searchField, '==', searchValue));
+          }
+          const sortField = document.getElementById('sortField').value;
+          const sortOrder = document.getElementById('sortOrder').value;
+          newQuery = query(newQuery, orderBy(sortField, sortOrder));
+          currentQuery = newQuery;
+          applyQuery();
+        });
+
+        document.getElementById('resetSearch').addEventListener('click', () => {
+          document.getElementById('searchValue').value = '';
+          const sortField = document.getElementById('sortField').value;
+          const sortOrder = document.getElementById('sortOrder').value;
+          currentQuery = query(collection(db, 'serviceRequests'), orderBy(sortField, sortOrder));
+          applyQuery();
+        });
+
+        function applyQuery() {
+          console.log('applyQuery 실행');
+          onSnapshot(currentQuery, (snapshot) => {
+            console.log('스냅샷 데이터:', snapshot.docs.map(doc => doc.data()));
+            requestTable.innerHTML = '';
+            snapshot.forEach((doc) => {
+              const request = doc.data();
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td aria-label="신청 ID">${doc.id}</td>
+                <td aria-label="고객 이름">${request.customerName || '미등록'}</td>
+                <td aria-label="연락처">${request.customerPhone || '미등록'}</td>
+                <td aria-label="주소">${request.address || '-'}</td>
+                <td aria-label="지역">${request.region || '-'}</td>
+                <td aria-label="상태">${request.status || 'pending'}</td>
+                <td aria-label="작업 날짜">${request.workDate || '-'}</td>
+                <td>
+                  <button class="btn btn-primary btn-sm update-status" data-id="${doc.id}" data-status="confirmed" aria-label="신청 상태를 확인으로 변경">확인</button>
+                  <button class="btn btn-warning btn-sm edit-request" data-id="${doc.id}">수정</button>
+                  <button class="btn btn-info btn-sm show-map" data-lat="${request.latitude}" data-lng="${request.longitude}" data-address="${request.address || ''}">지도 보기</button>
+                </td>
+              `;
+              requestTable.appendChild(row);
+            });
+
+            document.querySelectorAll('.update-status').forEach(button => {
+              button.addEventListener('click', async () => {
+                const id = button.getAttribute('data-id');
+                await updateDoc(doc(db, 'serviceRequests', id), { status: button.getAttribute('data-status') });
+                alert('상태가 업데이트되었습니다.');
+              });
+            });
+
+            document.querySelectorAll('.edit-request').forEach(button => {
+              button.addEventListener('click', () => {
+                const id = button.getAttribute('data-id');
+                const request = snapshot.docs.find(doc => doc.id === id).data();
+                document.getElementById('editRequestId').value = id;
+                document.getElementById('editCustomerName').value = request.customerName || '';
+                document.getElementById('editCustomerPhone').value = request.customerPhone || '';
+                document.getElementById('editAddress').value = request.address || '';
+                document.getElementById('editRegion').value = request.region || '';
+                document.getElementById('editStatus').value = request.status || 'pending';
+                document.getElementById('editWorkDate').value = request.workDate || '';
+                document.getElementById('editLatitude').value = request.latitude || '';
+                document.getElementById('editLongitude').value = request.longitude || '';
+                new bootstrap.Modal(document.getElementById('editRequestModal')).show();
+              });
+            });
+
+            document.querySelectorAll('.show-map').forEach(button => {
+              button.addEventListener('click', () => {
+                const lat = parseFloat(button.getAttribute('data-lat'));
+                const lng = parseFloat(button.getAttribute('data-lng'));
+                const address = button.getAttribute('data-address');
+                showMap(lat, lng, address);
+              });
+            });
+          }, (error) => {
+            console.error('스냅샷 오류:', error);
+            requestTable.innerHTML = '<tr><td colspan="8">데이터 로드 실패: ' + error.message + '</td></tr>';
+          });
+        }
+
+        document.getElementById('saveRequestChanges').addEventListener('click', async () => {
+          const id = document.getElementById('editRequestId').value;
+          const updatedData = {
+            customerName: document.getElementById('editCustomerName').value,
+            customerPhone: document.getElementById('editCustomerPhone').value,
+            address: document.getElementById('editAddress').value,
+            region: document.getElementById('editRegion').value,
+            status: document.getElementById('editStatus').value,
+            workDate: document.getElementById('editWorkDate').value,
+            latitude: parseFloat(document.getElementById('editLatitude').value),
+            longitude: parseFloat(document.getElementById('editLongitude').value),
+          };
+          await updateDoc(doc(db, 'serviceRequests', id), updatedData);
+          alert('신청 내역이 수정되었습니다.');
+          bootstrap.Modal.getInstance(document.getElementById('editRequestModal')).hide();
+        });
+
+        function showMap(lat, lng, address) {
+          const mapElement = document.getElementById('map');
+          const mapOption = {
+            center: new kakao.maps.LatLng(lat, lng),
+            level: 3
+          };
+          currentMap = new kakao.maps.Map(mapElement, mapOption);
+          const markerPosition = new kakao.maps.LatLng(lat, lng);
+          const marker = new kakao.maps.Marker({
+            position: markerPosition,
+            title: address
+          });
+          marker.setMap(currentMap);
+          new bootstrap.Modal(document.getElementById('mapModal')).show();
+        }
+
+        applyQuery();
+      }
+
+      function loadWorkers() {
+        console.log('loadWorkers 호출');
+        const workersContainer = document.getElementById('workers-container');
+        workersContainer.innerHTML = '';
+        
+        const regionList = [
+          "서울특별시", "부산광역시", "대구광역시", "인천광역시", "광주광역시", "대전광역시", "울산광역시", "세종특별자치시",
+          "대구광역시 달성군", "울산광역시 울주군",
+          "경기도 수원시", "경기도 성남시", "경기도 고양시", "경기도 용인시", "경기도 부천시", "경기도 안산시", "경기도 안양시", 
+          "경기도 남양주시", "경기도 화성시", "경기도 평택시", "경기도 의정부시", "경기도 시흥시", "경기도 파주시", "경기도 광명시", 
+          "경기도 김포시", "경기도 군포시", "경기도 광주시", "경기도 이천시", "경기도 양주시", "경기도 오산시", "경기도 구리시", 
+          "경기도 안성시", "경기도 포천시", "경기도 의왕시", "경기도 하남시", "경기도 여주시", "경기도 양평시", "경기도 동두천시", 
+          "경기도 과천시", "경기도 가평시",
+          "경기도 양평군", "경기도 연천군", "경기도 가평군",
+          "강원도 춘천시", "강원도 원주시", "강원도 강릉시", "강원도 동해시", "강원도 태백시", "강원도 속초시", "강원도 삼척시",
+          "강원도 홍천군", "강원도 횡성군", "강원도 영월군", "강원도 평창군", "강원도 정선군", "강원도 철원군", "강원도 화천군", 
+          "강원도 양구군", "강원도 인제군", "강원도 고성군", "강원도 양양군",
+          "충청북도 청주시", "충청북도 충주시", "충청북도 제천시",
+          "충청북도 보은군", "충청북도 옥천군", "충청북도 영동군", "충청북도 증평군", "충청북도 진천군", "충청북도 괴산군", 
+          "충청북도 음성군", "충청북도 단양군",
+          "충청남도 천안시", "충청남도 공주시", "충청남도 보령시", "충청남도 아산시", "충청남도 서산시", "충청남도 논산시", 
+          "충청남도 계룡시", "충청남도 당진시",
+          "충청남도 금산군", "충청남도 부여군", "충청남도 서천군", "충청남도 청양군", "충청남도 홍성군", "충청남도 예산군", 
+          "충청남도 태안군",
+          "전북특별자치도 전주시", "전북특별자치도 군산시", "전북특별자치도 익산시", "전북특별자치도 정읍시", 
+          "전북특별자치도 남원시", "전북특별자치도 김제시",
+          "전북특별자치도 진안군", "전북특별자치도 무주군", "전북특별자치도 장수군", "전북특별자치도 임실군", 
+          "전북특별자치도 순창군", "전북특별자치도 고창군", "전북특별자치도 부안군",
+          "전라남도 목포시", "전라남도 여수시", "전라남도 순천시", "전라남도 나주시", "전라남도 광양시",
+          "전라남도 담양군", "전라남도 곡성군", "전라남도 구례군", "전라남도 고흥군", "전라남도 보성군", "전라남도 화순군", 
+          "전라남도 장흥군", "전라남도 강진군", "전라남도 해남군", "전라남도 영암군", "전라남도 무안군", "전라남도 함평군", 
+          "전라남도 영광군", "전라남도 장성군", "전라남도 완도군", "전라남도 진도군", "전라남도 신안군",
+          "경상북도 포항시", "경상북도 경주시", "경상북도 김천시", "경상북도 안동시", "경상북도 구미시", "경상북도 영주시", 
+          "경상북도 영천시", "경상북도 상주시", "경상북도 문경시", "경상북도 경산시",
+          "경상북도 군위군", "경상북도 의성군", "경상북도 청송군", "경상북도 영양군", "경상북도 영덕군", "경상북도 청도군", 
+          "경상북도 고령군", "경상북도 성주군", "경상북도 칠곡군", "경상북도 예천군", "경상북도 봉화군", "경상북도 울진군", 
+          "경상북도 울릉군",
+          "경상남도 창원시", "경상남도 진주시", "경상남도 통영시", "경상남도 사천시", "경상남도 김해시", "경상남도 밀양시", 
+          "경상남도 거제시", "경상남도 양산시",
+          "경상남도 의령군", "경상남도 함안군", "경상남도 창녕군", "경상남도 고성군", "경상남도 남해군", "경상남도 하동군", 
+          "경상남도 산청군", "경상남도 함양군", "경상남도 거창군", "경상남도 합천군"
+        ];
+
+        let baseQuery = query(collection(db, 'users'), where('isWorker', '==', true), orderBy('createdAt', 'desc'));
+        let currentWorkers = [];
+
+        function renderWorkers(workers) {
+          workersContainer.innerHTML = '';
+          if (workers.length === 0) {
+            workersContainer.innerHTML = '<div class="col-12"><p>작업자가 없습니다.</p></div>';
+            return;
+          }
+          workers.forEach(worker => {
+            const card = document.createElement('div');
+            card.className = 'col-md-4 worker-card';
+            card.innerHTML = `
+            <h5 aria-label="작업자 이름" aria-level="3">${worker.name || '미등록'}</h5>
+            <div role="group" aria-labelledby="worker-info-${worker.id}">
+                <p id="worker-info-${worker.id}" >
+                    <strong aria-label="상태:">상태:</strong> ${worker.workerApproved ? '승인됨' : '승인 대기'}
+                </p>
+                <p aria-label="가입일:">
+                    <strong >가입일:</strong> ${worker.createdAt ? new Date(worker.createdAt.toDate()).toLocaleString('ko-KR') : '미입력'}
+                </p>
+                <span class="details-toggle" aria-expanded="false">상세 정보 보기</span>
+                <div class="details" style="display: none;">
+                    <p aria-label="ID:">
+                        <strong>ID:</strong> ${worker.workerId || worker.id}
+                    </p>
+                    <p aria-label="이메일:">
+                        <strong>이메일:</strong> ${worker.email || '미등록'}
+                    </p>
+                    <p aria-label="전화번호:">
+                        <strong>전화번호:</strong> ${worker.phone || '미등록'}
+                    </p>
+                    <p aria-label="지역:">
+                        <strong>지역:</strong> ${worker.regions ? worker.regions.join(', ') : '미지정'}
+                    </p>
+                    <p aria-label="팀 인원:">
+                        <strong>팀 인원:</strong> ${worker.teamSize || '미입력'}
+                    </p>
+                    <p aria-label="사업자 여부:">
+                        <strong>사업자 여부:</strong> ${worker.businessRegistered ? '예 (' + (worker.businessNumber || '미입력') + ')' : '아니오'}
+                    </p>
+                    <p aria-label="작업 종류:">
+                        <strong>작업 종류:</strong> ${worker.tasks ? worker.tasks.join(', ') : '미선택'}
+                    </p>
+                </div>
+            </div>
+            <div class="actions" role="group" aria-labelledby="worker-actions-${worker.id}">
+                ${!worker.workerApproved ? `<button class="btn btn-success btn-sm approve-worker" data-id="${worker.id}" aria-label="작업자 승인">승인</button> <button class="btn btn-danger btn-sm reject-worker" data-id="${worker.id}" aria-label="작업자 거절">거절</button>` : ''}
+                <button class="btn btn-info btn-sm edit-regions" data-id="${worker.id}" aria-label="지역 수정">지역 수정</button>
+            </div>
+            `;
+
+            workersContainer.appendChild(card);
+          });
+
+          document.querySelectorAll('.details-toggle').forEach(toggle => {
+            toggle.addEventListener('click', () => {
+              const details = toggle.nextElementSibling;
+              details.style.display = details.style.display === 'block' ? 'none' : 'block';
+            });
+          });
+
+          document.querySelectorAll('.approve-worker').forEach(button => {
+            button.addEventListener('click', async () => {
+              const workerId = button.getAttribute('data-id');
+              try {
+                await updateDoc(doc(db, 'users', workerId), { workerApproved: true });
+                document.getElementById('feedback-message').textContent = '작업자가 승인되었습니다.';
+                document.getElementById('feedback-message').classList.remove('error');
+                document.getElementById('feedback-message').classList.add('success');
+                setTimeout(() => document.getElementById('feedback-message').classList.remove('success'), 2000);
+              } catch (error) {
+                document.getElementById('feedback-message').textContent = '승인 실패: ' + error.message;
+                document.getElementById('feedback-message').classList.add('error');
+                setTimeout(() => document.getElementById('feedback-message').classList.remove('error'), 2000);
+              }
+            });
+          });
+
+          document.querySelectorAll('.reject-worker').forEach(button => {
+            button.addEventListener('click', async () => {
+              const workerId = button.getAttribute('data-id');
+              try {
+                await updateDoc(doc(db, 'users', workerId), { isWorker: false, workerApproved: false });
+                document.getElementById('feedback-message').textContent = '작업자 승인이 거절되었습니다.';
+                document.getElementById('feedback-message').classList.remove('error');
+                document.getElementById('feedback-message').classList.add('success');
+                setTimeout(() => document.getElementById('feedback-message').classList.remove('success'), 2000);
+              } catch (error) {
+                document.getElementById('feedback-message').textContent = '거절 실패: ' + error.message;
+                document.getElementById('feedback-message').classList.add('error');
+                setTimeout(() => document.getElementById('feedback-message').classList.remove('error'), 2000);
+              }
+            });
+          });
+
+          document.querySelectorAll('.edit-regions').forEach(button => {
+            button.addEventListener('click', () => {
+              const workerId = button.getAttribute('data-id');
+              const worker = currentWorkers.find(w => w.id === workerId);
+              
+              document.getElementById('editWorkerId').value = workerId;
+              const editRegionsSelect = document.getElementById('editRegions');
+              editRegionsSelect.innerHTML = '';
+              
+              regionList.forEach(region => {
+                const option = document.createElement('option');
+                option.value = region;
+                option.text = region;
+                if (worker.regions && worker.regions.includes(region)) {
+                  option.selected = true;
+                }
+                editRegionsSelect.appendChild(option);
+              });
+
+              new bootstrap.Modal(document.getElementById('editWorkerRegionsModal')).show();
+            });
+          });
+        }
+
+        onSnapshot(baseQuery, (snapshot) => {
+          currentWorkers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          renderWorkers(currentWorkers);
+        });
+
+        document.getElementById('workerSearchBtn').addEventListener('click', () => {
+          const searchField = document.getElementById('workerSearchField').value;
+          const searchValue = document.getElementById('workerSearchValue').value.trim().toLowerCase();
+          const filteredWorkers = currentWorkers.filter(worker => {
+            if (searchField === 'name') return worker.name?.toLowerCase().includes(searchValue);
+            if (searchField === 'email') return worker.email?.toLowerCase().includes(searchValue);
+            if (searchField === 'status') return worker.workerApproved === (searchValue === '승인됨');
+            return true;
+          });
+          renderWorkers(filteredWorkers);
+        });
+
+        document.getElementById('workerResetSearch').addEventListener('click', () => {
+          document.getElementById('workerSearchValue').value = '';
+          document.getElementById('workerFilterStatus').value = 'all';
+          renderWorkers(currentWorkers);
+        });
+
+        document.getElementById('workerFilterBtn').addEventListener('click', () => {
+          const filterStatus = document.getElementById('workerFilterStatus').value;
+          const filteredWorkers = currentWorkers.filter(worker => {
+            if (filterStatus === 'approved') return worker.workerApproved;
+            if (filterStatus === 'pending') return !worker.workerApproved;
+            return true;
+          });
+          renderWorkers(filteredWorkers);
+        });
+      }
+
+      function loadWorkerHistory() {
+        console.log('loadWorkerHistory 호출');
+        const historyTable = document.getElementById('worker-history-table');
+        historyTable.innerHTML = '';
+        const q = query(collection(db, 'workerHistory'), orderBy('updatedAt', 'desc'));
+        onSnapshot(q, (snapshot) => {
+          historyTable.innerHTML = '';
+          snapshot.forEach((doc) => {
+            const history = doc.data();
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${history.workerId}</td>
+            <td aria-label="신청 ID">${history.requestId}</td>
+            <td aria-label="처리 날짜">${history.updatedAt ? new Date(history.updatedAt.toDate()).toLocaleString('ko-KR') : '-'}</td>
+            <td aria-label="상태">${history.status || 'pending'}</td>
+             `;
+            historyTable.appendChild(row);
+          });
+        });
+      }
+
+      function loadWorkLogs() {
+        console.log('loadWorkLogs 호출');
+        const logsTable = document.getElementById('work-logs-table');
+        logsTable.innerHTML = '';
+        const q = query(collection(db, 'workLogs'), orderBy('updatedAt', 'desc'));
+        onSnapshot(q, (snapshot) => {
+          logsTable.innerHTML = '';
+          snapshot.forEach((doc) => {
+            const log = doc.data();
+            const row = document.createElement('tr');
+            row.innerHTML = `
+            <td aria-label="신청 ID">${log.requestId}</td>
+            <td aria-label="작업자">${log.workerId}</td>
+            <td aria-label="상태">${log.status || 'pending'}</td>
+            <td aria-label="업데이트 날짜">${log.updatedAt ? new Date(log.updatedAt.toDate()).toLocaleString('ko-KR') : '-'}</td>
+            <td><button class="btn btn-primary btn-sm update-log" data-id="${doc.id}" aria-label="작업 상태 업데이트">업데이트</button></td>
+            `;
+            logsTable.appendChild(row);
+          });
+
+          document.querySelectorAll('.update-log').forEach(button => {
+            button.addEventListener('click', async () => {
+              const id = button.getAttribute('data-id');
+              const newStatus = prompt('새로운 상태 입력 (예: completed):');
+              if (newStatus) {
+                await updateDoc(doc(db, 'workLogs', id), { status: newStatus, updatedAt: serverTimestamp() });
+                alert('작업사항이 업데이트되었습니다.');
+              }
+            });
+          });
+        });
+      }
+
+      document.getElementById('saveWorkerRegions').addEventListener('click', async () => {
+        const workerId = document.getElementById('editWorkerId').value;
+        const selectedRegions = Array.from(document.getElementById('editRegions').selectedOptions).map(option => option.value);
+        
+        if (selectedRegions.length > 3) {
+          document.getElementById('feedback-message').textContent = '최대 3개 지역만 선택 가능합니다.';
+          document.getElementById('feedback-message').classList.add('error');
+          setTimeout(() => document.getElementById('feedback-message').classList.remove('error'), 2000);
+          return;
+        }
+
+        try {
+          await updateDoc(doc(db, 'users', workerId), { regions: selectedRegions });
+          document.getElementById('feedback-message').textContent = '작업자 지역이 수정 및 배정되었습니다.';
+          document.getElementById('feedback-message').classList.remove('error');
+          document.getElementById('feedback-message').classList.add('success');
+          setTimeout(() => document.getElementById('feedback-message').classList.remove('success'), 2000);
+          bootstrap.Modal.getInstance(document.getElementById('editWorkerRegionsModal')).hide();
+        } catch (error) {
+          document.getElementById('feedback-message').textContent = '지역 수정 실패: ' + error.message;
+          document.getElementById('feedback-message').classList.add('error');
+          setTimeout(() => document.getElementById('feedback-message').classList.remove('error'), 2000);
+        }
+      });
+    });
+  </script> 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+</body>
+</html>

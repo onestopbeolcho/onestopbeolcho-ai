@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="원스톱 벌초 - 작업자 페이지">
+  <meta name="keywords" content="작업자, 원스톱 벌초, 서비스 관리">
+  <title>원스톱 벌초 - 작업자</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/styles/common.css">
+  <style>
+    .feedback-message { 
+      display: none; 
+      margin-bottom: 10px; 
+      padding: 10px; 
+      border-radius: 5px; 
+      text-align: center; 
+    }
+    .feedback-message.error { 
+      background: #ffebee; 
+      color: #c62828; 
+      display: block; 
+    }
+    .feedback-message.success { 
+      background: #e3f2fd; 
+      color: #1E88E5; 
+      display: block; 
+    }
+    #nav-container { 
+      background: #1E88E5 !important; 
+      color: #ffffff !important; 
+    }
+    /* 모달 스타일 */
+    .modal { 
+      display: none; 
+      position: fixed; 
+      z-index: 1000; 
+      left: 0; 
+      top: 0; 
+      width: 100%; 
+      height: 100%; 
+      overflow: auto; 
+      background-color: rgb(0,0,0); 
+      background-color: rgba(0,0,0,0.4); 
+    }
+    .modal-content { 
+      background-color: #fefefe; 
+      margin: 15% auto; 
+      padding: 20px; 
+      border: 1px solid #888; 
+      width: 80%; 
+    }
+    .close { 
+      color: #aaa; 
+      float: right; 
+      font-size: 28px; 
+      font-weight: bold; 
+    }
+    .close:hover, 
+    .close:focus { 
+      color: black; 
+      text-decoration: none; 
+      cursor: pointer; 
+    }
+    /* 사진 미리보기 스타일 */
+    #preview-photos { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 10px; 
+    }
+    .preview-photo-container { 
+      position: relative; 
+      width: 100px; 
+      height: 100px; 
+      overflow: hidden; 
+      border: 1px solid #ccc; 
+    }
+    .preview-photo { 
+      width: 100%; 
+      height: 100%; 
+      object-fit: cover; 
+    }
+    .remove-photo { 
+      position: absolute; 
+      top: 0; 
+      right: 0; 
+      background-color: rgba(255, 255, 255, 0.7); 
+      border: none; 
+      cursor: pointer; 
+    }
+    .photo-count-warning { 
+      color: red; 
+      font-size: 0.8em; 
+      display: none; 
+    }
+    .photo-count-warning.show { 
+      display: block; 
+    }
+    #preview-additional-cost-photos { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 10px; 
+    }
+    .preview-additional-cost-photo-container { 
+      position: relative; 
+      width: 100px; 
+      height: 100px; 
+      overflow: hidden; 
+      border: 1px solid #ccc; 
+    }
+    .preview-additional-cost-photo { 
+      width: 100%; 
+      height: 100%; 
+      object-fit: cover; 
+    }
+    .remove-additional-cost-photo { 
+      position: absolute; 
+      top: 0; 
+      right: 0; 
+      background-color: rgba(255, 255, 255, 0.7); 
+      border: none; 
+      cursor: pointer; 
+    }
+    .additional-cost-info-container { 
+      margin-bottom: 10px; 
+    }
+    .additional-cost-info-label { 
+      font-weight: bold; 
+    }
+    .additional-cost-info-value { 
+      margin-left: 5px; 
+    }
+    #footer-container { 
+      background: #1f2937 !important; 
+      color: #d1d5db !important; 
+    }
+    /* 카드형 스타일 추가 */
+    .request-card {
+      margin-bottom: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .request-card .card-body {
+      padding: 15px;
+    }
+    .request-card .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .request-card .card-text {
+      margin-bottom: 5px;
+      font-size: 0.9rem;
+    }
+    .request-card .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 10px;
+    }
+    .request-card .btn {
+      font-size: 0.8rem;
+      padding: 5px 10px;
+    }
+    .additional-cost-item {
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+    .additional-cost-item p {
+      margin-bottom: 5px;
+    }
+    @media (min-width: 768px) {
+      .request-card {
+        margin-bottom: 20px;
+      }
+      .request-card .card-body {
+        padding: 20px;
+      }
+      .request-card .card-title {
+        font-size: 1.2rem;
+      }
+      .request-card .card-text {
+        font-size: 1rem;
+      }
+      .request-card .btn {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav id="nav-container"></nav>
+  <script src="/scripts/nav.js" type="module" defer></script>
+
+  <div class="container mt-4">
+    <h2 class="text-center mb-4">작업자 페이지</h2>
+    <div id="feedback-message" class="feedback-message"></div>
+    <div id="requestList" class="row"></div>
+  </div>
+
+  <!-- 작업 전/후 사진 업로드 모달 -->
+  <div id="upload-photo-modal" class="modal">
+    <div class="modal-content">
+      <span class="close">×</span>
+      <h2>사진 업로드</h2>
+      <input type="file" id="photo-files" multiple accept="image/*">
+      <div id="preview-photos"></div>
+      <p class="photo-count-warning">사진은 최대 5장까지 업로드 가능합니다.</p>
+      <button id="upload-photo-btn" class="btn btn-primary">사진 업로드</button>
+    </div>
+  </div>
+
+  <!-- 추가 견적 요청 모달 -->
+  <div id="additional-cost-modal" class="modal">
+    <div class="modal-content">
+      <span class="close">×</span>
+      <h2>추가 견적 요청</h2>
+      <label for="additional-cost-reason">추가 견적 사유:</label>
+      <textarea id="additional-cost-reason" class="form-control" rows="3"></textarea>
+      <label for="additional-cost-files">추가 견적 사진:</label>
+      <input type="file" id="additional-cost-files" multiple accept="image/*">
+      <div id="preview-additional-cost-photos"></div>
+      <label for="additional-cost-amount">추가 견적 금액:</label>
+      <input type="number" id="additional-cost-amount" class="form-control">
+      <button id="submit-additional-cost" class="btn btn-primary mt-3">추가 견적 제출</button>
+    </div>
+  </div>
+
+  <!-- 추가 견적 요청 확인 모달 -->
+  <div id="additional-cost-response-modal" class="modal">
+    <div id="additional-cost-info" class="modal-content"></div>
+  </div>
+
+  <div id="footer-container"></div>
+  <script src="/scripts/footer.js" type="text/javascript" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/scripts/auth.js" type="module"></script>
+  <script type="module">
+    import { checkAuth } from '/scripts/auth.js';
+    import { getFirestore, collection, query, where, onSnapshot, updateDoc, doc, getDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+    import { httpsCallable, getFunctions } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js';
+    import { auth } from '/scripts/firebase-config.js';
+
+    const db = getFirestore();
+    const storage = getStorage();
+    const functions = getFunctions();
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const footerContainer = document.getElementById('footer-container');
+      const requestList = document.getElementById('requestList');
+      const feedbackMessage = document.getElementById('feedback-message');
+      let allRequests = new Map();
+
+      function checkNavFooter() {
+        const navContainer = document.getElementById('nav-container');
+        if (!navContainer.innerHTML.trim()) {
+          console.warn('네비게이션이 삽입되지 않았습니다. nav.js 확인 필요.');
+          navContainer.innerHTML = '<p>네비게이션 로드 실패 (임시)</p>';
+        }
+        if (!footerContainer.innerHTML.trim()) {
+          console.warn('푸터가 삽입되지 않았습니다. footer.js 확인 필요.');
+          footerContainer.innerHTML = '<p>푸터 로드 실패 (임시)</p>';
+        }
+      }
+
+      // 모달 관련 함수
+      const modal = document.getElementById("upload-photo-modal");
+      const modalCloseBtn = modal ? modal.querySelector(".close") : null;
+      const photoFilesInput = document.getElementById("photo-files");
+      const previewPhotosDiv = document.getElementById("preview-photos");
+      const uploadPhotoButton = document.getElementById("upload-photo-btn");
+      const photoCountWarning = document.querySelector(".photo-count-warning");
+      let currentRequestId = null;
+
+      // 모달 닫기 함수
+      const closeModal = () => {
+        if (modal) {
+          modal.style.display = "none";
+          previewPhotosDiv.innerHTML = ""; // 미리보기 초기화
+          photoFilesInput.value = ""; // 파일 입력 초기화
+          photoCountWarning.classList.remove("show"); // 경고 메시지 숨김
+          currentRequestId = null;
+        }
+      };
+
+      // 모달 닫기 이벤트
+      if (modalCloseBtn) {
+        modalCloseBtn.addEventListener('click', closeModal);
+      }
+
+      // 모달 외부 클릭 시 닫기
+      window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+          closeModal();
+        }
+      });
+
+      // 사진 미리보기 기능
+      if (photoFilesInput) {
+        photoFilesInput.addEventListener('change', () => {
+          previewPhotosDiv.innerHTML = ""; // 기존 미리보기 초기화
+          const files = photoFilesInput.files;
+          const maxFiles = 5; // 최대 파일 개수
+
+          if (files.length > maxFiles) {
+            photoCountWarning.classList.add("show"); // 경고 메시지 표시
+            return;
+          } else {
+            photoCountWarning.classList.remove("show"); // 경고 메시지 숨김
+          }
+
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const photoContainer = document.createElement("div");
+              photoContainer.className = "preview-photo-container";
+
+              const img = document.createElement("img");
+              img.src = e.target.result;
+              img.className = "preview-photo";
+
+              const removeButton = document.createElement("button");
+              removeButton.textContent = "X";
+              removeButton.className = "remove-photo";
+              removeButton.addEventListener("click", () => {
+                photoContainer.remove(); // 미리보기에서 제거
+              });
+
+              photoContainer.appendChild(img);
+              photoContainer.appendChild(removeButton);
+              previewPhotosDiv.appendChild(photoContainer);
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+
+      // 추가 견적 요청 모달 관련 함수
+      const additionalCostModal = document.getElementById("additional-cost-modal");
+      const additionalCostModalCloseBtn = additionalCostModal ? additionalCostModal.querySelector(".close") : null;
+      const additionalCostReasonInput = document.getElementById("additional-cost-reason");
+      const additionalCostFilesInput = document.getElementById("additional-cost-files");
+      const previewAdditionalCostPhotosDiv = document.getElementById("preview-additional-cost-photos");
+      const additionalCostAmountInput = document.getElementById("additional-cost-amount");
+      const submitAdditionalCostButton = document.getElementById("submit-additional-cost");
+      let currentAdditionalRequestId = null;
+
+      // 추가 견적 요청 모달 닫기 함수
+      const closeAdditionalCostModal = () => {
+        if (additionalCostModal) {
+          additionalCostModal.style.display = "none";
+          previewAdditionalCostPhotosDiv.innerHTML = ""; // 미리보기 초기화
+          additionalCostFilesInput.value = ""; // 파일 입력 초기화
+          additionalCostReasonInput.value = ""; // 사유 입력 초기화
+          additionalCostAmountInput.value = ""; // 금액 입력 초기화
+          currentAdditionalRequestId = null;
+        }
+      };
+
+      // 추가 견적 요청 모달 닫기 이벤트
+      if (additionalCostModalCloseBtn) {
+        additionalCostModalCloseBtn.addEventListener('click', closeAdditionalCostModal);
+      }
+
+      // 추가 견적 요청 모달 외부 클릭 시 닫기
+      window.addEventListener('click', (event) => {
+        if (event.target === additionalCostModal) {
+          closeAdditionalCostModal();
+        }
+      });
+
+      // 추가 견적 사진 미리보기 기능
+      if (additionalCostFilesInput) {
+        additionalCostFilesInput.addEventListener('change', () => {
+          previewAdditionalCostPhotosDiv.innerHTML = ""; // 기존 미리보기 초기화
+          const files = additionalCostFilesInput.files;
+          const maxFiles = 5; // 최대 파일 개수
+
+          if (files.length > maxFiles) {
+            photoCountWarning.classList.add("show"); // 경고 메시지 표시
+            return;
+          } else {
+            photoCountWarning.classList.remove("show"); // 경고 메시지 숨김
+          }
+
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const photoContainer = document.createElement("div");
+              photoContainer.className = "preview-additional-cost-photo-container";
+
+              const img = document.createElement("img");
+              img.src = e.target.result;
+              img.className = "preview-additional-cost-photo";
+
+              const removeButton = document.createElement("button");
+              removeButton.textContent = "X";
+              removeButton.className = "remove-additional-cost-photo";
+              removeButton.addEventListener("click", () => {
+                photoContainer.remove(); // 미리보기에서 제거
+              });
+
+              photoContainer.appendChild(img);
+              photoContainer.appendChild(removeButton);
+              previewAdditionalCostPhotosDiv.appendChild(photoContainer);
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+
+      function openAdditionalCostModal(requestId) {
+        currentAdditionalRequestId = requestId; // 현재 작업 중인 요청 ID 저장
+        if (additionalCostModal) {
+          additionalCostModal.style.display = "block"; // 모달 열기
+        }
+      }
+
+      // 사진 업로드 버튼 클릭 시 이벤트
+      if (uploadPhotoButton) {
+        uploadPhotoButton.addEventListener("click", async () => {
+          if (!currentRequestId) {
+            console.error("RequestId가 설정되지 않았습니다.");
+            return;
+          }
+          const files = photoFilesInput.files;
+          const storageRef = ref(storage);
+          const uploadPromises = [];
+          const photoUrls = [];
+
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const fileRef = ref(storageRef, `photos/${currentRequestId}/${file.name}`);
+            const uploadTask = uploadBytesResumable(fileRef, file);
+            uploadPromises.push(uploadTask);
+            uploadTask.on('state_changed',
+              (snapshot) => {
+                // 업로드 진행 상황을 모니터링
+              },
+              (error) => {
+                console.error("파일 업로드 실패:", error);
+              },
+              () => {
+                getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                  photoUrls.push(downloadURL);
+                });
+              }
+            );
+          }
+
+          try {
+            await Promise.all(uploadPromises);
+            const requestDocRef = doc(db, 'serviceRequests', currentRequestId);
+
+            // 사진 업로드 완료 후 어떤 사진을 저장할지 선택하는 로직
+            const photoChoice = await new Promise((resolve) => {
+              const modalContent = document.querySelector("#upload-photo-modal .modal-content");
+
+              // 선택 버튼 생성
+              const chooseBeforeBtn = document.createElement("button");
+              chooseBeforeBtn.textContent = "작업 전 사진";
+              chooseBeforeBtn.className = "btn btn-success";
+              chooseBeforeBtn.style = "margin-right: 10px";
+              chooseBeforeBtn.addEventListener('click', () => {
+                resolve("before");
+                chooseBeforeBtn.remove();
+                chooseAfterBtn.remove();
+              });
+
+              const chooseAfterBtn = document.createElement("button");
+              chooseAfterBtn.textContent = "작업 후 사진";
+              chooseAfterBtn.className = "btn btn-info";
+              chooseAfterBtn.addEventListener('click', () => {
+                resolve("after");
+                chooseBeforeBtn.remove();
+                chooseAfterBtn.remove();
+              });
+
+              // 버튼을 모달에 추가
+              modalContent.appendChild(chooseBeforeBtn);
+              modalContent.appendChild(chooseAfterBtn);
+
+              if (modalCloseBtn) {
+                modalCloseBtn.addEventListener('click', () => {
+                  resolve(null); // 사용자가 모달을 직접 닫으면 null로 처리
+                  closeModal();
+                }, { once: true });
+              }
+            });
+
+            if (photoChoice === "before") {
+              await updateDoc(requestDocRef, { beforePhotos: arrayUnion(...photoUrls) });
+              console.log("작업 전 사진 업로드 및 URL 저장 완료");
+            } else if (photoChoice === "after") {
+              await updateDoc(requestDocRef, { afterPhotos: arrayUnion(...photoUrls) });
+              console.log("작업 후 사진 업로드 및 URL 저장 완료");
+            } else {
+              console.log("사용자에 의해 취소");
+            }
+          } catch (error) {
+            console.error("사진 업로드 실패:", error);
+            feedbackMessage.textContent = '사진 업로드 실패: ' + error.message;
+            feedbackMessage.classList.add('error');
+            setTimeout(() => feedbackMessage.classList.remove('error'), 2000);
+          } finally {
+            closeModal();
+          }
+        });
+      }
+
+      // 추가 견적 제출 버튼 클릭 시 이벤트
+      if (submitAdditionalCostButton) {
+        submitAdditionalCostButton.addEventListener("click", async () => {
+          if (!currentAdditionalRequestId) {
+            console.error("추가 견적 RequestId가 설정되지 않았습니다.");
+            return;
+          }
+          const reason = additionalCostReasonInput.value;
+          const amount = additionalCostAmountInput.value;
+          const files = additionalCostFilesInput.files;
+          const storageRef = ref(storage);
+          const uploadPromises = [];
+          const photoUrls = [];
+
+          console.log('추가 견적 저장할 reason:', reason);
+          console.log('추가 견적 저장할 amount:', amount);
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const fileRef = ref(storageRef, `additionalCostPhotos/${currentAdditionalRequestId}/${file.name}`);
+            const uploadTask = uploadBytesResumable(fileRef, file);
+            uploadPromises.push(uploadTask);
+            uploadTask.on('state_changed',
+              (snapshot) => {
+                // 업로드 진행 상황을 모니터링
+              },
+              (error) => {
+                console.error("파일 업로드 실패:", error);
+              },
+              () => {
+                getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                  photoUrls.push(downloadURL);
+                });
+              }
+            );
+          }
+
+          try {
+            await Promise.all(uploadPromises);
+            const requestDocRef = doc(db, 'serviceRequests', currentAdditionalRequestId);
+
+            const docSnap = await getDoc(requestDocRef);
+            if (!docSnap.exists()) {
+              console.error("No such document!");
+              return;
+            }
+            const data = docSnap.data();
+
+            await updateDoc(requestDocRef, {
+              additionalRequests: arrayUnion({ reason: reason, photos: photoUrls, amount: amount, status: "pending" })
+            });
+            await sendNotification(data.customerId, "추가 견적 요청이 도착했습니다.", 'additionalCost');
+            console.log("추가 견적 요청 저장 완료");
+            feedbackMessage.textContent = '추가 견적 요청이 제출되었습니다!';
+            feedbackMessage.classList.remove('error');
+            feedbackMessage.classList.add('success');
+            setTimeout(() => feedbackMessage.classList.remove('success'), 2000);
+          } catch (error) {
+            console.error("추가 견적 요청 저장 실패:", error);
+            feedbackMessage.textContent = '추가 견적 요청 실패: ' + error.message;
+            feedbackMessage.classList.add('error');
+            setTimeout(() => feedbackMessage.classList.remove('error'), 2000);
+          } finally {
+            closeAdditionalCostModal();
+          }
+        });
+      }
+
+      setTimeout(checkNavFooter, 1000);
+
+      // 추가 견적 요청 확인 모달 관련 함수
+      const additionalCostResponseModal = document.getElementById("additional-cost-response-modal");
+      const additionalCostResponseModalCloseBtn = additionalCostResponseModal ? additionalCostResponseModal.querySelector(".close") : null;
+      const additionalCostInfoDiv = document.getElementById('additional-cost-info');
+
+      // 추가 견적 요청 모달 닫기 함수
+      const closeAdditionalCostResponseModal = () => {
+        if (additionalCostResponseModal) {
+          additionalCostResponseModal.style.display = "none";
+          additionalCostInfoDiv.innerHTML = ""; // 모달 내용 초기화
+        }
+      };
+
+      // 추가 견적 요청 모달 닫기 이벤트
+      if (additionalCostResponseModalCloseBtn) {
+        additionalCostResponseModalCloseBtn.addEventListener('click', closeAdditionalCostResponseModal);
+      }
+
+      // 추가 견적 요청 모달 외부 클릭 시 닫기
+      window.addEventListener('click', (event) => {
+        if (event.target === additionalCostResponseModal) {
+          closeAdditionalCostResponseModal();
+        }
+      });
+
+      function openAdditionalCostResponseModal(request, requestId) {
+        if (additionalCostInfoDiv) {
+          additionalCostInfoDiv.innerHTML = `
+            <div class="additional-cost-info-container">
+              <span class="additional-cost-info-label">추가 견적 사유:</span><span class="additional-cost-info-value">${request.reason}</span>
+            </div>
+            <div class="additional-cost-info-container">
+              <span class="additional-cost-info-label">추가 견적 금액:</span><span class="additional-cost-info-value">${request.amount}</span>
+            </div>
+            <div id="preview-additional-cost-photos"></div>
+          `;
+          request.photos.forEach(photo => {
+            additionalCostInfoDiv.querySelector('#preview-additional-cost-photos').innerHTML += `<div class="preview-additional-cost-photo-container"><img src="${photo}" class="preview-additional-cost-photo"></div>`;
+          });
+          if (additionalCostResponseModal) {
+            additionalCostResponseModal.style.display = "block";
+          }
+        }
+      }
+
+      checkAuth(true, async (user) => {
+        if (!user) {
+          console.log('worker.html: 로그인되지 않은 상태');
+          feedbackMessage.textContent = '로그인이 필요합니다. 메인 페이지로 이동합니다.';
+          feedbackMessage.classList.add('error');
+          setTimeout(() => window.location.href = '/index.html', 2000);
+          return;
+        }
+        try {
+          console.log('worker.html: 로그인된 사용자 UID:', user.uid);
+          const userRef = doc(db, 'users', user.uid);
+          const userDoc = await getDoc(userRef);
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            console.log('worker.html: 사용자 데이터:', userData);
+
+            if (userData.isWorker && userData.workerApproved) {
+              const userRegions = userData.regions || [];
+              console.log('작업자 담당 지역:', userRegions);
+
+              if (userRegions.length === 0) {
+                requestList.innerHTML = '<div class="col-12"><div class="card request-card"><div class="card-body"><p class="card-text text-center">담당 지역이 없습니다.</p></div></div></div>';
+                console.log('담당 지역 없음');
+                return;
+              }
+
+              const queries = userRegions.map(region => {
+                console.log(`쿼리 지역: ${region}, 사용자 지역:`, userRegions);
+                return query(
+                  collection(db, 'serviceRequests'),
+                  where('region', '==', region)
+                );
+              });
+
+              queries.forEach(q => {
+                onSnapshot(q, (snapshot) => {
+                  allRequests.clear(); // 맵 초기화
+                  snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const requestId = doc.id;
+                    allRequests.set(requestId, { id: requestId, ...data });
+                  });
+
+                  requestList.innerHTML = '';
+                  if (allRequests.size === 0) {
+                    requestList.innerHTML = '<div class="col-12"><div class="card request-card"><div class="card-body"><p class="card-text text-center">담당 지역의 신청 내역이 없습니다.</p></div></div></div>';
+                    console.log('담당 지역의 신청 없음');
+                  } else {
+                    allRequests.forEach((data) => {
+                      const requestId = data.id;
+                      const col = document.createElement('div');
+                      col.className = 'col-12';
+                      col.innerHTML = `
+                        <div class="card request-card">
+                          <div class="card-body">
+                            <h5 class="card-title">신청자: ${data.customerName || '미입력'}</h5>
+                            <p class="card-text"><strong>연락처:</strong> ${data.customerPhone || '미입력'}</p>
+                            <p class="card-text"><strong>서비스:</strong> ${data.serviceType || '미입력'}</p>
+                            <p class="card-text"><strong>주소:</strong> ${data.address || '미입력'}</p>
+                            <p class="card-text"><strong>상태:</strong> ${data.status || '미입력'}</p>
+                            <div class="btn-group">
+                              <button class="btn btn-success btn-sm update-status" data-id="${requestId}" data-status="completed">완료</button>
+                              <button class="btn btn-info btn-sm update-status" data-id="${requestId}" data-status="upload-photo">사진업로드</button>
+                              <button class="btn btn-warning btn-sm update-status" data-id="${requestId}" data-status="in-progress">진행 중</button>
+                              <button class="btn btn-secondary btn-sm update-status" data-id="${requestId}" data-status="additional-cost">추가견적</button>
+                              <button class="btn btn-primary btn-sm update-status" data-id="${requestId}" data-status="confirmed">작업 확인</button>
+                            </div>
+                            <div id="additional-cost-list-${requestId}"></div>
+                          </div>
+                        </div>
+                      `;
+                      requestList.appendChild(col);
+
+                      // 추가 견적 요청 목록 표시
+                      const additionalCostListDiv = document.getElementById(`additional-cost-list-${requestId}`);
+                      additionalCostListDiv.innerHTML = '';
+                      if (data.additionalRequests && data.additionalRequests.length > 0) {
+                        data.additionalRequests.forEach((request, index) => {
+                          const additionalCostItem = document.createElement('div');
+                          additionalCostItem.className = 'additional-cost-item';
+                          let statusText = '';
+                          switch (request.status) {
+                            case 'accepted':
+                              statusText = '승인됨';
+                              break;
+                            case 'rejected':
+                              statusText = '거절됨';
+                              break;
+                            default:
+                              statusText = '대기 중';
+                              break;
+                          }
+                          additionalCostItem.innerHTML = `
+                            <p>추가 견적 요청 ${index + 1}: ${statusText}</p>
+                            <button class="btn btn-sm btn-info additional-cost-detail-btn" data-request-id="${requestId}" data-index="${index}">요청 자세히 보기</button>
+                          `;
+                          additionalCostListDiv.appendChild(additionalCostItem);
+                        });
+                      }
+
+                      // 추가 견적 요청 자세히 보기 버튼 이벤트
+                      document.querySelectorAll('.additional-cost-detail-btn').forEach(button => {
+                        button.removeEventListener('click', button._clickHandler);
+                        button._clickHandler = async () => {
+                          const requestId = button.getAttribute('data-request-id');
+                          const index = button.getAttribute('data-index');
+                          try {
+                            const docRef = doc(db, 'serviceRequests', requestId);
+                            const docSnap = await getDoc(docRef);
+                            if (docSnap.exists()) {
+                              const docData = docSnap.data();
+                              openAdditionalCostResponseModal(docData.additionalRequests[index], requestId); // 모달 열기
+                            }
+                          } catch (error) {
+                            console.error("Error fetching additional cost details:", error);
+                            feedbackMessage.textContent = '추가 견적 조회 실패: ' + error.message;
+                            feedbackMessage.classList.add('error');
+                            setTimeout(() => feedbackMessage.classList.remove('error'), 2000);
+                          }
+                        };
+                        button.addEventListener('click', button._clickHandler);
+                      });
+                    });
+                  }
+
+                  // 사진 업로드 버튼 이벤트
+                  document.querySelectorAll('.update-status[data-status="upload-photo"]').forEach(button => {
+                    button.removeEventListener('click', button._clickHandler);
+                    button._clickHandler = () => openPhotoUploadModal(button.getAttribute('data-id'));
+                    button.addEventListener('click', button._clickHandler);
+                  });
+
+                  // 추가 견적 요청 버튼 이벤트
+                  document.querySelectorAll('.update-status[data-status="additional-cost"]').forEach(button => {
+                    button.removeEventListener('click', button._clickHandler);
+                    button._clickHandler = () => openAdditionalCostModal(button.getAttribute('data-id'));
+                    button.addEventListener('click', button._clickHandler);
+                  });
+
+                  // 상태 업데이트 버튼 이벤트
+                  document.querySelectorAll('.update-status').forEach(button => {
+                    button.removeEventListener('click', button._clickHandler);
+                    button._clickHandler = async () => {
+                      const requestId = button.getAttribute('data-id');
+                      const newStatus = button.getAttribute('data-status');
+                      try {
+                        await updateDoc(doc(db, 'serviceRequests', requestId), { status: newStatus });
+                        feedbackMessage.textContent = '상태가 업데이트되었습니다!';
+                        feedbackMessage.classList.remove('error');
+                        feedbackMessage.classList.add('success');
+                        setTimeout(() => feedbackMessage.classList.remove('success'), 2000);
+                      } catch (error) {
+                        console.error('상태 업데이트 오류:', error.message, '코드:', error.code);
+                        feedbackMessage.textContent = '상태 업데이트 실패: ' + error.message;
+                        feedbackMessage.classList.add('error');
+                        setTimeout(() => feedbackMessage.classList.remove('error'), 2000);
+                      }
+                    };
+                    button.addEventListener('click', button._clickHandler);
+                  });
+                }, (error) => {
+                  console.error('Firestore 데이터 로드 오류:', error.message, '코드:', error.code, '상세:', error.details);
+                  feedbackMessage.textContent = '조회 실패: ' + error.message;
+                  feedbackMessage.classList.add('error');
+                  requestList.innerHTML = '<div class="col-12"><div class="card request-card"><div class="card-body"><p class="card-text text-center">데이터 로드 실패: ' + error.message + '</p></div></div></div>';
+                });
+              });
+            } else {
+              feedbackMessage.textContent = userData.workerApproved === false ? '관리자 승인 대기 중입니다.' : '작업자 권한이 없습니다.';
+              feedbackMessage.classList.add('error');
+            }
+          } else {
+            console.error('worker.html: 사용자 데이터가 존재하지 않습니다.');
+            feedbackMessage.textContent = '사용자 정보를 찾을 수 없습니다.';
+            feedbackMessage.classList.add('error');
+            setTimeout(() => window.location.href = '/login.html', 2000);
+          }
+        } catch (error) {
+          console.error('worker.html: 사용자 정보 로드 오류:', error.message, '코드:', error.code);
+          feedbackMessage.textContent = '사용자 정보 로드 실패: ' + error.message;
+          feedbackMessage.classList.add('error');
+          setTimeout(() => window.location.href = '/login.html', 2000);
+          return;
+        }
+      });
+    });
+
+    function openPhotoUploadModal(requestId) {
+      currentRequestId = requestId; // 현재 작업 중인 요청 ID 저장
+      if (modal) {
+        modal.style.display = "block"; // 모달 열기
+      }
+    }
+
+    async function sendNotification(customerId, message, type) {
+      const sendNotificationFunc = httpsCallable(functions, 'sendNotification');
+      try {
+        const result = await sendNotificationFunc({ customerId: customerId, message: message, type: type });
+        console.log("알림 성공", result);
+      } catch (error) {
+        console.error("알림 실패", error);
+        feedbackMessage.textContent = '알림 전송 실패: ' + error.message;
+        feedbackMessage.classList.add('error');
+        setTimeout(() => feedbackMessage.classList.remove('error'), 2000);
+      }
+    }
+  </script>
+</body>
+</html>

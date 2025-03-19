@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>마이페이지 - 원스톱 벌초</title>
+  <meta name="description" content="마이페이지에서 원스톱 벌초 서비스 신청 내역을 확인하고 관리하세요.">
+  <meta name="keywords" content="마이페이지, 원스톱 벌초, 신청 내역, 서비스 관리">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1E88E5">
+  <link rel="apple-touch-icon" href="/assets/icons/icon-192x192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/styles/theme.css">
+  <script src="/scripts/nav.js" type="module" defer></script>
+  <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef6b942fdad36e982c84eb0061d1d2ed&libraries=services"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="auth.js"></script>
+<body>
+  <script src="/scripts/nav.js" type="module" defer></script>
+
+  <div class="container mypage-container">
+    <h2>마이페이지</h2>
+    <div class="user-info">
+      <h3>사용자 정보</h3>
+      <div class="fields" id="user-info-fields">
+        <p>사용자 정보를 불러오는 중...</p>
+      </div>
+    </div>
+    <div class="change-password-card">
+      <form class="change-password-form" id="change-password-form">
+        <label for="new-password">새 비밀번호</label>
+        <input type="password" id="new-password" placeholder="새 비밀번호 입력 (6자 이상)" required>
+        <button type="submit">비밀번호 변경</button>
+      </form>
+      <div id="feedback-message" class="feedback-message"></div>
+    </div>
+    <div id="common-modal" class="modal">
+      <div class="modal-content common-modal-content">
+        <span class="close-btn">×</span>
+        <h3 id="common-modal-title"></h3>
+        <form id="common-modal-form">
+          </form>
+
+        </div>
+    </div>
+    <div id="feedback-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn" onclick="hideFeedbackModal()">×</span>
+        <h3 id="feedback-modal-title"></h3>
+        <div id="feedback-modal-message"></div>
+        <button id="feedback-modal-close" onclick="hideFeedbackModal()">확인</button>
+      </div>
+    </div>
+    <h3>서비스 신청 내역</h3>
+    <div class="request-list" id="request-list">
+      <p>신청 내역을 불러오는 중...</p>
+    </div>
+    <div class="notifications" id="notifications">
+      <h3>알림</h3>
+      <div id="notification-list"></div>
+    </div>
+    <div class="account-info">
+      <h3>입금 계좌 안내</h3>
+      <p>계좌번호: 123-456-789012</p>
+      <p>예금주: 원스톱 벌초 서비스</p>
+      <p>은행명: 국민은행</p>
+    </div>
+  </div>
+  <div id="map-modal" class="map-modal">
+    <div class="map-modal-content">
+      <span class="close-btn">×</span>
+      <div id="map"></div>
+    </div>
+  </div>
+  <div id="additional-cost-response-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">×</span>
+      <h3>추가 견적 확인</h3>
+        <button id="edit-additional-cost-btn">수정</button>
+
+      <div id="additional-cost-info"></div>
+      <div id="preview-additional-cost-photos" class="photo-gallery"></div>
+      <div class="additional-cost-actions">
+        <button id="approve-additional-cost">승인</button>
+        <button id="reject-additional-cost">거절</button>
+      </div>
+    </div>
+  </div>
+  <nav id="nav-container"></nav><footer id="footer-container"></footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/scripts/footer.js" type="text/javascript" defer></script>
+  <script type="module">
+    import { auth, db } from '/scripts/firebase-config.js';
+    import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js';
+    import { signOut, onAuthStateChanged, updatePassword } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
+
+    import { collection, query, where, getDocs, orderBy, updateDoc, doc, addDoc, deleteDoc, onSnapshot, serverTimestamp, documentId } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
+    checkAuth();
+
+    checkAuth();
+    const analytics = getAnalytics();
+    const messaging = getMessaging();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => registration.update())
+        .catch(error => console.error('Service Worker 업데이트 실패:', error));
+    }
+
+    async function requestNotificationPermission() {
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          const token = await getToken(messaging, { vapidKey: 'BDdV3WIG5bRFOenHTZiS7xEESkQH-68jf0h-pFAAXF-HvETIKElQRHxnAYHuwXyjBoj9aNZlc8HRZyiz2DW2j_4' });
+          if (auth.currentUser) {
+            await updateDoc(doc(db, 'users', auth.currentUser.uid), { fcmToken: token });
+          }
+        }
+      } catch (error) {
+        console.error('알림 권한 요청 오류:', error);
+      }
+    }
+
+    onMessage(messaging, (payload) => {
+      const notificationTitle = payload.notification.title || '새 알림';
+      const notificationOptions = {
+        body: payload.notification.body || '알림 내용이 없습니다.',
+        icon: '/assets/icons/icon-192x192.png',
+        data: { click_action: '/mypage.html' }
+      };
+      new Notification(notificationTitle, notificationOptions);
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const userInfoFields = document.getElementById('user-info-fields');
+      const changePasswordForm = document.getElementById('change-password-form');
+      const feedbackMessage = document.getElementById('feedback-message');
+      const requestList = document.getElementById('request-list');
+      const notificationList = document.getElementById('notification-list');
+      const commonModal = document.getElementById('common-modal');
+      const mapModal = document.getElementById('map-modal');
+      const cashReceiptForm = document.getElementById('cash-receipt-form');
+      const commonModalForm = document.getElementById('common-modal-form');
+      const taxInvoiceForm = document.getElementById('tax-invoice-form');
+      const reRequestForm = document.getElementById('re-request-form');
+      const additionalCostResponseModal = document.getElementById('additional-cost-response-modal');
+      const editAdditionalCostBtn = document.getElementById('edit-additional-cost-btn');
+      let currentRequestId = null;
+
+          function showFeedbackModal(message, type = 'success') {
+            const feedbackModal = document.getElementById('feedback-modal');
+            const feedbackModalMessage = document.getElementById('feedback-modal-message');
+            const feedbackModalTitle = document.getElementById('feedback-modal-title');
+
+            feedbackModalMessage.textContent = message;
+            feedbackModalMessage.classList.remove('success', 'error');
+            feedbackModalMessage.classList.add(type);
+
+            if (type === 'success') {
+              feedbackModalTitle.textContent = '성공';
+            } else {
+              feedbackModalTitle.textContent = '오류';
+            }
+            feedbackModal.style.display = 'flex';
+          }
+
+          function hideFeedbackModal() {
+            const feedbackModal = document.getElementById('feedback-modal');
+            feedbackModal.style.display = 'none';
+          }
+
+      }
+
+      requestNotificationPermission();
+
+      document.querySelectorAll('.close-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          commonModal.style.display = 'none';
+          mapModal.style.display = 'none';
+          additionalCostResponseModal.style.display = 'none';
+        });
+      });
+
+      function showCommonModal(title, formContent, submitCallback) {
+        const commonModal = document.getElementById('common-modal');
+        const commonModalTitle = document.getElementById('common-modal-title');
+        const commonModalForm = document.getElementById('common-modal-form');
+        commonModalTitle.textContent = title;
+        commonModalForm.innerHTML = formContent;
+        commonModalForm.removeEventListener('submit', submitCallback);
+        commonModalForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          submitCallback();
+        });
+        commonModal.style.display = 'flex';
+      }
+
+          document.querySelectorAll('.tax-invoice-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+              currentRequestId = btn.getAttribute('data-id');
+              const commonModal = document.getElementById('common-modal');
+              const commonModalTitle = document.getElementById('common-modal-title');
+              const commonModalForm = document.getElementById('common-modal-form');
+              commonModalTitle.textContent = "세금계산서 신청";
+              commonModalForm.innerHTML = '';
+              const form = document.createElement('form');
+              const businessNumberLabel = document.createElement('label');
+              businessNumberLabel.setAttribute('for', 'business-number');
+              businessNumberLabel.textContent = "사업자 번호";
+              const businessNumberInput = document.createElement('input');
+              businessNumberInput.setAttribute('type', 'text');
+              businessNumberInput.setAttribute('id', 'business-number');
+              businessNumberInput.setAttribute('placeholder', '123-45-67890');
+              businessNumberInput.setAttribute('required', '');
+              form.appendChild(businessNumberLabel);
+              form.appendChild(businessNumberInput);
+              const emailLabel = document.createElement('label');
+              emailLabel.setAttribute('for', 'email');
+              emailLabel.textContent = "이메일 주소";
+              const emailInput = document.createElement('input');
+              emailInput.setAttribute('type', 'email');
+              emailInput.setAttribute('id', 'email');
+              emailInput.setAttribute('placeholder', 'example@email.com');
+              emailInput.setAttribute('required', '');
+              form.appendChild(emailLabel);
+              form.appendChild(emailInput);
+              const submitButton = document.createElement('button');
+              submitButton.setAttribute('type', 'submit');
+              submitButton.textContent = "신청";
+              form.appendChild(submitButton);
+              commonModalForm.appendChild(form);
+              commonModal.style.display = 'flex';
+              commonModalForm.removeEventListener('submit', handleTaxInvoiceSubmit);
+              async function handleTaxInvoiceSubmit(e) {
+                e.preventDefault();
+                const businessNumber = document.getElementById('business-number').value;
+                const email = document.getElementById('email').value;                
+                await addDoc(collection(db, 'taxInvoices'), { requestId: currentRequestId, businessNumber, email, status: 'pending', createdAt: serverTimestamp() }).then(() => showFeedback('세금계산서 신청이 완료되었습니다.')).catch((error) => showFeedback('세금계산서 신청에 실패했습니다: ' + error.message, 'error'));
+                commonModal.style.display = 'none';
+              }
+              commonModalForm.addEventListener('submit', handleTaxInvoiceSubmit);
+            });
+          });
+
+      onAuthStateChanged(auth, async (user) => {
+        console.log('사용자 상태 체크:', user ? user.uid : '로그아웃');
+        if (user) {
+          try {
+            const userQuery = query(collection(db, 'users'), where('uid', '==', user.uid));
+            const userDocs = await getDocs(userQuery);
+            let userData = {};
+            if (!userDocs.empty) {
+              userData = userDocs.docs[0].data();
+            } else {
+              throw new Error('사용자 데이터가 없습니다.');
+            }
+
+            userInfoFields.innerHTML = `
+              <div class="field" data-field="email">
+                <label>이메일</label>
+                <span>${user.email}</span>
+              </div>
+              <div class="field" data-field="name">
+                <label>이름</label>
+                <span>${userData.name || '미등록'}</span>
+                <input type="text" value="${userData.name || ''}" style="display: none;">
+                <button class="edit-btn">수정</button>
+              </div>
+              <div class="field" data-field="phone">
+                <label>전화번호</label>
+                <span>${userData.phone || '미등록'}</span>
+                <input type="tel" value="${userData.phone || ''}" style="display: none;">
+                <button class="edit-btn">수정</button>
+              </div>
+            `;
+
+            userInfoFields.querySelectorAll('.edit-btn').forEach(btn => {
+              btn.addEventListener('click', async () => {
+                const fieldDiv = btn.parentElement;
+                const field = fieldDiv.getAttribute('data-field');
+                const span = fieldDiv.querySelector('span');
+                const input = fieldDiv.querySelector('input');
+                const isEditing = fieldDiv.classList.contains('editing');
+
+                if (isEditing) {
+                  const newValue = input.value.trim();
+                  if (newValue) {
+                    try {
+                      await updateDoc(doc(db, 'users', user.uid), { [field]: newValue });
+                      span.textContent = newValue;
+                      fieldDiv.classList.remove('editing');
+                      showFeedbackModal(`${field === 'name' ? '이름' : '전화번호'}이 성공적으로 수정되었습니다!`, 'success');
+                    } catch (error) {
+                      console.error('사용자 정보 수정 오류:', error);
+                      showFeedbackModal('수정 실패: ' + error.message, 'error');
+                    }
+                  } else {
+                    showFeedbackModal('값을 입력해주세요.', 'error');
+                    }
+                } else {
+                  fieldDiv.classList.add('editing');
+                  btn.textContent = '저장';
+                  input.style.display = 'block';
+                  span.style.display = 'none';
+                }
+              });
+            });
+
+            const q = query(collection(db, 'serviceRequests'), where('userId', '==', user.uid), orderBy('createdAt', 'desc'));
+            onSnapshot(q, (snapshot) => {
+              requestList.innerHTML = '';
+              if (snapshot.empty) {
+                requestList.innerHTML = '<p style="text-align: center; color: #757575;">신청 내역이 없습니다.</p>';
+                return;
+              }
+              snapshot.forEach((doc, index) => {
+                const request = doc.data();
+                const status = request.status || 'pending';
+                const statusText = { 'pending': '접수완료', 'confirmed': '작업확인', 'in-progress': '작업중', 'completed': '작업완료' }[status];
+                const statusIndex = ['pending', 'confirmed', 'in-progress', 'completed'].indexOf(status);
+                const progressWidth = statusIndex * 33.33;
+                const hasAdditionalRequests = request.additionalRequests && request.additionalRequests.length > 0;
+
+                const card = document.createElement('div');
+                card.className = 'request-card';
+                card.style.setProperty('--delay', index);
+                card.innerHTML = `
+                  ${hasAdditionalRequests ? request.additionalRequests.map(additionalRequest => `
+                    <div class="status-tag ${additionalRequest.status}">${additionalRequest.status === 'pending' ? '추가 비용 요청 중' : additionalRequest.status === 'approved' ? '추가 비용 승인' : '추가 비용 거절'}</div>
+                  `).join('') : ''}
+                  ${hasAdditionalRequests ? request.additionalRequests.map(additionalRequest => `
+                    ${additionalRequest.status === 'pending' ? `
+                    <div class="additional-cost-alert">
+                      <p>추가 비용 요청: ${additionalRequest.amount.toLocaleString('ko-KR')}원, 사유: ${additionalRequest.reason}</p>
+                      <div class="additional-cost-actions">
+                        <button class="show-additional-cost-btn" data-id="${doc.id}" data-index="${index}">보기</button>
+                      </div>
+                    </div>
+                    `: `
+                    <div class="additional-cost-alert">
+                      <p>추가 비용: ${additionalRequest.amount.toLocaleString('ko-KR')}원 (${additionalRequest.status === 'approved' ? '승인됨' : '거절됨'})</p>
+                    </div>
+                    `}
+                      <div class="additional-cost-actions">
+                        <button class="approve-btn" data-id="${doc.id}">동의</button>
+                        <button class="reject-btn" data-id="${doc.id}">거절</button>
+                      </div>
+                    </div>
+                  ` : hasAdditionalCost && request.additionalCostStatus !== 'pending' ? `
+                    <div class="additional-cost-alert">
+                      
+                    </div>
+                    </div>
+                  ` : ''}
+                  <div class="fields">
+                    <div class="field"><label>별명</label><span>${request.nickname || '설정 안됨'} <button class="nickname-btn" data-id="${doc.id}">수정</button></span></div>
+                    <div class="field"><label>작업자 요청</label><span>${request.workerRequest || '없음'}</span></div>
+                    <div class="field"><label>서비스 유형</label><span>${request.serviceType}</span></div>
+                    <div class="field"><label>주소</label><span>${request.address}</span><button class="map-btn" data-lat="${request.latitude}" data-lng="${request.longitude}">지도 보기</button></div>
+                    <div class="field"><label>희망 작업 날짜</label><span>${request.workDate}</span></div>
+                    <div class="field"><label>예상 비용</label><span>${(request.estimatedCost || 0).toLocaleString('ko-KR')}원</span></div>
+                    ${request.additionalCost ? `<div class="field"><label>추가 비용</label><span>${request.additionalCost.toLocaleString('ko-KR')}원</span></div><div class="field"><label>총 비용</label><span>${((request.estimatedCost || 0) + request.additionalCost).toLocaleString('ko-KR')}원</span></div>` : ''}
+                    <div class="field"><label>묘지 유형</label><span>${request.graveType || '없음'}</span></div>
+                    <div class="field"><label>묘지 개수</label><span>${request.graveCount || '없음'}</span></div>
+                    <div class="field"><label>벌초 면적</label><span>${request.beolchoAreaSize || '없음'} 평</span></div>
+                  </div>
+                  ${request.fileUrls && request.fileUrls.length > 0 ? `
+                    <div class="photo-section">
+                      <h4 style="font-size: 1.1em; color: #1E88E5; margin-bottom: 10px;">신청 시 첨부 사진</h4>
+                      <div class="photo-gallery">${request.fileUrls.map(url => `<img src="${url}" alt="신청 사진">`).join('')}</div>
+                    </div>
+                  ` : ''}
+                  <div class="progress-timeline">
+                    <div class="progress-fill" style="width: ${progressWidth}%"></div>
+                    <div class="progress-step ${statusIndex >= 0 ? 'completed' : ''} ${status === 'pending' ? 'active' : ''}"><div class="step-circle">1</div><div class="step-label">접수완료</div></div>
+                    <div class="progress-step ${statusIndex >= 1 ? 'completed' : ''} ${status === 'confirmed' ? 'active' : ''}"><div class="step-circle">2</div><div class="step-label">작업확인</div></div>
+                    <div class="progress-step ${statusIndex >= 2 ? 'completed' : ''} ${status === 'in-progress' ? 'active' : ''}"><div class="step-circle">3</div><div class="step-label">작업중</div></div>
+                    <div class="progress-step ${statusIndex >= 3 ? 'completed' : ''} ${status === 'completed' ? 'active' : ''}"><div class="step-circle">4</div><div class="step-label">작업완료</div></div>
+                  </div>
+                  <div style="text-align: center; margin-top: 10px; font-size: 0.9em; color: #757575;">현재 상태: ${statusText}</div>
+                  <div class="action-buttons">
+                    <button class="re-request-btn" data-id="${doc.id}">원클릭 재신청 접수</button>
+                    <button class="cash-receipt-btn" data-id="${doc.id}">현금영수증 신청</button>
+                    <button class="tax-invoice-btn" data-id="${doc.id}">세금계산서 신청</button>
+                    <button class="share-btn" data-id="${doc.id}">내역 공유</button>
+                    <button class="delete-btn" data-id="${doc.id}">삭제</button>
+                  </div>
+                `;
+                requestList.appendChild(card);
+
+                const deleteBtn = card.querySelector('.delete-btn');
+                deleteBtn.addEventListener('click', async () => {
+                  if (confirm('이 신청 내역을 삭제하시겠습니까?')) {
+                    try {
+                      await deleteDoc(doc(db, 'serviceRequests', doc.id));
+                      card.remove();
+                      showFeedbackModal('신청 내역이 삭제되었습니다.', 'success');
+                    } catch (error) {
+                      console.error('삭제 오류:', error);
+                      showFeedback('삭제 실패: ' + error.message, 'error');
+
+                    }
+                  }
+                });
+
+                const mapBtn = card.querySelector('.map-btn');
+                mapBtn.addEventListener('click', () => {
+                  const lat = mapBtn.getAttribute('data-lat');
+                  const lng = mapBtn.getAttribute('data-lng');                    
+                  if (lat && lng) showMap(lat, lng);
+                  else showFeedbackModal('위치 정보가 없습니다.', 'error');
+                });
+
+
+                const showAdditionalCostBtn = card.querySelector('.show-additional-cost-btn');
+                if (showAdditionalCostBtn) {
+                  showAdditionalCostBtn.addEventListener('click', async () => {
+                    const requestId = showAdditionalCostBtn.getAttribute('data-id');
+                    const requestIndex = showAdditionalCostBtn.getAttribute('data-index');
+                    const currentRequest = snapshot.docs.find(doc => doc.id === requestId).data();
+                    const additionalRequest = currentRequest.additionalRequests[0];
+                      const innerForm = document.createElement("form");
+                      innerForm.id = "inner-common-modal-form";
+                      innerForm.innerHTML = `
+                                              <label for="new-amount">추가 비용</label>
+                                             <input type="number" id="new-amount" required value="${additionalRequest.amount}">
+                                              <label for="new-reason">사유</label>
+                                             <input type="text" id="new-reason" required value="${additionalRequest.reason}">
+                                             <label for="new-photos">사진 업로드</label>
+                                             <input type="file" id="new-photos" multiple accept="image/*"><div id="preview-photos"></div>
+                                              <button type="submit">수정</button>
+                                             `;
+
+                    
+                    const previewAdditionalCostPhotos = document.getElementById('preview-additional-cost-photos');
+                    previewAdditionalCostPhotos.innerHTML = additionalRequest.photos && additionalRequest.photos.length > 0 ? additionalRequest.photos.map(url => `<img src="${url}" alt="추가 견적 사진">`).join('') : '<p>첨부된 사진이 없습니다.</p>';
+                    additionalCostResponseModal.style.display = 'flex';
+
+                    const approveAdditionalCostBtn = document.getElementById('approve-additional-cost');
+                    const rejectAdditionalCostBtn = document.getElementById('reject-additional-cost');
+
+                    approveAdditionalCostBtn.addEventListener('click', async () => {
+                      try {
+                        const requestRef = doc(db, 'serviceRequests', requestId);
+                        await updateDoc(requestRef, {
+                            additionalRequests: currentRequest.additionalRequests.map((req, idx) => idx === 0 ? { ...req, status: 'approved' } : req)
+                        });
+                        showFeedbackModal('추가 비용 요청에 동의하였습니다.', 'success');
+                        window.location.reload();
+                      } catch (error) {
+                        console.error('동의 오류:', error);                        
+                        alert('처리 실패: ' + error.message);
+                      }
+                    });
+
+                    const rejectAdditionalCostBtn = document.getElementById('reject-additional-cost');
+                    rejectAdditionalCostBtn.addEventListener('click', async () => {
+                      try {
+                        const requestRef = doc(db, 'serviceRequests', requestId);
+                        await updateDoc(requestRef, {
+                          additionalRequests: currentRequest.additionalRequests.map((req, idx) => idx === 0 ? { ...req, status: 'rejected' } : req)
+                        });
+                        console.log('추가 비용 요청이 거절됨:', requestId);
+                        showFeedbackModal('추가 비용 요청이 거절되었습니다.', 'success');
+                        additionalCostResponseModal.style.display = 'none';
+                        window.location.reload();
+                      } catch (error) {
+                        console.error('거절 오류:', error);
+                        alert('처리 실패: ' + error.message);
+                      }
+                    });
+                  }
+                });
+
+                if(editAdditionalCostBtn){
+                  editAdditionalCostBtn.addEventListener('click', async () => {
+                    try {
+                      const requestId = showAdditionalCostBtn.getAttribute('data-id');
+                      const requestIndex = showAdditionalCostBtn.getAttribute('data-index');
+                      const currentRequest = snapshot.docs.find(doc => doc.id === requestId).data();
+                      const additionalRequest = currentRequest.additionalRequests[0];
+                      const innerForm = document.createElement("form");
+                      innerForm.id = "inner-common-modal-form";
+                      innerForm.innerHTML = `
+                                              <label for="new-amount">추가 비용</label>
+                                             <input type="number" id="new-amount" required value="${additionalRequest.amount}">
+                                              <label for="new-reason">사유</label>
+                                             <input type="text" id="new-reason" required value="${additionalRequest.reason}">
+                                             <label for="new-photos">사진 업로드</label>
+                                             <input type="file" id="new-photos" multiple accept="image/*"><div id="preview-photos"></div>
+                                              <button type="submit">수정</button>
+                                             `;
+                        const previewContainer = innerForm.querySelector("#preview-photos");
+                        const commonModal = document.getElementById('common-modal');
+                        const fileInput = innerForm.querySelector("#new-photos");
+                        const storage = getStorage();
+                         
+                         const uploadPhotos = async (files) => {
+                          const uploadPromises = [];
+                          for (const file of files) {
+                            const storageRef = ref(storage, `additionalPhotos/${currentRequestId}/${file.name}`);
+                            const uploadPromise = uploadBytes(storageRef, file).then((snapshot) => {
+                              return getDownloadURL(snapshot.ref);
+                            });
+                            uploadPromises.push(uploadPromise);
+                          }
+                          try {
+                            const urls = await Promise.all(uploadPromises);
+                            return urls;
+                          } catch (error) {
+                            console.error('사진 업로드 실패:', error);
+                            showFeedbackWithModal('사진 업로드에 실패했습니다: ' + error.message, 'error');
+                            return [];
+                          }
+                        };
+                        innerForm.addEventListener('submit', async (event) => {
+                        event.preventDefault();
+
+                        const photos = fileInput.files;
+
+                        const photoUrls = await uploadPhotos(photos);
+                        document.getElementById('edit-additional-cost-btn').disabled = true;
+                        if(photoUrls.length === 0){
+                          commonModal.style.display = 'none';
+                          return;
+                        }
+                        const amount = innerForm.querySelector('#new-amount').value;
+                        const reason = innerForm.querySelector('#new-reason').value;
+                        const requestRef = doc(db, 'serviceRequests', requestId);
+                        await updateDoc(requestRef, {
+                         additionalRequests: currentRequest.additionalRequests.map((req, idx) => idx === currentRequestIndex ? { ...req, amount: Number(amount), reason: reason, photos: photoUrls } : req)
+                         });
+                         showFeedbackWithModal('추가 비용 수정 완료', 'success');
+                         window.location.reload();
+                          
+                        const fileInput = innerForm.querySelector("#new-photos");
+                        fileInput.addEventListener("change", (event) => {
+                          previewContainer.innerHTML = "";
+                          for (const file of event.target.files) {
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                              const imgContainer = document.createElement('div');
+                              imgContainer.style.position = 'relative';
+                              imgContainer.style.display = 'inline-block';
+                              imgContainer.style.margin = '5px';
+
+                              const img = document.createElement('img');
+                              img.src = e.target.result;
+                              img.style.width = '100px';
+                              img.style.height = '100px';
+                              img.style.objectFit = 'cover';
+                              img.style.borderRadius = '5px';
+
+                              const deleteBtn = document.createElement('button');
+                              deleteBtn.textContent = '삭제';
+                              deleteBtn.style.position = 'absolute';
+                              deleteBtn.style.top = '0'; deleteBtn.style.right = '0';
+                              deleteBtn.onclick = () => imgContainer.remove();
+                              imgContainer.appendChild(img);
+                              imgContainer.appendChild(deleteBtn);
+                              previewContainer.appendChild(imgContainer);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        });
+                      showCommonModal(
+                        "추가 견적 수정",
+                        innerForm.outerHTML, () => {
+                          document.getElementById('edit-additional-cost-btn').disabled = true;
+                          
+                        }
+                      );
+                      }finally {
+                          document.getElementById('edit-additional-cost-btn').disabled = false;
+                        }
+                      } catch (error) {
+                        console.error('추가 비용 수정 오류:', error);
+                        showFeedbackWithModal('추가 비용 수정 실패: ' + error.message, 'error');
+                      }
+                    });
+                  }
+                
+
+
+
+
+
+                
+
+
+
+
+                
+
+                const reRequestBtn = card.querySelector('.re-request-btn');
+                reRequestBtn.addEventListener('click', () => {
+                  currentRequestId = doc.id;
+                  const newWorkDate = document.createElement('input');
+                  newWorkDate.setAttribute('type', 'date');
+                  newWorkDate.setAttribute('id', 'new-work-date');
+                  newWorkDate.setAttribute('required', '');
+                  const newWorkerRequest = document.createElement('input');
+                  newWorkerRequest.setAttribute('type', 'text');
+                  newWorkerRequest.setAttribute('id', 'new-worker-request');
+                  newWorkerRequest.setAttribute('placeholder', '작업자 요청 입력');
+                  showCommonModal(
+                    "재신청",
+                    `<label for="new-work-date">새 희망 작업 날짜</label>${newWorkDate.outerHTML}<label for="new-worker-request">새 작업자 요청</label>${newWorkerRequest.outerHTML}<button type="submit">재신청</button>`,
+                    async () => {
+                      const newWorkDate = document.getElementById('new-work-date').value;
+                      const newWorkerRequest = document.getElementById('new-worker-request').value;
+                      try {
+                        await updateDoc(doc(db, 'serviceRequests', currentRequestId), {
+                          workDate: newWorkDate,
+                          workerRequest: newWorkerRequest
+                        });
+                        showFeedbackModal('재신청이 완료되었습니다.', 'success');
+                      } catch (error) {
+                        console.error('재신청 오류:', error);
+                        showFeedback('재신청에 실패했습니다: ' + error.message, 'error');
+                      } finally {
+                        commonModal.style.display = 'none';
+                      }
+                    }
+                  );
+                });
+                const reRequestForm = document.getElementById('re-request-form');
+                if (reRequestForm) reRequestForm.remove();
+
+                const shareBtn = card.querySelector('.share-btn');
+                shareBtn.addEventListener('click', async () => {
+                  const shareUrl = `${window.location.origin}/share.html?requestId=${doc.id}`;
+                  try {
+                    if (navigator.share) {
+                      await navigator.share({ title: '신청 내역', text: `내역: ${request.nickname || '신청 내역'}`, url: shareUrl });
+                    } else {
+                      await navigator.clipboard.writeText(shareUrl);
+                      alert('링크 복사: ' + shareUrl);
+                      showFeedbackModal('링크가 복사 되었습니다.', 'success');                    }
+                  } catch (error) {
+                    console.error('공유 오류:', error);
+                    showFeedbackModal('공유에 실패하였습니다. 링크: ' + shareUrl + ' 를 복사 후 공유하세요.', 'error');                  }
+                });
+              });
+            }, (error) => {
+              console.error('서비스 신청 내역 로드 오류:', error);
+              requestList.innerHTML = '<p style="text-align: center; color: #757575;">신청 내역을 불러올 수 없습니다.</p>';
+            });
+
+            const notificationsQuery = query(collection(db, 'notifications'), where('userId', '==', user.uid), orderBy('createdAt', 'desc'));
+            onSnapshot(notificationsQuery, (snapshot) => {
+              const notifications = [];
+              snapshot.forEach((doc) => {
+                const data = doc.data();
+                notifications.push({
+                  id: doc.id,
+                  message: data.message,
+                  time: data.createdAt ? new Date(data.createdAt.toDate()).toLocaleString('ko-KR') : '알 수 없음'
+                });
+              });
+              notificationList.innerHTML = notifications.length ? notifications.map(n => `
+                <div class="notification-item">
+                  <span>${n.message}</span>
+                  <span style="font-size: 0.8em; color: #757575;">${n.time}</span>
+                </div>
+              `).join('') : '<p style="text-align: center; color: #757575;">알림이 없습니다.</p>';
+            }, (error) => {
+              console.error('알림 로드 오류:', error);
+              notificationList.innerHTML = '<p style="text-align: center; color: #757575;">알림을 불러올 수 없습니다.</p>';
+            });
+          } catch (error) {
+            console.error('데이터 로드 오류:', error);
+            userInfoFields.innerHTML = '<p>사용자 정보를 불러올 수 없습니다.</p>';
+            requestList.innerHTML = '<p style="text-align: center; color: #757575;">신청 내역을 불러올 수 없습니다.</p>';
+            notificationList.innerHTML = '<p style="text-align: center; color: #757575;">알림을 불러올 수 없습니다.</p>';
+            setTimeout(() => window.location.href = '/login.html', 2000);
+          }
+        } else {
+          console.log('사용자 인증 없음, 로그인 페이지로 리다이렉션');
+          setTimeout(() => window.location.href = '/login.html', 1000);
+        }
+      });
+
+      function showMap(lat, lng) {
+        const mapContainer = document.getElementById('map');
+        if (!mapContainer) {
+          console.error('Map container not found');
+          showFeedback('지도 컨테이너를 찾을 수 없습니다.', 'error');
+          return;
+        }
+
+        if (typeof kakao === 'undefined' || !kakao.maps) {
+          console.error('Kakao Maps SDK가 로드되지 않았습니다.');
+          showFeedbackModal('지도 API가 준비되지 않았습니다. 페이지를 새로고침하세요.', 'error');
+          return;
+        }
+
+        if (window.mapInstance) window.mapInstance.setMap(null);
+
+        const mapOption = { center: new kakao.maps.LatLng(lat, lng), level: 3 };
+        const map = new kakao.maps.Map(mapContainer, mapOption);
+        new kakao.maps.Marker({ position: new kakao.maps.LatLng(lat, lng) }).setMap(map);
+        window.mapInstance = map;
+        mapModal.style.display = 'flex';
+
+        setTimeout(() => map.relayout(), 100);
+      }
+
+      changePasswordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const newPassword = document.getElementById('new-password').value;
+        const user = auth.currentUser;
+        if (newPassword.length < 6) {
+          showFeedbackModal('비밀번호는 6자 이상이어야 합니다.', 'error');
+          return;
+        }
+        if (user) {
+          try {
+            await updatePassword(user, newPassword);
+            showFeedbackModal('비밀번호가 변경되었습니다. 다시 로그인 해주세요.', 'success');            
+          } catch (error) {
+            console.error('비밀번호 변경 오류:', error);
+            feedbackMessage.textContent = '변경 실패: ' + error.message;
+            feedbackMessage.classList.add('visible', 'error');
+            setTimeout(() => feedbackMessage.classList.remove('visible'), 2000);
+          }
+        } else {
+          feedbackMessage.textContent = '로그인 필요';
+          feedbackMessage.classList.add('visible', 'error');          
+          setTimeout(() => window.location.href = '/login.html', 2000);
+        }
+      });
+
+    });
+  </script>
+  <style>
+    .mypage-container { padding: 20px; max-width: 1200px; margin: 0 auto; font-family: 'Inter', sans-serif; }
+    .user-info, .change-password-card, .request-list, .notifications, .account-info { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .fields { display: flex; flex-wrap: wrap; gap: 15px; }
+    .field { flex: 1 1 calc(33.33% - 10px); min-width: 200px; position: relative; }
+    .field label { font-weight: 500; color: #333; margin-bottom: 5px; display: block; }
+    .field span { display: block; padding: 8px; background: #f5f5f5; border-radius: 5px; }
+    .field input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; display: none; box-sizing: border-box; }
+    .field.editing input { display: block !important; }
+    .field.editing span { display: none !important; }
+    .field button.edit-btn { margin-top: 5px; padding: 5px 10px; background: #1E88E5; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+    .field button.edit-btn:hover { background: #1565C0; }
+    .change-password-form { display: flex; flex-direction: column; gap: 10px; }
+    .change-password-form label { font-weight: 500; }
+    .change-password-form input { padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+    .change-password-form button { padding: 10px; background: #1E88E5; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+    .change-password-form button:hover { background: #1565C0; }
+    .feedback-message { display: none; margin-top: 10px; padding: 10px; border-radius: 5px; }
+    .feedback-message.visible { display: block; }
+    .feedback-message.success { background: #e3f2fd; color: #1E88E5; }
+    .feedback-message.error { background: #ffebee; color: #c62828; }
+    .request-card { background: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 15px; animation: fadeIn 0.5s ease forwards; }
+    .status-tag { padding: 5px 10px; border-radius: 5px; color: #fff; font-size: 0.9em; margin-bottom: 10px; display: inline-block; }
+    .status-tag.pending { background: #FF9800; }
+    .status-tag.approved { background: #4CAF50; }
+    .status-tag.rejected { background: #F44336; }
+    .additional-cost-alert { background: #fff3e0; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
+    .additional-cost-actions button { margin-right: 5px; padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer; }
+    .additional-cost-actions .approve-btn { background: #4CAF50; color: #fff; }
+    .additional-cost-actions .approve-btn:hover { background: #45a049; }
+    #edit-additional-cost-btn { margin-right: 5px; padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer; background: #4CAF50; color: #fff; position: absolute; top: 10px; right: 60px;}
+    #edit-additional-cost-btn:hover { background: #45a049; }
+
+    .additional-cost-actions .reject-btn { background: #F44336; color: #fff; }
+    .additional-cost-actions .reject-btn:hover { background: #da190b; }
+    .fields .field { margin-bottom: 10px; }
+    .photo-section h4 { margin-top: 10px; }
+    .photo-gallery { display: flex; flex-wrap: wrap; gap: 10px; }
+    .photo-gallery img { width: 100px; height: 100px; object-fit: cover; border-radius: 5px; }
+    .progress-timeline { display: flex; align-items: center; position: relative; margin: 20px 0; }
+    .progress-fill { position: absolute; height: 4px; background: #1E88E5; z-index: 1; transition: width 0.3s ease; }
+    .progress-step { flex: 1; text-align: center; position: relative; z-index: 2; }
+    .progress-step.completed .step-circle { background: #1E88E5; color: #fff; }
+    .progress-step.active .step-circle { border-color: #1E88E5; }
+    .step-circle { width: 20px; height: 20px; border: 2px solid #ddd; border-radius: 50%; margin: 0 auto 5px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.9em; transition: all 0.3s ease; }
+    .step-label { font-size: 0.8em; color: #757575; }
+    .action-buttons { display: flex; gap: 10px; margin-top: 10px; }
+    .action-buttons button { flex: 1; padding: 8px; border: none; border-radius: 5px; cursor: pointer; }
+    .action-buttons .re-request-btn { background: #1E88E5; color: #fff; }
+    .action-buttons .re-request-btn:hover { background: #1565C0; }
+    .action-buttons .cash-receipt-btn { background: #4CAF50; color: #fff; }
+    .action-buttons .cash-receipt-btn:hover { background: #45a049; }
+    .action-buttons .tax-invoice-btn { background: #FF9800; color: #fff; }
+    .action-buttons .tax-invoice-btn:hover { background: #f57c00; }
+    .action-buttons .share-btn { background: #9C27B0; color: #fff; }
+    .action-buttons .share-btn:hover { background: #7b1fa2; }
+    .action-buttons .delete-btn { background: #F44336; color: #fff; }
+    .action-buttons .delete-btn:hover { background: #da190b; }
+    .notifications .notification-item { padding: 10px; border-bottom: 1px solid #ddd; }
+    .modal, .map-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+    .modal-content, .map-modal-content { background: #fff; width: 90%; max-width: 500px; margin: 50px auto; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: relative; }
+    .close-btn { position: absolute; top: 10px; right: 10px; font-size: 1.5em; cursor: pointer; color: #757575; }
+    .close-btn:hover { color: #333; }
+    .map-modal-content #map { height: 400px; width: 100%; }
+    #feedback-modal #feedback-modal-close { padding: 10px 20px; margin-top: 20px; background-color: #1e88e5; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    #feedback-modal .modal-content { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+    #feedback-modal.modal-content.success { background-color: #e8f5e9; color: #388e3c; }
+    #feedback-modal.modal-content.error { background-color: #ffebee; color: #d32f2f; }
+    .account-info p { margin: 5px 0; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .request-card { animation: fadeIn 0.5s ease forwards; }
+  </style>
+</body>
+</html>
