@@ -139,15 +139,21 @@
   <script src="scripts/common.js" defer></script>
   <script src="scripts/footer.js" type="module" defer></script>
   <script type="module">
-    import { auth, db, app } from '/scripts/firebase-config.js';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js';
     import { getAnalytics } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-analytics.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js';
+    import { getFirestore } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js';
     import { signOut, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js';
     import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-storage.js';
     import { collection, query, where, getDocs, orderBy, updateDoc, doc, addDoc, deleteDoc, onSnapshot, serverTimestamp, documentId } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js';
     import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-messaging.js';    
     import { checkAuth } from '/scripts/auth.js';
+    import { firebaseConfig } from '/scripts/firebase-config.js';
 
-    // Firebase Analytics 초기화
+    // Firebase 초기화
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
     const analytics = getAnalytics(app);
 
     const messaging = getMessaging();
