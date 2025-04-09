@@ -171,7 +171,10 @@
       try {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-          const token = await getToken(messaging, { vapidKey: 'BDdV3WIG5bRFOenHTZiS7xEESkQH-68jf0h-pFAAXF-HvETIKElQRHxnAYHuwXyjBoj9aNZlc8HRZyiz2DW2j_4' });
+          const token = await getToken(messaging, { 
+            vapidKey: 'BDdV3WIG5bRFOenHTZiS7xEESkQH-68jf0h-pFAAXF-HvETIKElQRHxnAYHuwXyjBoj9aNZlc8HRZyiz2DW2j_4',
+            serviceWorkerRegistration: await navigator.serviceWorker.register('/firebase-messaging-sw.js')
+          });
           if (auth.currentUser) {
             await updateDoc(doc(db, 'users', auth.currentUser.uid), { fcmToken: token });
           }
