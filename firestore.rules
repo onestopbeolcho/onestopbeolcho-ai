@@ -1,27 +1,52 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // users: 자기 데이터만 접근 가능
+    // 관리자 확인
+    function isAdmin() {
+      return request.auth != null && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == 'admin';
+    }
+
+    // 작업자 확인
+    function isWorker() {
+      return request.auth != null && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.userRole == 'worker';
+    }
+
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if true;
+      allow create: if request.auth.uid == userId;
+      allow update: if isAdmin();
     }
-    
-    // serviceRequests: 로그인한 사람만 접근 가능
-    match /serviceRequests/{requestId} {
-      allow read, write: if request.auth != null;
+    match /workerApplications/{applicationId} {
+      allow read, create, update, delete: if isAdmin();
     }
-    
-    // reviews: 누구나 읽기 가능, 작성/수정/삭제는 조건에 따라
+    match /portfolio/{portfolioId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+    match /serviceRequests/{serviceRequestId} {
+      allow get, list: if isAdmin() || isWorker() || request.auth == null;
+      allow create: if true;
+      allow update, delete: if isAdmin();
+      allow update: if isWorker() && 
+                    request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'fileUrls', 'workerId']);
+    }
+    match /re-requests/{reRequestId} {
+      allow get: if request.auth == null;
+      allow list: if request.auth == null;
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+    match /workLogs/{workLogId} {
+      allow read, create, update: if isAdmin() || (isWorker() && resource.data.workerId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
     match /reviews/{reviewId} {
       allow read: if true;
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
-    }
-    
-    // re-requests: 비회원 생성 가능, 읽기/수정/삭제는 클라이언트 검증
-    match /re-requests/{reRequestId} {
-      allow create: if true;
-      allow read, update, delete: if true; // 클라이언트에서 핸드폰 번호와 비밀번호 검증
+      allow create, update, delete: if isAdmin();
     }
   }
 }

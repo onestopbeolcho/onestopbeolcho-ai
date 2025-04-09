@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ko" itemscope itemtype="http://schema.org/WebPage">
+<head>
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="온라인 원스톱 벌초 서비스">
+    <meta name="description" content="온라인으로 간편하게 신청하는 원스톱 벌초 서비스! 벌초, 예초, 태양광 관리까지 한 번에 해결하세요.">
+    <meta name="keywords" content="벌초, 예초, 태양광 관리, 원스톱 서비스, 온라인 벌초, 간편 벌초, 묘지 관리, 태양광 예초, 벌초 신청, 예초 신청">
+    <meta name="robots" content="index, follow">
+    <title>원스톱 벌초 | 온라인 벌초, 예초, 태양광 관리 서비스</title>
+
+  <!-- Open Graph 태그 -->
+  <meta property="og:title" content="온라인 원스톱 벌초 서비스 - 간편한 벌초, 예초, 태양광 관리">
+  <meta property="og:description" content="벌초, 예초, 태양광 관리 서비스를 온라인으로 간편하게 신청하세요.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://onestopbeolcho.com">
+    <meta property="og:image" content="https://onestopbeolcho.com/assets/images/hero-image.png">
+
+  <!-- Schema.org 마크업 -->
+  <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "Organization",
+      "name": "온라인 원스톱 벌초 서비스",
+        "url": "https://onestopbeolcho.com",
+        "logo": "https://onestopbeolcho.com/assets/images/logo.png",
+      "description": "벌초, 예초, 태양광 관리 서비스를 온라인으로 간편하게 신청하세요.",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+82-1555-1487",
+        "contactType": "customer service"
+      }
+    }
+  </script>
+
+  <!-- 외부 스타일 및 라이브러리 -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" async></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="styles/common.css">
+
+  <!-- PWA 설정 -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6D4AFF">
+</head>
+<body itemscope itemtype="http://schema.org/WebPage">
+  <nav id="nav-container">
+    <div class="navbar navbar-expand-lg">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="index.html">
+          <img src="images/logo.png" alt="원스톱 벌초 로고" height="40">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item"><a class="nav-link" href="request.html">서비스 신청</a></li>
+            <li class="nav-item"><a class="nav-link" href="mypage.html">마이페이지</a></li>
+            <li class="nav-item"><a class="nav-link" href="login.html">로그인</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container">
+      <h1 class="animate__animated animate__fadeIn">원스톱 벌초 서비스</h1>
+      <p class="animate__animated animate__fadeIn" data-delay="0.3s" itemprop="description">
+        벌초, 예초, 태양광 관리를 간편하게 신청하세요.
+      </p>
+      <div class="mt-4 animate__animated animate__fadeIn service-shortcuts" data-delay="0.6s">
+        <div class="service-grid">
+          <div class="service-item">
+            <a href="/request.html?type=벌초&selected=true">
+              <i class="fas fa-mound"></i>
+              <p>벌초</p>
+            </a>
+          </div>
+          <div class="service-item">
+            <a href="/request.html?type=예초&selected=true">
+              <i class="fas fa-cut"></i>
+              <p>예초</p>
+            </a>
+          </div>
+          <div class="service-item">
+            <a href="/request.html?type=태양광 전문 예초&selected=true">
+              <i class="fas fa-solar-panel"></i>
+              <p>태양광 예초</p>
+            </a>
+          </div>
+          <div class="service-item">
+            <a href="/request.html?type=가지치기&selected=true">
+              <i class="fas fa-leaf"></i>
+              <p>가지치기</p>
+            </a>
+          </div>
+          <div class="service-item">
+            <a href="/request.html?type=벌목&selected=true">
+              <i class="fas fa-tree"></i>
+              <p>벌목</p>
+            </a>
+          </div>
+          <div class="service-item">
+            <a href="/request.html?type=제초제 살포&selected=true">
+              <i class="fas fa-flask"></i>
+              <p>제초제 살포</p>
+            </a>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </section>
+
+  <!-- Portfolio Section -->
+  <section class="portfolio-section py-5 bg-white">
+    <div class="container">
+      <h2 class="text-center mb-4 fw-bold">우리의 작업</h2>
+      <div class="portfolio-grid">
+        <div class="portfolio-card">
+          <img src="/images/beolcho1.webp" alt="벌초 작업 예시">
+          <div class="portfolio-content">
+            <h5>벌초 서비스</h5>
+            <p>깔끔하게 정리된 묘지 관리</p>
+          </div>
+        </div>
+        <div class="portfolio-card">
+          <img src="/images/road1.webp" alt="예초 작업 예시">
+          <div class="portfolio-content">
+            <h5>예초 서비스</h5>
+            <p>정돈된 풀 제거 작업</p>
+          </div>
+        </div>
+        <div class="portfolio-card">
+          <img src="/images/solar1.webp" alt="태양광 예초 작업 예시">
+          <div class="portfolio-content">
+            <h5>태양광 예초</h5>
+            <p>태양광 패널 주변 관리</p>
+          </div>
+        </div>
+        <div class="portfolio-card">
+          <img src="/images/park1.webp" alt="관공서 작업 예시">
+          <div class="portfolio-content">
+            <h5>관공서,기업 서비스</h5>
+            <p>공공기관,기업 조경관리</p>
+          </div>
+        </div>
+      </div>
+      <!--
+        <div class="text-center mt-4">
+            <a href="/portfolio.html" class="btn btn-outline-primary">더보기</a>
+        </div>
+        -->
+    </div>
+  </section>
+
+  <!-- Recent Requests -->
+  <section class="recent-requests-section py-5">
+    <div class="container">
+      <h2 class="text-center mb-4 fw-bold">최신 신청 내역</h2>
+      <div class="row g-4" id="request-list" role="region" aria-labelledby="recent-requests-section"></div>
+      <div class="text-center mt-4">
+        <button id="more-requests-button" class="btn btn-outline-primary">더보기</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reviews Section -->
+  <section class="reviews-section py-5 bg-white">
+    <div class="container">
+      <h2 class="text-center mb-4 fw-bold">사용자 후기</h2>
+      <div class="row g-4" id="review-list" role="region" aria-labelledby="review-list"></div>
+      <div class="text-center mt-4">
+        <button id="more-reviews-button" class="btn btn-outline-primary">더보기</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats-section py-4 text-white text-center">
+    <div class="container">
+      <p class="fs-5" id="stats-text" aria-live="polite">
+        지난 30일 동안 <span id="total-requests" class="fw-bold"></span>건의 서비스가 신청되었습니다!
+      </p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="text-center py-3 shadow-sm" id="footer-container">
+    <div class="container">
+      <p class="mb-1">© 2025 온라인 원스톱 벌초 서비스. All rights reserved.</p>
+      <p class="mb-0 small">문의: +82-1555-1487 | <a href="mailto:support@onestop.com" style="color: #333333;">support@onestop.com</a></p>
+    </div>
+  </footer>
+
+  <!-- 외부 스크립트 -->
+  <script src="/scripts/nav.js" type="module" defer onerror="console.error('nav.js 로드 실패'); document.getElementById('nav-container').innerHTML = '<div class=\"navbar\">네비게이션 로드 실패</div>'"></script>
+  <script src="/scripts/footer.js" type="module" defer></script>
+  <script src="/scripts/common.js" defer></script>
+
+  <!-- JavaScript -->
+  <script type="module">
+    import { checkAuth } from '/scripts/auth.js';
+    import { db } from '/scripts/firebase-config.js';
+    import { collection, query, orderBy, limit, onSnapshot, getDocs, where, Timestamp } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js';
+
+    checkAuth(false);
+
+    function extractRegion(address) {
+      if (!address) return "";
+      const parts = address.split(" ");
+      if (parts[0] === "세종특별자치시") {
+        return parts[0];
+      }
+      return parts.length >= 2 ? `${parts[0]} ${parts[1]}` : parts[0];
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(() => console.log('Service Worker 등록 성공'))
+        .catch((error) => console.log('Service Worker 등록 실패:', error));
+    }
+
+    function anonymizeName(name) {
+      if (!name) return "";
+      if (name.length < 3) return `${name}O`;
+      return `${name[0]}O${name[name.length - 1]}`;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const reviewList = document.getElementById('review-list');
+      const requestList = document.getElementById('request-list');
+      const moreReviewsButton = document.getElementById('more-reviews-button');
+      const moreRequestsButton = document.getElementById('more-requests-button');
+
+      // 최신 신청 내역
+      const requestQuery = query(collection(db, 'serviceRequests'), orderBy('createdAt', 'desc'), limit(6));
+      let currentRequests = [];
+      onSnapshot(requestQuery, (snapshot) => {
+        console.log('serviceRequests 스냅샷:', snapshot.docs.map(doc => doc.data()));
+        currentRequests = [];
+        requestList.innerHTML = '';
+        if (snapshot.empty) {
+          requestList.innerHTML = '<p class="text-center text-muted">아직 신청 내역이 없습니다.</p>';
+          return;
+        }
+        snapshot.forEach((doc, index) => {
+          const request = doc.data();
+          currentRequests.push({ id: doc.id, ...request });
+          const anonymizedName = anonymizeName(request.customerName || '이름 없음');
+          const region = extractRegion(request.region); // 변경: 지역 정보 추출
+          const timeAgo = calculateTimeAgo(request.createdAt.toDate());          
+          requestList.innerHTML += `
+            <div class="col-md-4">
+              <div class="card p-3 animate" style="animation-delay: ${index * 0.2}s;">
+                <p class="mb-1">${anonymizedName} - ${request.region || '지역 없음'}, ${request.serviceType || '서비스 없음'}</p>
+                <span class="text-muted small">${timeAgo}</span>
+              </div>
+            </div>
+          `;
+        });
+      }, (error) => {
+        console.error('신청 내역 가져오기 실패:', error);
+        requestList.innerHTML = '<p class="text-center text-danger">신청 내역을 불러오는 데 실패했습니다: ' + error.message + '</p>';
+      });
+
+      // 더보기 버튼 이벤트
+      moreRequestsButton.addEventListener('click', () => {
+        const nextRequests = currentRequests.slice(requestList.children.length);
+        if (nextRequests.length > 0) {
+          nextRequests.forEach((request, index) => {
+            const anonymizedName = anonymizeName(request.customerName || '이름 없음');
+            const region = extractRegion(request.region); // 변경: 지역 정보 추출
+            const timeAgo = calculateTimeAgo(request.createdAt.toDate());            
+            requestList.innerHTML += `
+              <div class="col-md-4">
+                <div class="card p-3 animate" style="animation-delay: ${index * 0.2}s;">
+                  <p class="mb-1">${anonymizedName} - ${request.region || '지역 없음'}, ${request.serviceType || '서비스 없음'}</p>
+                  <span class="text-muted small">${timeAgo}</span>
+                </div>
+              </div>
+            `;
+          });
+        } else {
+          moreRequestsButton.textContent = '마지막 신청 내역입니다.';
+          moreRequestsButton.disabled = true;
+        }
+      });
+
+      // 사용자 후기
+      const reviewQuery = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'), limit(3));
+      let currentReviews = [];
+      onSnapshot(reviewQuery, (snapshot) => {
+        console.log('reviews 스냅샷:', snapshot.docs.map(doc => doc.data()));
+        currentReviews = [];
+        reviewList.innerHTML = '';
+        if (snapshot.empty) {
+          reviewList.innerHTML = '<p class="text-center text-muted">아직 후기가 없습니다.</p>';
+          return;
+        }
+        snapshot.forEach((doc) => {
+          const review = doc.data();
+          currentReviews.push({ id: doc.id, ...review });
+          const anonymizedName = anonymizeName(review.customerName || '이름 없음');
+          const stars = '★'.repeat(review.rating || 0) + '☆'.repeat(5 - (review.rating || 0));
+          reviewList.innerHTML += `
+            <div class="col-md-4">
+              <div class="card p-3">
+                <p class="mb-2">${anonymizedName}: ${review.comment || '후기 없음'}</p>
+                <div class="rating text-warning" aria-label="평점: ${review.rating || 0}점">${stars}</div>
+              </div>
+            </div>
+          `;
+        });
+      }, (error) => {
+        console.error('후기 가져오기 실패:', error);
+        reviewList.innerHTML = '<p class="text-center text-danger">후기를 불러오는 데 실패했습니다: ' + error.message + '</p>';
+      });
+
+      moreReviewsButton.addEventListener('click', () => {
+        const nextReviews = currentReviews.slice(reviewList.children.length);
+        if (nextReviews.length > 0) {
+          nextReviews.forEach((review) => {
+            const anonymizedName = anonymizeName(review.customerName || '이름 없음');
+            const stars = '★'.repeat(review.rating || 0) + '☆'.repeat(5 - (review.rating || 0));
+            reviewList.innerHTML += `
+              <div class="col-md-4">
+                <div class="card p-3">
+                  <p class="mb-2">${anonymizedName}: ${review.comment || '후기 없음'}</p>
+                  <div class="rating text-warning" aria-label="평점: ${review.rating || 0}점">${stars}</div>
+                </div>
+              </div>
+            `;
+          });
+        } else {
+          moreReviewsButton.textContent = '마지막 후기입니다.';
+          moreReviewsButton.disabled = true;
+        }
+      });
+
+      // 지난 30일 통계
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      getDocs(query(collection(db, 'serviceRequests'), where('createdAt', '>', Timestamp.fromDate(thirtyDaysAgo))))
+        .then((querySnapshot) => {
+          console.log('총 신청 건수:', querySnapshot.size);
+          document.getElementById('total-requests').textContent = querySnapshot.size;
+        })
+        .catch((error) => {
+          console.error('신청 건수 가져오기 실패:', error);
+          document.getElementById('total-requests').textContent = '0';
+        });
+
+      function calculateTimeAgo(date) {
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
+        if (diffInSeconds < 60) return '방금';
+        else if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}분 전`;
+        else if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}시간 전`;
+        else if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}일 전`;
+        else return `${Math.floor(diffInSeconds / 2592000)}달 전`;
+      }
+
+      document.querySelectorAll('[data-delay]').forEach(el => {
+        el.style.animationDelay = el.getAttribute('data-delay');
+      });
+    });
+  </script>
+</body>
+</html>

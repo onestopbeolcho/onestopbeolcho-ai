@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>네이버 로그인 콜백</title>
+  <script type="module">
+    import { handleNaverCallback } from '../scripts/auth.js';
+    
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        await handleNaverCallback();
+      } catch (error) {
+        console.error('네이버 로그인 콜백 오류:', error);
+        alert('네이버 로그인에 실패했습니다: ' + error.message);
+        window.location.href = '/login.html';
+      }
+    });
+  </script>
+</head>
+<body>
+  <div style="text-align: center; margin-top: 50px;">
+    <h2>네이버 로그인 처리 중...</h2>
+    <p>잠시만 기다려주세요.</p>
+  </div>
+</body>
+</html> 

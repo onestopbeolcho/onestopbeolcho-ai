@@ -119,25 +119,47 @@
         <div class="text-center mt-3">
           <a href="signup.html">회원가입</a>
         </div>
+        <button id="google-login-button" class="btn btn-outline-primary mt-2">Google로 로그인</button>
+
+
       </form>
     </div>
   </div>
 
   <div id="footer-container"></div>
-  <!-- footer.js를 모듈로 로드하도록 수정 -->
   <script src="/scripts/footer.js" type="module" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module">
-    // firebase-config.js에서 auth를 직접 가져오도록 수정
-    import { auth, signInWithEmailAndPassword } from '/scripts/firebase-config.js';
-
+    import { auth } from '/scripts/firebase-config.js';
+    import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { googleSignIn } from '/scripts/auth.js';
+  
     document.addEventListener('DOMContentLoaded', () => {
       const navContainer = document.getElementById('nav-container');
+      const googleLoginButton = document.getElementById('google-login-button');
+      if (googleLoginButton) {
+        googleLoginButton.addEventListener('click', (e) => {
+          console.log('Google 로그인 버튼 클릭됨');
+          googleSignIn();
+        });
+      }
+  
       const footerContainer = document.getElementById('footer-container');
       const loginForm = document.getElementById('login-form');
       const feedbackMessage = document.getElementById('feedback-message');
-
-      // 네비게이션과 푸터 로드 확인
+  
+      if (!loginForm) {
+        console.error('login-form 요소를 찾을 수 없습니다.');
+        return;
+      }
+  
+      console.log('loginForm 요소 발견:', loginForm);
+  
+      // 세션 유지 설정
+      setPersistence(auth, browserLocalPersistence)
+        .then(() => console.log('세션 영속성 설정 완료'))
+        .catch(error => console.error('세션 영속성 설정 오류:', error));
+  
       function checkNavFooter() {
         if (!navContainer.innerHTML.trim()) {
           console.warn('네비게이션이 삽입되지 않았습니다. nav.js 확인 필요.');
@@ -148,24 +170,25 @@
           footerContainer.innerHTML = '<p>푸터 로드 실패 (임시)</p>';
         }
       }
-
+  
       setTimeout(checkNavFooter, 1000);
-
-      // 로그인 폼 제출 이벤트
+  
       loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-
+        console.log('submit 이벤트 트리거됨');
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
-
+        console.log('로그인 시도 - 이메일:', email);
+  
         try {
           const userCredential = await signInWithEmailAndPassword(auth, email, password);
+          console.log('로그인 성공 - UID:', userCredential.user.uid, '이메일:', userCredential.user.email);
           feedbackMessage.textContent = '로그인 성공! 메인 페이지로 이동합니다.';
           feedbackMessage.classList.remove('error');
           feedbackMessage.classList.add('success');
           setTimeout(() => window.location.href = '/index.html', 2000);
         } catch (error) {
-          console.error('로그인 실패:', error.message, '코드:', error.code);
+          console.error('로그인 실패 - 코드:', error.code, '메시지:', error.message);
           let errorMessage = '로그인 실패: ';
           switch (error.code) {
             case 'auth/invalid-email':
@@ -178,7 +201,10 @@
               errorMessage += '비밀번호가 틀렸습니다.';
               break;
             case 'auth/too-many-requests':
-              errorMessage += '너무 많은 시도로 인해 일시적으로 차단되었습니다. 나중에 다시 시도하세요.';
+              errorMessage += '너무 많은 시도로 차단되었습니다. 나중에 시도하세요.';
+              break;
+            case 'auth/network-request-failed':
+              errorMessage += '네트워크 연결을 확인하세요.';
               break;
             default:
               errorMessage += error.message;

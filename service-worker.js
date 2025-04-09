@@ -1,5 +1,5 @@
 // 캐시 버전 설정
-const CACHE_NAME = 'onestop-beolcho-v3'; // 버전 업데이트
+const CACHE_NAME = 'onestop-beolcho-v12';
 
 // 캐싱할 리소스 목록
 const urlsToCache = [
@@ -8,14 +8,13 @@ const urlsToCache = [
   '/request.html',
   '/worker.html',
   '/mypage.html',
-  '/admin/admin.html',
   '/login.html',
   '/signup.html',
   '/worker-signup.html',
-  '/styles/theme.css',
-  '/styles/footer.css',
-  '/scripts/nav.js', // 경로 수정
-  '/scripts/footer.js', // 경로 수정
+  '/rerequest.html',
+  '/styles/common.css',
+  '/scripts/nav.js',
+  '/scripts/footer.js',
   '/assets/icons/icon-192x192.png',
   '/assets/icons/icon-512x512.png'
 ];
@@ -28,7 +27,7 @@ self.addEventListener('install', (event) => {
       return cache.addAll(urlsToCache)
         .then(() => {
           console.log('Service Worker: 모든 리소스 캐싱 완료');
-          return self.skipWaiting(); // 새 Service Worker 즉시 활성화
+          return self.skipWaiting();
         })
         .catch((error) => console.error('Service Worker: 캐싱 실패:', error));
     })
@@ -73,7 +72,7 @@ self.addEventListener('fetch', (event) => {
             return cachedResponse;
           }
           console.error('Service Worker: 네트워크 및 캐시 모두 실패:', requestUrl);
-          return caches.match('/index.html'); // 오프라인 기본 페이지
+          return caches.match('/index.html');
         });
       })
   );
@@ -92,7 +91,7 @@ self.addEventListener('activate', (event) => {
         })
       ).then(() => {
         console.log('Service Worker: 캐시 정리 완료');
-        return self.clients.claim(); // 클라이언트 제어
+        return self.clients.claim();
       });
     })
   );

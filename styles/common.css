@@ -1,11 +1,12 @@
+/* common.css */
 body {
   font-family: 'Noto Sans KR', sans-serif;
+  background-color: #FFFFFF;
+  color: #333333;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #F5F7FA; /* 숨고의 밝은 배경 톤 */
-  color: #333;
-  padding-top: 56px; /* 네비게이션 기본 높이에 맞춘 초기 패딩 */
+  padding-top: 56px;
 }
 
 nav {
@@ -13,117 +14,107 @@ nav {
   top: 0;
   width: 100%;
   z-index: 1000;
-  overflow: visible; /* 네비게이션 메뉴가 잘리지 않도록 */
+  overflow: visible;
+  min-height: 56px; /* 최소 높이 추가 */
 }
 
-/* 네비게이션 스타일 */
 .navbar {
-  background-color: #fff;
+  background-color: #FFFFFF;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  min-height: 25px; /* 고정 높이 설정 */
-  padding: 0.05rem 1rem;
+  min-height: 56px;
+  padding: 0.5rem 1rem;
 }
 
 .navbar-brand {
   font-weight: 700;
-  color: #6D4AFF !important; /* 숨고의 보라색 */
+  color: #6D4AFF !important;
   font-size: 1.1rem;
 }
- 
+
 .navbar-nav .nav-link {
   font-size: 0.9rem;
   padding: 3px 8px;
-  color: #1E88E5 !important; /* 숨고의 파란색 */
+  color: #6D4AFF !important;
 }
 
 .container {
-  padding: 15px; /* 모바일 친화적 패딩 */
+  padding: 15px;
   flex: 1 0 auto;
-  position: relative; /* 본문 콘텐츠가 position: relative로 설정되어 body의 padding-top에 영향을 받도록 */
+  position: relative;
   margin-top: 0px;
 }
 
-/* 본문 섹션에 네비게이션 아래 간격 제거 (body에 이미 처리) */
-.hero-section {
-  padding-top: 0; /* 이전 padding-top 제거, body로 이동 */
-  margin-top: 0px;
+.container h1,
+.container h2,
+.container h3,
+.container h4,
+.container h5,
+.container h6,
+.container p,
+.container .form-label,
+.container .login-card h2 {
+  color: #333333 !important;
+}
 
-/* 푸터 스타일 (높이 절반으로 조정, 숨고 스타일 반영) */
+.hero-section {
+  background: linear-gradient(135deg, #6D4AFF 0%, #A78BFA 100%);
+  color: #FFFFFF;
+  padding: 4rem 0;
+  text-align: center;
+  margin-top: 0;
+}
+
+.hero-section h1 {
+  font-weight: 700;
+  font-size: 2.5rem;
+}
+
+.hero-section p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
 .footer {
   flex-shrink: 0;
-  background-color: #fff;
-  color: #333;
-  border-top: 1px solid #dee2e6;
+  background-color: #FFFFFF;
+  color: #333333;
+  border-top: 1px solid #7E57C2;
   box-shadow: 0 -3px 8px rgba(0, 0, 0, 0.1);
-  padding: 5px 0; /* 원래 10px 0 → 절반으로 조정 */
+  padding: 2px 0;
   text-align: center;
-  border-radius: 10px 10px 0 0; /* 숨고 스타일의 둥근 상단 모서리 */
+  border-radius: 0;
+}
+
+.footer p,
+.footer a {
+  color: #333333;
+  margin-bottom: 0.5rem;
 }
 
 .footer .btn-outline-primary {
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
+  color: #6D4AFF;
+  border-color: #6D4AFF;
+}
+
+.footer .btn-outline-primary:hover {
+  background-color: #5C3AD9;
+  color: #FFFFFF;
 }
 
 .footer a {
-  color: #1E88E5; /* 숨고의 파란색 링크 */
   text-decoration: none;
 }
 
 .footer a:hover {
-  color: #6D4AFF; /* 숨고의 보라색 호버 효과 */
+  color: #5C3AD9;
 }
 
-/* 다크 모드 스타일 */
-.dark-mode-btn {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background-color: #6D4AFF;
-  color: #fff;
-  border: none;
-}
-
-.dark-mode {
-  background-color: #333;
-  color: #fff;
-}
-
-.dark-mode .navbar {
-  background-color: #444 !important;
-}
-
-.dark-mode .footer {
-  background-color: #333;
-  color: #bbb;
-  border-color: #555;
-}
-
-.dark-mode .footer a {
-  color: #1E88E5;
-}
-
-.dark-mode .footer a:hover {
-  color: #6D4AFF;
-}
-
-.dark-mode .text-muted {
-  color: #bbb !important;
-}
-
-.dark-mode .bg-light {
-  background-color: #444 !important;
-}
-
-/* 버튼 스타일 (숨고 스타일 반영) */
 .btn-primary {
   background-color: #6D4AFF;
   border-color: #6D4AFF;
-  border-radius: 20px; /* 둥근 버튼 */
+  border-radius: 20px;
 }
 
 .btn-primary:hover {
@@ -132,82 +123,299 @@ nav {
 }
 
 .btn-outline-secondary {
-  border-color: #1E88E5;
-  color: #1E88E5;
+  border-color: #6D4AFF;
+  color: #6D4AFF;
   border-radius: 20px;
 }
 
 .btn-outline-secondary:hover {
-  background-color: #E3F2FD; /* 숨고의 연한 파랑 */
+  background-color: #7E57C2;
+  color: #FFFFFF;
+}
+
+/* index.html 스타일 통합 */
+.card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+  background-color: #F5F5F5;
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card.animate {
+  animation: fadeInUp 1s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-control {
+  border-radius: 10px;
+  padding: 0.75rem;
+  border: 1px solid #6D4AFF;
+  background-color: #F5F5F5;
+  color: #333333;
+}
+
+.form-control:focus {
+  border-color: #6D4AFF;
+  box-shadow: 0 0 5px rgba(109, 74, 255, 0.3);
+}
+
+.carousel-item img {
+  max-height: 300px;
+  object-fit: cover;
+  width: 100%;
+  border-radius: 10px;
+}
+
+.carousel-caption {
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.portfolio-section .carousel-indicators {
+  bottom: -40px;
+}
+
+.portfolio-section .carousel-indicators button {
+  background-color: #6D4AFF;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.portfolio-section .carousel-control-prev,
+.portfolio-section .carousel-control-next {
+  width: 10%;
+}
+
+.service-shortcuts .service-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 0.5rem;
+  justify-items: center;
+}
+
+.service-shortcuts .service-item {
+  text-align: center;
+  min-width: 80px;
+}
+
+.service-shortcuts .service-item a {
+  text-decoration: none;
+  color: #FFFFFF;
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.service-shortcuts .service-item a:hover {
+  transform: scale(1.1);
+}
+
+.service-shortcuts i {
+  font-size: 1.8rem;
+  color: #FFFFFF;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.service-shortcuts p {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #FFFFFF;
+}
+
+.stats-section {
+  background-color: #6D4AFF;
+  color: #FFFFFF;
 }
 
 /* 모바일 우선 반응형 스타일 */
-@media (max-width: 991px) {
-  /* 모바일 환경에서 네비게이션 바 스타일 */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+  .navbar-brand {
+    font-size: 1.2rem;
+  }
+  .navbar-nav .nav-link {
+    padding: 8px 15px;
+  }
   .navbar {
-    min-height: 56px; /* 모바일에서 네비게이션 바 기본 높이 */
+    min-height: 56px;
   }
-
-  /* navbar-collapse 스타일 */
   .navbar-collapse {
-    background-color: #444; /* 다크 모드와 일치 */
-    padding: 10px; /* 메뉴 항목 간격 조정 */
-    position: absolute;    
-    top: 25px; /* 네비게이션 바 높이에 맞춤 */
-    left: 0;
-    right: 0;
-    z-index: 999; /* 다른 요소 위에 표시 */
-    height: auto; /* 높이를 콘텐츠에 맞게 자동 조정 */
+    padding: 10px;
+    position: static;
+    background-color: #FFFFFF;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
   }
+  .card {
+    border-radius: 8px;
+  }
+  .service-card {
+    border-radius: 8px;
+  }
+  .footer .btn-outline-primary {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.7rem;
+  }
+  .hero-section {
+    padding: 2rem 0;
+    margin-top: 0;
+  }
+  .hero-section h1 {
+    font-size: 1.8rem;
+  }
+  .hero-section p {
+    font-size: 1rem;
+  }
+  .carousel-item img {
+    max-height: 200px;
+  }
+  h2.text-center {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+}
 
-  /* 본문 콘텐츠와 네비게이션 바 사이에 공백 추가 */
-  .container,
-  .hero-section,
-   body:has(.navbar-collapse.show){
-    margin-top: 20px; /* 기본 공백 */
+@media (min-width: 769px) {
+  .navbar {
+    min-height: 56px;
+  }
+  .navbar-collapse {
+    display: flex;
+    height: auto;
+    position: static;
+    background-color: transparent;
+    box-shadow: none;
+  }
+  .container {
+    margin-top: 20px;
+  }
+  .hero-section {
+    padding: 4rem 0;
+    margin-top: 0;
+  }
+  .service-shortcuts .service-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 1rem;
+  }
+  .service-shortcuts i {
+    font-size: 2.5rem;
+  }
+  .service-shortcuts p {
+    font-size: 1rem;
+  }
+  h2.text-center {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* Portfolio Section (카드형) */
+.portfolio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.portfolio-card {
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.portfolio-card:hover {
+  transform: translateY(-5px);
+}
+
+.portfolio-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.portfolio-content {
+  padding: 15px;
+  text-align: center;
+}
+
+.portfolio-content h5 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #333333;
+}
+
+.portfolio-content p {
+  font-size: 0.9rem;
+  color: #666666;
+  margin: 0;
+}
+
+/* 모바일 반응형 조정 */
+@media (max-width: 576px) {
+  .portfolio-grid {
+    grid-template-columns: 1fr;
+  }
+  .portfolio-card img {
+    height: 150px;
+  }
+}
+
+/* Banner Section */
+.banner-section img {
+  height: 25px;
+  object-fit: contain;
+  margin: 10px 0;
+}
+
+/* 미디어 쿼리 */
+@media (min-width: 576px) {
+  .banner-section img {
+    max-width: 540px;
+  }
+}
+
+@media (min-width: 768px) {
+  .banner-section img {
+    max-width: 720px;
   }
 }
 
 @media (min-width: 992px) {
-  /* PC 환경에서 네비게이션 바 스타일 */
-  .navbar {
-    min-height: 56px; /* PC에서도 동일한 높이 유지 */
-  }
-
-  /* PC에서는 navbar-collapse가 기본적으로 표시됨 */
-  .navbar-collapse {
-    display: flex; /* Bootstrap 기본 스타일 유지 */
-    height: auto; /* 높이를 콘텐츠에 맞게 자동 조정 */
-  }
-
-  /* PC에서도 본문 콘텐츠와 네비게이션 바 사이에 공백 추가 */
-  .container,
-  .hero-section {
-    margin-top: 20px; /* 기본 공백 */
+  .banner-section img {
+    max-width: 960px;
   }
 }
 
-/* 기존 모바일 반응형 스타일 유지 */
-@media (max-width: 768px) {
-  .container {
-      padding: 10px; /* 더 좁은 화면에 맞춘 패딩 */
+@media (min-width: 1200px) {
+  .banner-section img {
+    max-width: 1140px;
   }
-  .navbar-brand {
-      font-size: 1.2rem; /* 모바일에서 텍스트 크기 감소 */
-  }
+}
 
-  .navbar-nav .nav-link {
-      padding: 2px 8px; /* 모바일에서 패딩 조정 */
-  }
-
-  .card, .navbar-collapse {
-      border-radius: 15px; /* 숨고 스타일의 둥근 카드 */
-  }
-  .service-card {
-      border-radius: 15px;
-  }
-  .footer .btn-outline-primary {
-      padding: 0.2rem 0.4rem;
-      font-size: 0.7rem;
+@media (min-width: 1400px) {
+  .banner-section img {
+    max-width: 1320px;
   }
 }

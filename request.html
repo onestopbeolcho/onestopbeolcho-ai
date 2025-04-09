@@ -3,203 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>서비스 신청 - 원스톱 벌초</title>
 
-  <!-- Bootstrap 및 스타일 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="/manifest.json?v=1">
   <meta name="theme-color" content="#1E88E5">
 
-  <!-- Kakao Maps API (동기 로드, 최초 방식 복원) -->
   <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ef6b942fdad36e982c84eb0061d1d2ed&libraries=services"></script>
   <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-
-  <!-- 공통 스타일 로드 -->
-  <link rel="stylesheet" href="/styles/common.css">
+  <link rel="stylesheet" href="/styles/common.css?v=1">
 
   <style>
-    .step-container {
-      display: none;
-    }
-    .step-container.active {
-      display: block;
-    }
-    .progress-container {
-      margin-bottom: 20px;
-    }
-    .progress-bar {
-      background-color: #6D4AFF; /* 숨고 스타일의 보라색 */
-    }
-    .progress-text {
-      color: #1E88E5; /* 숨고 스타일의 파란색 */
-      font-weight: 500;
-    }
-    .progress-arrow {
-      position: absolute;
-      top: -35px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 1.2rem;
-      color: #1E88E5;
-      animation: bounce 1s infinite;
-    }
-    @keyframes bounce {
-      0%, 100% { transform: translateX(-50%) translateY(0); }
-      50% { transform: translateX(-50%) translateY(-10px); }
-    }
-    #nv-map {
-      width: 100%;
-      height: 500px;
-      border-radius: 8px;
-      margin-top: 10px;
-    }
-    .service-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-      gap: 15px;
-    }
-    .service-card {
-      background-color: #fff;
-      border: 1px solid #dee2e6;
-      border-radius: 10px;
-      padding: 15px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative; /* 체크 아이콘 위치를 위해 */
-    }
-    .service-card:hover {
-      background-color: #1E88E5;
-      color: white;
-      border-color: #1E88E5;
-    }
-    .service-card input[type="radio"] {
-      display: none;
-    }
-    .service-card label {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      cursor: pointer;
-      padding: 15px; /* 클릭 영역 확장 */
-    }
-    .service-card input[type="radio"]:checked + label {
-      background-color: #1E88E5;
-      color: white;
-      border-color: #1E88E5;
-    }
-    .service-card input[type="radio"]:checked + label .check-icon {
-      display: block; /* 체크 아이콘 표시 */
-    }
-    .check-icon {
-      display: none; /* 기본적으로 숨김 */
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      color: #fff;
-      font-size: 1rem;
-    }
-    .service-text {
-      display: block;
-      width: 100%;
-    }
-    .form-label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .form-label i {
-      color: #6D4AFF;
-    }
-    .form-control {
-      border-radius: 10px; /* 둥근 입력창 */
-      padding: 0.75rem; /* 더 넉넉한 패딩 */
-      font-size: 1rem; /* 더 큰 글씨 */
-      border: 1px solid #1E88E5; /* 숨고 스타일의 파란색 테두리 */
-    }
-    .form-control:focus {
-      border-color: #6D4AFF; /* 포커스 시 보라색 */
-      box-shadow: 0 0 5px rgba(109, 74, 255, 0.3);
-    }
-    .btn-primary,
-    .btn-secondary {
-      padding: 0.5rem 1.5rem; /* 더 넉넉한 패딩 */
-      font-size: 1rem; /* 더 큰 글씨 */
-    }
-    #address-search-btn {
-      color: #1E88E5;
-      border-color: #1E88E5;
-      border-radius: 20px;
-      padding: 0.5rem 1rem; /* 더 넉넉한 패딩 */
-      font-size: 0.9rem;
-    }
-    #address-search-btn:hover {
-      background-color: #1E88E5;
-      color: white;
-      border-color: #1E88E5;
-    }
-    .dark-mode .card,
-    .dark-mode .service-card {
-      background-color: #444;
-      border-color: #555;
-    }
-    .dark-mode .service-card:hover {
-      background-color: #1E88E5;
-      color: white;
-    }
-    .dark-mode .form-control {
-      background-color: #444;
-      color: #fff;
-      border-color: #555;
-    }
-    @media (min-width: 768px) {
-      .service-cards {
-        grid-template-columns: repeat(3, 1fr);
-      }
-      #nv-map {
-        height: 400px;
-      }
-    }
-    @media (max-width: 768px) {
-      .service-cards {
-        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-        gap: 10px;
-      }
-      .service-card {
-        padding: 10px;
-      }
-      .service-card label {
-        padding: 10px;
-      }
-      .check-icon {
-        font-size: 0.8rem;
-      }
-      .form-control {
-        padding: 0.6rem;
-        font-size: 0.9rem;
-      }
-      .btn-primary,
-      .btn-secondary {
-        padding: 0.4rem 1.2rem;
-        font-size: 0.9rem;
-      }
-      #address-search-btn {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.8rem;
-      }
-    }
+    .step-container { display: none; }
+    .step-container.active { display: block; }
+    .progress-container { margin-bottom: 20px; }
+    .progress-bar { background-color: #6D4AFF; }
+    .progress-text { color: #1E88E5; font-weight: 500; }
+    .progress-arrow { position: absolute; top: -35px; left: 50%; transform: translateX(-50%); font-size: 1.2rem; color: #1E88E5; animation: bounce 1s infinite; }
+    @keyframes bounce { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-10px); } }
+    #nv-map { width: 100%; height: 500px; border-radius: 8px; margin-top: 10px; }
+    .service-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 15px; }
+    .service-card { background-color: #fff; border: 1px solid #dee2e6; border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; transition: all 0.3s ease; position: relative; }
+    .service-card:hover { background-color: #1E88E5; color: white; border-color: #1E88E5; }
+    .service-card input[type="radio"] { display: none; }
+    .service-card label { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; margin: 0; cursor: pointer; padding: 15px; }
+    .service-card input[type="radio"]:checked + label { background-color: #1E88E5; color: white; border-color: #1E88E5; }
+    .service-card input[type="radio"]:checked + label .check-icon { display: block; }
+    .check-icon { display: none; position: absolute; top: 5px; right: 5px; color: #fff; font-size: 1rem; }
+    .service-text { display: block; width: 100%; }
+    .form-label { display: flex; align-items: center; gap: 0.5rem; }
+    .form-label i { color: #6D4AFF; }
+    .form-control { border-radius: 10px; padding: 0.75rem; font-size: 1rem; border: 1px solid #1E88E5; }
+    .form-control:focus { border-color: #6D4AFF; box-shadow: 0 0 5px rgba(109, 74, 255, 0.3); }
+    .btn-primary, .btn-secondary { padding: 0.5rem 1.5rem; font-size: 1rem; }
+    #address-search-btn { color: #1E88E5; border-color: #1E88E5; border-radius: 20px; padding: 0.5rem 1rem; font-size: 0.9rem; }
+    #address-search-btn:hover { background-color: #1E88E5; color: white; border-color: #1E88E5; }
+    .btn-loading::after { content: ' '; display: inline-block; width: 16px; height: 16px; margin-left: 8px; border: 2px solid #fff; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @media (min-width: 768px) { .service-cards { grid-template-columns: repeat(3, 1fr); } #nv-map { height: 400px; } }
+    @media (max-width: 768px) { .service-cards { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 10px; } .service-card { padding: 10px; } .service-card label { padding: 10px; } .check-icon { font-size: 0.8rem; } .form-control { padding: 0.6rem; font-size: 0.9rem; } .btn-primary, .btn-secondary { padding: 0.4rem 1.2rem; font-size: 0.9rem; } #address-search-btn { padding: 0.4rem 0.8rem; font-size: 0.8rem; } }
   </style>
 </head>
-<body class="dark-mode">
+<body>
   <nav id="nav-container"></nav>
 
   <div class="container">
@@ -214,7 +64,6 @@
 
     <div class="request-container">
       <form id="service-form">
-        <!-- Step 1: 서비스 유형 선택 -->
         <div class="step-container active" id="step1">
           <div class="form-group">
             <label class="form-label"><i class="fas fa-cut"></i> 서비스 유형 <span class="text-danger">*</span></label>
@@ -278,11 +127,10 @@
           </div>
         </div>
 
-        <!-- Step 2: 이름 입력 -->
         <div class="step-container" id="step2">
           <div class="form-group">
             <label for="customer-name" class="form-label"><i class="fas fa-user"></i> 이름 <span class="text-danger">*</span></label>
-            <input type="text" id="customer-name" class="form-control" placeholder="예: 홍길동" required>
+            <input type="text" id="customer-name" class="form-control" placeholder="예: 홍길동" required autocomplete="off">
             <small class="form-text text-muted">개인 또는 기업명을 입력하세요. 신청 확인 시 사용됩니다. <br>예: 홍길동, (주)메타아이엠</small>
           </div>
           <div class="d-flex justify-content-between mt-3">
@@ -291,11 +139,10 @@
           </div>
         </div>
 
-        <!-- Step 3: 연락처 입력 -->
         <div class="step-container" id="step3">
           <div class="form-group">
             <label for="customer-phone" class="form-label"><i class="fas fa-phone"></i> 연락처 <span class="text-danger">*</span></label>
-            <input type="tel" id="customer-phone" class="form-control" placeholder="예: 01012345678" maxlength="13" required>
+            <input type="tel" id="customer-phone" class="form-control" placeholder="예: 01012345678" maxlength="13" required autocomplete="off">
             <small class="form-text text-muted">작업자와 연락 시 사용할 번호를 입력하세요. <br>형식: 01012345678 (하이픈 없이 입력)</small>
           </div>
           <div class="d-flex justify-content-between mt-3">
@@ -304,12 +151,11 @@
           </div>
         </div>
 
-        <!-- Step 4: 비밀번호 입력 -->
         <div class="step-container" id="step4">
           <div class="form-group">
-            <label for="customer-password" class="form-label"><i class="fas fa-lock"></i> 비밀번호 <span class="text-danger">*</span></label>
-            <input type="password" id="customer-password" class="form-control" placeholder="신청 조회용" required>
-            <small class="form-text text-muted">신청 내역 조회 시 사용할 비밀번호입니다. <br>4~8자리로 설정해 주세요. 나중에 비회원 재신청 시 필요합니다.</small>
+            <label for="customer-password" class="form-label"><i class="fas fa-lock"></i> 비밀번호</label>
+            <input type="password" id="customer-password" class="form-control" placeholder="신청 조회용" autocomplete="new-password">
+            <small class="form-text text-muted">신청 내역 조회 시 사용할 비밀번호입니다. <br>4~8자리로 설정해 주세요. 나중에 비회원 재신청 시 필요합니다. <br><strong>회원가입 하시면 비밀번호 입력을 안하셔도 됩니다.</strong></small>
           </div>
           <div class="d-flex justify-content-between mt-3">
             <button type="button" class="btn btn-secondary rounded-pill" id="prev-step4">이전</button>
@@ -317,12 +163,11 @@
           </div>
         </div>
 
-        <!-- Step 5: 위치 정보 -->
         <div class="step-container" id="step5">
           <div class="form-group">
             <label class="form-label"><i class="fas fa-map-marker-alt"></i> 위치 정보 <span class="text-danger">*</span></label>
             <button type="button" id="address-search-btn" class="btn btn-outline-primary btn-sm mb-2">주소 검색</button>
-            <input type="text" id="address" class="form-control" placeholder="주소를 검색하세요" readonly required>
+            <input type="text" id="address" class="form-control" placeholder="주소를 검색하세요" readonly required autocomplete="off">
             <div id="nv-map"></div>
             <small class="form-text text-muted">주소를 검색한 후 지도에서 정확한 위치를 선택하세요. <br>위성사진 모드에서 핀을 이동하여 작업 위치를 지정할 수 있습니다.</small>
           </div>
@@ -332,7 +177,6 @@
           </div>
         </div>
 
-        <!-- Step 6: 세부 사항 입력 -->
         <div class="step-container" id="step6">
           <div class="form-group" id="service-details">
             <label class="form-label"><i class="fas fa-info-circle"></i> 세부 사항</label>
@@ -344,7 +188,6 @@
           </div>
         </div>
 
-        <!-- Step 7: 희망 작업 날짜 -->
         <div class="step-container" id="step7">
           <div class="form-group">
             <label for="work-date" class="form-label"><i class="fas fa-calendar-alt"></i> 희망 작업 날짜 <span class="text-danger">*</span></label>
@@ -357,7 +200,6 @@
           </div>
         </div>
 
-        <!-- Step 8: 요청 사항 및 제출 -->
         <div class="step-container" id="step8">
           <div class="form-group">
             <label for="worker-request" class="form-label"><i class="fas fa-comment"></i> 요청 사항</label>
@@ -371,7 +213,35 @@
           </div>
           <div class="d-flex justify-content-between mt-3">
             <button type="button" class="btn btn-secondary rounded-pill" id="prev-step8">이전</button>
-            <button type="submit" class="btn btn-primary rounded-pill" id="submit-btn">제출</button>
+            <button type="button" class="btn btn-primary rounded-pill" id="next-step8">다음</button>
+          </div>
+        </div>
+
+        <div class="step-container" id="step9">
+          <div class="form-group">
+            <label class="form-label"><i class="fas fa-calculator"></i> 예상 견적</label>
+            <div id="estimate-details" class="card p-3">
+              <h5>견적 내역</h5>
+              <table class="table" id="estimate-table">
+                <thead>
+                  <tr>
+                    <th>항목</th>
+                    <th>비용</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>서비스 유형</td><td id="estimate-service-type"></td></tr>
+                  <tr><td>기본 비용</td><td id="estimate-base-cost"></td></tr>
+                  <tr><td>추가 비용 합계</td><td id="estimate-extra-cost-sum"></td></tr>
+                  <tr><td>총 예상 비용</td><td id="estimate-total-cost" class="fw-bold"></td></tr>
+                </tbody>
+              </table>
+              <small class="form-text text-muted">* 실제 비용은 작업자와 협의 후 확정됩니다. 봉분이 떨어져 있는 경우 별도 계산이 필요합니다.</small>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between mt-3">
+            <button type="button" class="btn btn-secondary rounded-pill" id="prev-step9">이전</button>
+            <button type="submit" class="btn btn-primary rounded-pill" id="submit-btn">확인 후 제출</button>
           </div>
         </div>
       </form>
@@ -380,54 +250,47 @@
 
   <footer class="bg-white text-center py-2 shadow-sm" id="footer-container"></footer>
 
-  <!-- 다크 모드 토글 버튼 -->
-  <button id="toggleDarkModeButton" class="btn btn-outline-light dark-mode-btn"><i class="fas fa-moon"></i></button>
-
-  <!-- 외부 스크립트 -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-  <script src="/scripts/nav.js" type="module" defer></script>
-  <script src="/scripts/footer.js" type="text/javascript" defer></script>
-  <script src="/scripts/common.js" defer></script>
+  <script src="/scripts/nav.js?v=1" type="module" defer></script>
+  <script src="/scripts/footer.js?v=1" type="module" defer></script>
+  <script src="/scripts/common.js?v=1" type="module" defer></script>
 
-  <!-- Firebase 및 Kakao Maps 스크립트 -->
   <script type="module">
-    import { db } from '/scripts/firebase-config.js';
-    import { collection, addDoc, Timestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-    import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
-
-    const storage = getStorage();
+    import { db, auth, storage, ref } from '/scripts/firebase-config.js?v=1';
+    import { Timestamp, collection, addDoc } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js';
+    import { uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-storage.js';
 
     let currentStep = 1;
-    const totalSteps = 8;
+    const totalSteps = 9;
     let latitude = null;
     let longitude = null;
     let map, marker, geocoder;
 
-    // 진행률 업데이트
     function updateProgressBar() {
       const progress = (currentStep / totalSteps) * 100;
       document.getElementById('progressBar').style.width = `${progress}%`;
-      document.getElementById('progressText').textContent = `Step ${currentStep}/${totalSteps}: ${['서비스 유형 선택', '이름 입력', '연락처 입력', '비밀번호 입력', '위치 정보', '세부 사항 입력', '희망 작업 날짜', '요청 사항 및 제출'][currentStep - 1]}`;
+      document.getElementById('progressText').textContent = `Step ${currentStep}/${totalSteps}: ${['서비스 유형 선택', '이름 입력', '연락처 입력', '비밀번호 입력', '위치 정보', '세부 사항 입력', '희망 작업 날짜', '요청 사항', '예상 견적 확인'][currentStep - 1]}`;
     }
 
-    // 단계 표시
     function showStep(step) {
       document.querySelectorAll('.step-container').forEach(container => container.classList.remove('active'));
       document.getElementById(`step${step}`).classList.add('active');
       currentStep = step;
       updateProgressBar();
       if (step === 5 && map) {
-        setTimeout(() => map.relayout(), 100);
+        setTimeout(() => {
+          map.relayout();
+          map.setCenter(new kakao.maps.LatLng(latitude || 37.5665, longitude || 126.9780));
+        }, 100);
       }
       window.scrollTo(0, 0);
     }
 
-    // 지도 초기화
     function initializeMap(containerId) {
       const mapOptions = {
         center: new kakao.maps.LatLng(37.5665, 126.9780),
         level: 3,
-        mapTypeId: kakao.maps.MapTypeId.HYBRID // 위성사진 모드 설정
+        mapTypeId: kakao.maps.MapTypeId.HYBRID
       };
       const map = new kakao.maps.Map(document.getElementById(containerId), mapOptions);
       const marker = new kakao.maps.Marker({ position: map.getCenter(), draggable: true });
@@ -436,22 +299,100 @@
       return { map, marker, geocoder };
     }
 
+    // 매칭 로직 삭제: 고객이 선택한 주소를 그대로 사용
+    function extractRegionFromAddress(address) {
+      return address; // 전체 주소를 그대로 반환
+    }
+
+    function calculateEstimate(serviceType, details) {
+      let baseCost = 0;
+      let extraCostDetails = {};
+      let totalExtraCost = 0;
+      const areaSize = details.areaSize ? parseInt(details.areaSize) : 0;
+
+      switch (serviceType) {
+        case '벌초':
+          if (details.graveType === '일반 봉분묘') {
+            baseCost = 120000;
+            const extraGraves = details.graveCount ? parseInt(details.graveCount) - 1 : 0;
+            extraCostDetails.graveExtra = extraGraves * 33000;
+            const extraArea = areaSize - 20;
+            if (extraArea > 0) {
+              if (areaSize <= 200) {
+                extraCostDetails.areaExtra = extraArea * 2200;
+              } else {
+                extraCostDetails.areaExtraNormal = 180 * 2200;
+                extraCostDetails.areaExtraLarge = (areaSize - 200) * 700;
+              }
+            }
+          } else if (details.graveType === '평장묘') {
+            baseCost = 120000;
+            const extraGraves = details.graveCount ? parseInt(details.graveCount) - 4 : 0;
+            extraCostDetails.graveExtra = extraGraves * 11000;
+            const extraArea = areaSize - 20;
+            if (extraArea > 0) extraCostDetails.areaExtra = extraArea * 2200;
+          } else if (details.graveType === '공원묘지') {
+            baseCost = 60000;
+            const extraGraves = details.graveCount ? parseInt(details.graveCount) - 1 : 0;
+            extraCostDetails.graveExtra = extraGraves * 33000;
+          }
+          break;
+        case '예초':
+          baseCost = 120000;
+          if (areaSize <= 1000) extraCostDetails.areaExtra = areaSize * 770;
+          else if (areaSize <= 2000) extraCostDetails.areaExtra = 660000 - 120000;
+          else if (areaSize <= 3000) extraCostDetails.areaExtra = 1200000 - 120000;
+          else if (areaSize <= 4000) extraCostDetails.areaExtra = 1650000 - 120000;
+          else return { baseCost: 120000, extraCostDetails: {}, totalCost: '4000평 이상 별도 상담' };
+          break;
+        case '제초제 살포':
+          baseCost = 60000;
+          extraCostDetails.areaExtra = areaSize * 2200;
+          break;
+        case '태양광 예초 관리':
+          baseCost = 220000;
+          const extraArea = areaSize - 400;
+          if (extraArea > 0) extraCostDetails.areaExtra = extraArea * 770;
+          break;
+        case '가지치기':
+          return { baseCost: 0, extraCostDetails: {}, totalCost: '작업자와 상담 필요' };
+        case '나무 제거(벌목)':
+          baseCost = 150000;
+          extraCostDetails.treeExtra = details.treeCount ? parseInt(details.treeCount) * 50000 : 0;
+          break;
+        case '기타':
+          return { baseCost: 0, extraCostDetails: {}, totalCost: '작업자와 상담 필요' };
+      }
+
+      totalExtraCost = Object.values(extraCostDetails).reduce((sum, cost) => sum + (cost || 0), 0);
+      const totalCost = typeof baseCost === 'number' ? baseCost + totalExtraCost : '상담 필요';
+      return { baseCost, extraCostDetails, totalCost };
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-      // 지도 초기화
+      if (!db || !auth || !storage || !ref) {
+        console.error('Firebase 초기화 실패:', { db, auth, storage, ref });
+        alert('Firebase 로드에 실패했습니다. 페이지를 새로고침해 주세요.');
+        return;
+      }
+      console.log('Firebase 초기화 성공:', { db, auth, storage, ref });
+
       const { map: mobileMap, marker: mobileMarker, geocoder: mobileGeocoder } = initializeMap('nv-map');
+      console.log('Map initialized:', mobileMap);
       map = mobileMap;
       marker = mobileMarker;
       geocoder = mobileGeocoder;
 
-      // 지도 이벤트
       kakao.maps.event.addListener(map, 'click', (mouseEvent) => {
         const latlng = mouseEvent.latLng;
         marker.setPosition(latlng);
         latitude = latlng.getLat();
         longitude = latlng.getLng();
+        console.log('Map clicked - Latitude:', latitude, 'Longitude:', longitude);
         geocoder.coord2Address(latlng.getLng(), latlng.getLat(), (result, status) => {
           if (status === kakao.maps.services.Status.OK) {
             document.getElementById('address').value = result[0].address.address_name;
+            console.log('Address updated:', result[0].address.address_name);
           }
         });
       });
@@ -460,18 +401,18 @@
         const latlng = marker.getPosition();
         latitude = latlng.getLat();
         longitude = latlng.getLng();
+        console.log('Marker dragged - Latitude:', latitude, 'Longitude:', longitude);
         geocoder.coord2Address(latlng.getLng(), latlng.getLat(), (result, status) => {
           if (status === kakao.maps.services.Status.OK) {
             document.getElementById('address').value = result[0].address.address_name;
+            console.log('Address updated after drag:', result[0].address.address_name);
           }
         });
       });
 
-      // 쿼리 파라미터 처리
       const urlParams = new URLSearchParams(window.location.search);
-      const selectedType = decodeURIComponent(urlParams.get('type')); // URL 디코딩
+      const selectedType = decodeURIComponent(urlParams.get('type'));
       const isSelected = urlParams.get('selected') === 'true';
-      console.log('Selected Type:', selectedType, 'Is Selected:', isSelected); // 디버깅 로그
       if (selectedType && isSelected) {
         const checkboxMap = {
           '벌초': 'service-type1',
@@ -483,11 +424,9 @@
           '기타': 'service-type7'
         };
         const checkboxId = checkboxMap[selectedType];
-        console.log('Checkbox ID:', checkboxId); // 디버깅 로그
         if (checkboxId) {
           const checkbox = document.getElementById(checkboxId);
           checkbox.checked = true;
-          // change 이벤트 트리거
           const event = new Event('change', { bubbles: true });
           checkbox.dispatchEvent(event);
           if (checkboxId === 'service-type7') {
@@ -496,10 +435,9 @@
         }
       }
 
-      // 단계 전환 이벤트
       document.getElementById('next-step1').addEventListener('click', () => {
+        console.log('Step 1 Next clicked');
         const selectedService = document.querySelector('input[name="service-type"]:checked');
-        console.log('Selected Service:', selectedService ? selectedService.value : 'None'); // 디버깅 로그
         if (selectedService) {
           const customServiceInput = document.getElementById('custom-service');
           if (selectedService.value === '기타' && !customServiceInput.value) {
@@ -513,18 +451,45 @@
       });
 
       document.getElementById('next-step2').addEventListener('click', () => {
-        if (document.getElementById('customer-name').value) showStep(3);
-        else alert('이름을 입력하세요.');
+        console.log('Step 2 Next clicked');
+        const customerName = document.getElementById('customer-name').value.trim();
+        if (customerName) {
+          showStep(3);
+        } else {
+          alert('이름을 입력하세요.');
+        }
       });
 
       document.getElementById('next-step3').addEventListener('click', () => {
-        if (document.getElementById('customer-phone').value) showStep(4);
-        else alert('연락처를 입력하세요.');
+        console.log('Step 3 Next clicked');
+        const customerPhone = document.getElementById('customer-phone').value.trim();
+        const phoneRegex = /^010\d{8}$/;
+        if (!customerPhone) {
+          alert('연락처를 입력하세요.');
+          return;
+        }
+        if (!phoneRegex.test(customerPhone)) {
+          alert('올바른 연락처 형식을 입력하세요. (예: 01012345678)');
+          return;
+        }
+        showStep(4);
       });
 
       document.getElementById('next-step4').addEventListener('click', () => {
-        if (document.getElementById('customer-password').value) showStep(5);
-        else alert('비밀번호를 입력하세요.');
+        console.log('Step 4 Next clicked');
+        const user = auth.currentUser;
+        const password = document.getElementById('customer-password').value.trim();
+        if (!user && password) {
+          if (password.length < 4 || password.length > 8) {
+            alert('비밀번호는 4~8자리로 설정해 주세요.');
+            return;
+          }
+        }
+        if (!user && !password) {
+          alert('비밀번호를 입력하세요.');
+          return;
+        }
+        showStep(5);
       });
 
       document.getElementById('address-search-btn').addEventListener('click', () => {
@@ -543,7 +508,10 @@
                 marker.setPosition(coords);
                 latitude = coords.getLat();
                 longitude = coords.getLng();
+                console.log('Address search - Latitude:', latitude, 'Longitude:', longitude);
                 map.relayout();
+              } else {
+                console.error('Address search failed:', status);
               }
             });
           }
@@ -551,141 +519,268 @@
       });
 
       document.getElementById('next-step5').addEventListener('click', () => {
-        if (document.getElementById('address').value && latitude && longitude) {
-          showStep(6);
-          // Step 6 진입 시 즉시 세부 사항 로드
-          const serviceType = document.querySelector('input[name="service-type"]:checked').value;
-          const detailsDiv = document.getElementById('service-details');
-          detailsDiv.innerHTML = ''; // 기존 내용 초기화
-          if (serviceType === '벌초') {
-            detailsDiv.innerHTML = `
-              <label class="form-label"><i class="fas fa-tombstone"></i> 묘지 종류 <span class="text-danger">*</span></label>
-              <select class="form-select" id="grave-type" required>
-                <option value="">선택하세요</option>
-                <option value="일반 봉분묘">일반 봉분묘</option>
-                <option value="평장묘">평장묘</option>
-                <option value="공원묘지">공원묘지</option>
-              </select>
-              <label class="form-label mt-3"><i class="fas fa-tombstone"></i> 분묘 수 <span class="text-danger">*</span></label>
-              <input type="number" id="grave-count" class="form-control" min="1" required>
-              <label class="form-label mt-3"><i class="fas fa-ruler"></i> 평수 <span class="text-danger">*</span></label>
-              <input type="number" id="area-size" class="form-control" min="1" required>
-            `;
-          } else if (['예초', '태양광 예초 관리'].includes(serviceType)) {
-            detailsDiv.innerHTML = `
-              <label class="form-label"><i class="fas fa-ruler"></i> 평수 <span class="text-danger">*</span></label>
-              <input type="number" id="area-size" class="form-control" min="1" required>
-              <label class="form-label mt-3"><i class="fas fa-trash"></i> 풀 처리 방법</label>
-              <select class="form-select" id="grass-disposal">
-                <option value="none">선택 안 함</option>
-                <option value="multiple">여러 곳 모아놓기</option>
-                <option value="single">한 곳 모아놓기</option>
-                <option value="complete">완전 배출</option>
-              </select>
-            `;
-          } else if (serviceType === '가지치기') {
-            detailsDiv.innerHTML = `
-              <label class="form-label"><i class="fas fa-ruler"></i> 평수 <span class="text-danger">*</span></label>
-              <input type="number" id="area-size" class="form-control" min="1" required>
-              <label class="form-label mt-3"><i class="fas fa-ruler-vertical"></i> 가지치기 높이 (m) <span class="text-danger">*</span></label>
-              <input type="number" id="pruning-height" class="form-control" min="0" step="0.1" required>
-            `;
-          } else if (serviceType === '제초제 살포') {
-            detailsDiv.innerHTML = `
-              <label class="form-label"><i class="fas fa-ruler"></i> 평수 <span class="text-danger">*</span></label>
-              <input type="number" id="area-size" class="form-control" min="1" required>
-              <label class="form-label mt-3"><i class="fas fa-spray-can"></i> 제초제 종류 <span class="text-danger">*</span></label>
-              <select class="form-select" id="herbicide-type" required>
-                <option value="">선택하세요</option>
-                <option value="비선택성">비선택성 (모든 식물 제거)</option>
-                <option value="선택성">선택성 (특정 잡초 제거)</option>
-                <option value="친환경">친환경 제초제</option>
-              </select>
-            `;
-          } else if (serviceType === '나무 제거(벌목)') {
-            detailsDiv.innerHTML = `
-              <label class="form-label"><i class="fas fa-ruler"></i> 평수 <span class="text-danger">*</span></label>
-              <input type="number" id="area-size" class="form-control" min="1" required>
-              <label class="form-label mt-3"><i class="fas fa-tree"></i> 나무 개수 <span class="text-danger">*</span></label>
-              <input type="number" id="tree-count" class="form-control" min="1" required>
-            `;
-          } else if (serviceType === '기타') {
-            detailsDiv.innerHTML = `
-              <label class="form-label"><i class="fas fa-ruler"></i> 평수 <span class="text-danger">*</span></label>
-              <input type="number" id="area-size" class="form-control" min="1" required>
-              <label class="form-label mt-3"><i class="fas fa-info-circle"></i> 세부 요청 사항 <span class="text-danger">*</span></label>
-              <textarea id="custom-details" class="form-control" placeholder="세부 요청 사항 입력" rows="3" required></textarea>
-            `;
-          }
-        } else {
-          alert('주소를 검색하고 지도에서 위치를 선택하세요.');
+        console.log('Step 5 Next clicked');
+        console.log('Address:', document.getElementById('address').value);
+        console.log('Latitude:', latitude);
+        console.log('Longitude:', longitude);
+        const address = document.getElementById('address').value.trim();
+        if (!address) {
+          alert('주소를 검색해주세요.');
+          return;
+        }
+        if (!latitude || !longitude) {
+          alert('지도에서 위치를 선택해주세요.');
+          return;
+        }
+        showStep(6);
+        const serviceType = document.querySelector('input[name="service-type"]:checked').value;
+        const detailsDiv = document.getElementById('service-details');
+        detailsDiv.innerHTML = '';
+        if (serviceType === '벌초') {
+          detailsDiv.innerHTML = `
+            <label class="form-label"><i class="fas fa-tombstone"></i> 묘지 종류 <span class="text-danger">*</span></label>
+            <select class="form-select" id="grave-type" required>
+              <option value="">선택하세요</option>
+              <option value="일반 봉분묘">일반 봉분묘</option>
+              <option value="평장묘">평장묘</option>
+              <option value="공원묘지">공원묘지</option>
+            </select>
+            <label class="form-label mt-3"><i class="fas fa-tombstone"></i> 분묘 수 <span class="text-danger">*</span></label>
+            <input type="number" id="grave-count" class="form-control" min="1" required>
+            <label class="form-label mt-3"><i class="fas fa-ruler"></i> 평수 <span class="text-danger">*</span></label>
+            <input type="number" id="area-size" class="form-control" min="1" required>
+          `;
+        } else if (['예초', '태양광 예초 관리'].includes(serviceType)) {
+          detailsDiv.innerHTML = `
+            <label class="form-label"><i class="fas fa-ruler"></i> 평수 <span class="text-danger">*</span></label>
+            <input type="number" id="area-size" class="form-control" min="1" required>
+            <label class="form-label mt-3"><i class="fas fa-trash"></i> 풀 처리 방법</label>
+            <select class="form-select" id="grass-disposal">
+              <option value="none">선택 안 함</option>
+              <option value="multiple">여러 곳 모아놓기</option>
+              <option value="single">한 곳 모아놓기</option>
+              <option value="complete">완전 배출</option>
+            </select>
+          `;
+        } else if (serviceType === '가지치기') {
+          detailsDiv.innerHTML = `
+            <label class="form-label"><i class="fas fa-ruler"></i> 평수 <span class="text-danger">*</span></label>
+            <input type="number" id="area-size" class="form-control" min="1" required>
+            <label class="form-label mt-3"><i class="fas fa-ruler-vertical"></i> 가지치기 높이 (m) <span class="text-danger">*</span></label>
+            <input type="number" id="pruning-height" class="form-control" min="0" step="0.1" required>
+          `;
+        } else if (serviceType === '제초제 살포') {
+          detailsDiv.innerHTML = `
+            <label class="form-label"><i class="fas fa-ruler"></i> 평수 <span class="text-danger">*</span></label>
+            <input type="number" id="area-size" class="form-control" min="1" required>
+            <label class="form-label mt-3"><i class="fas fa-spray-can"></i> 제초제 종류 <span class="text-danger">*</span></label>
+            <select class="form-select" id="herbicide-type" required>
+              <option value="">선택하세요</option>
+              <option value="비선택성">비선택성 (모든 식물 제거)</option>
+              <option value="선택성">선택성 (특정 잡초 제거)</option>
+              <option value="친환경">친환경 제초제</option>
+            </select>
+          `;
+        } else if (serviceType === '나무 제거(벌목)') {
+          detailsDiv.innerHTML = `
+            <label class="form-label"><i class="fas fa-ruler"></i> 평수 <span class="text-danger">*</span></label>
+            <input type="number" id="area-size" class="form-control" min="1" required>
+            <label class="form-label mt-3"><i class="fas fa-tree"></i> 나무 개수 <span class="text-danger">*</span></label>
+            <input type="number" id="tree-count" class="form-control" min="1" required>
+          `;
+        } else if (serviceType === '기타') {
+          detailsDiv.innerHTML = `
+            <label class="form-label"><i class="fas fa-ruler"></i> 평수 <span class="text-danger">*</span></label>
+            <input type="number" id="area-size" class="form-control" min—
+"1" required>
+            <label class="form-label mt-3"><i class="fas fa-info-circle"></i> 세부 요청 사항 <span class="text-danger">*</span></label>
+            <textarea id="custom-details" class="form-control" placeholder="세부 요청 사항 입력" rows="3" required></textarea>
+          `;
         }
       });
 
       document.getElementById('next-step6').addEventListener('click', () => {
+        console.log('Step 6 Next clicked');
         const serviceType = document.querySelector('input[name="service-type"]:checked').value;
         let isValid = true;
+        let errorMessage = '';
 
         if (serviceType === '벌초') {
-          isValid = document.getElementById('grave-type').value && document.getElementById('grave-count').value && document.getElementById('area-size').value;
+          const graveType = document.getElementById('grave-type').value;
+          const graveCount = document.getElementById('grave-count').value;
+          const areaSize = document.getElementById('area-size').value;
+          if (!graveType) errorMessage = '묘지 종류를 선택하세요.';
+          else if (!graveCount) errorMessage = '분묘 수를 입력하세요.';
+          else if (!areaSize) errorMessage = '평수를 입력하세요.';
+          isValid = graveType && graveCount && areaSize;
         } else if (['예초', '태양광 예초 관리'].includes(serviceType)) {
-          isValid = document.getElementById('area-size').value;
+          const areaSize = document.getElementById('area-size').value;
+          if (!areaSize) errorMessage = '평수를 입력하세요.';
+          isValid = areaSize;
         } else if (serviceType === '가지치기') {
-          isValid = document.getElementById('area-size').value && document.getElementById('pruning-height').value;
+          const areaSize = document.getElementById('area-size').value;
+          const pruningHeight = document.getElementById('pruning-height').value;
+          if (!areaSize) errorMessage = '평수를 입력하세요.';
+          else if (!pruningHeight) errorMessage = '가지치기 높이를 입력하세요.';
+          isValid = areaSize && pruningHeight;
         } else if (serviceType === '제초제 살포') {
-          isValid = document.getElementById('area-size').value && document.getElementById('herbicide-type').value;
+          const areaSize = document.getElementById('area-size').value;
+          const herbicideType = document.getElementById('herbicide-type').value;
+          if (!areaSize) errorMessage = '평수를 입력하세요.';
+          else if (!herbicideType) errorMessage = '제초제 종류를 선택하세요.';
+          isValid = areaSize && herbicideType;
         } else if (serviceType === '나무 제거(벌목)') {
-          isValid = document.getElementById('area-size').value && document.getElementById('tree-count').value;
+          const areaSize = document.getElementById('area-size').value;
+          const treeCount = document.getElementById('tree-count').value;
+          if (!areaSize) errorMessage = '평수를 입력하세요.';
+          else if (!treeCount) errorMessage = '나무 개수를 입력하세요.';
+          isValid = areaSize && treeCount;
         } else if (serviceType === '기타') {
-          isValid = document.getElementById('area-size').value && document.getElementById('custom-details').value;
+          const areaSize = document.getElementById('area-size').value;
+          const customDetails = document.getElementById('custom-details').value;
+          if (!areaSize) errorMessage = '평수를 입력하세요.';
+          else if (!customDetails) errorMessage = '세부 요청 사항을 입력하세요.';
+          isValid = areaSize && customDetails;
         }
 
-        if (isValid) showStep(7);
-        else alert('모든 세부 사항을 입력하세요.');
+        if (isValid) {
+          showStep(7);
+        } else {
+          alert(errorMessage);
+        }
       });
 
       document.getElementById('next-step7').addEventListener('click', () => {
-        if (document.getElementById('work-date').value) showStep(8);
-        else alert('희망 작업 날짜를 선택하세요.');
+        console.log('Step 7 Next clicked');
+        const workDate = document.getElementById('work-date').value;
+        if (workDate) {
+          showStep(8);
+        } else {
+          alert('희망 작업 날짜를 선택하세요.');
+        }
       });
 
-      // 폼 제출 처리
+      document.getElementById('next-step8').addEventListener('click', () => {
+        console.log('Step 8 Next clicked');
+        showStep(9);
+        const serviceType = document.querySelector('input[name="service-type"]:checked').value;
+        const customService = document.getElementById('custom-service').value || serviceType;
+        const details = {};
+        if (serviceType === '벌초') {
+          details.graveType = document.getElementById('grave-type').value;
+          details.graveCount = document.getElementById('grave-count').value;
+          details.areaSize = document.getElementById('area-size').value;
+        } else if (['예초', '태양광 예초 관리'].includes(serviceType)) {
+          details.areaSize = document.getElementById('area-size').value;
+          details.grassDisposal = document.getElementById('grass-disposal').value;
+        } else if (serviceType === '가지치기') {
+          details.areaSize = document.getElementById('area-size').value;
+          details.pruningHeight = document.getElementById('pruning-height').value;
+        } else if (serviceType === '제초제 살포') {
+          details.areaSize = document.getElementById('area-size').value;
+          details.herbicideType = document.getElementById('herbicide-type').value;
+        } else if (serviceType === '나무 제거(벌목)') {
+          details.areaSize = document.getElementById('area-size').value;
+          details.treeCount = document.getElementById('tree-count').value;
+        } else if (serviceType === '기타') {
+          details.areaSize = document.getElementById('area-size').value;
+          details.customDetails = document.getElementById('custom-details').value;
+        }
+
+        const estimate = calculateEstimate(serviceType, details);
+        console.log('견적 계산 결과:', estimate);
+
+        document.getElementById('estimate-service-type').textContent = customService;
+        document.getElementById('estimate-base-cost').textContent = typeof estimate.baseCost === 'number' ? estimate.baseCost.toLocaleString() + '원' : '-';
+
+        const tableBody = document.querySelector('#estimate-table tbody');
+        tableBody.innerHTML = `
+          <tr><td>서비스 유형</td><td>${customService}</td></tr>
+          <tr><td>기본 비용</td><td>${typeof estimate.baseCost === 'number' ? estimate.baseCost.toLocaleString() + '원' : '-'}</td></tr>
+        `;
+
+        const extraCostEntries = Object.entries(estimate.extraCostDetails);
+        if (extraCostEntries.length > 0) {
+          extraCostEntries.forEach(([key, value]) => {
+            const label = key === 'graveExtra' ? '추가 분묘 비용' :
+                          key === 'areaExtra' ? '추가 평수 비용' :
+                          key === 'areaExtraNormal' ? '추가 평수 비용 (200평까지)' :
+                          key === 'areaExtraLarge' ? '추가 평수 비용 (201평 이상)' :
+                          key === 'treeExtra' ? '추가 나무 비용' : '기타 추가 비용';
+            const row = document.createElement('tr');
+            row.innerHTML = `<td>${label}</td><td>${value.toLocaleString()}원</td>`;
+            tableBody.appendChild(row);
+          });
+        } else {
+          const row = document.createElement('tr');
+          row.innerHTML = '<td>추가 비용</td><td>0원</td>';
+          tableBody.appendChild(row);
+        }
+
+        const totalExtraCost = Object.values(estimate.extraCostDetails).reduce((sum, cost) => sum + (cost || 0), 0);
+        const totalCostRow = document.createElement('tr');
+        totalCostRow.innerHTML = `<td>추가 비용 합계</td><td>${totalExtraCost.toLocaleString()}원</td>`;
+        tableBody.appendChild(totalCostRow);
+
+        const finalTotalCostRow = document.createElement('tr');
+        finalTotalCostRow.innerHTML = `<td>총 예상 비용</td><td class="fw-bold">${typeof estimate.totalCost === 'number' ? estimate.totalCost.toLocaleString() + '원' : estimate.totalCost}</td>`;
+        tableBody.appendChild(totalCostRow);
+      });
+
+      document.getElementById('prev-step9').addEventListener('click', () => showStep(8));
+
       document.getElementById('service-form').addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        const serviceType = document.querySelector('input[name="service-type"]:checked').value;
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.classList.add('btn-loading');
+        submitBtn.textContent = '제출 중';
+
+        const serviceType = document.querySelector('input[name="service-type"]:checked')?.value;
         const customService = document.getElementById('custom-service').value || (serviceType === '기타' ? '' : null);
-        const customerName = document.getElementById('customer-name').value;
-        const customerPhone = document.getElementById('customer-phone').value;
-        const customerPassword = document.getElementById('customer-password').value;
-        const address = document.getElementById('address').value;
+        const customerName = document.getElementById('customer-name').value.trim();
+        const customerPhone = document.getElementById('customer-phone').value.trim();
+        const customerPassword = document.getElementById('customer-password').value.trim();
+        const address = document.getElementById('address').value.trim();
         const workDate = document.getElementById('work-date').value;
         const workerRequest = document.getElementById('worker-request').value;
         const files = document.getElementById('request-files').files;
+        const region = extractRegionFromAddress(address); // 이제 region은 전체 주소를 그대로 반영
 
-        if (!customerName || !customerPhone || !customerPassword || !address || !workDate) {
+        const user = auth.currentUser;
+
+        console.log('신청 시도 - 사용자:', user);
+        console.log('입력 데이터:', { serviceType, customerName, customerPhone, customerPassword, address, workDate });
+
+        if (!serviceType || !customerName || !customerPhone || !address || !workDate) {
+          console.error('필수 입력 항목 누락:', { serviceType, customerName, customerPhone, address, workDate });
           alert('필수 입력 항목을 모두 작성해주세요.');
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('btn-loading');
+          submitBtn.textContent = '확인 후 제출';
+          return;
+        }
+        if (!user && !customerPassword) {
+          console.error('비밀번호 누락 (비로그인 상태)');
+          alert('비밀번호를 입력해주세요.');
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('btn-loading');
+          submitBtn.textContent = '확인 후 제출';
           return;
         }
 
         try {
-          // 파일 업로드 (실패 시에도 진행되도록 예외 처리)
           let fileUrls = [];
           if (files.length > 0) {
-            try {
-              for (const file of files) {
-                const storageRef = ref(storage, `requests/${Date.now()}_${file.name}`);
-                await uploadBytes(storageRef, file);
-                const fileUrl = await getDownloadURL(storageRef);
-                fileUrls.push(fileUrl);
-              }
-            } catch (uploadError) {
-              console.error('파일 업로드 실패:', uploadError);
-              alert('파일 업로드에 실패했습니다. 하지만 서비스 신청은 진행됩니다.');
+            for (const file of files) {
+              const storageRef = ref(storage, `requests/${Date.now()}_${file.name}`);
+              await uploadBytes(storageRef, file);
+              const fileUrl = await getDownloadURL(storageRef);
+              fileUrls.push(fileUrl);
             }
           }
 
-          // 세부 사항 데이터 수집
           let details = {};
           if (serviceType === '벌초') {
             details = {
@@ -720,39 +815,56 @@
             };
           }
 
-          // Firestore에 데이터 저장
+          const estimate = calculateEstimate(serviceType, details);
           const requestData = {
             serviceType: customService || serviceType,
-            customerName: customerName,
-            customerPhone: customerPhone,
-            customerPassword: customerPassword,
-            address: address,
-            latitude: latitude,
-            longitude: longitude,
-            workDate: workDate,
-            workerRequest: workerRequest,
-            fileUrls: fileUrls.length > 0 ? fileUrls : [],
-            details: details,
+            customerName,
+            customerPhone,
+            address,
+            region, // 이제 전체 주소가 저장됨
+            latitude,
+            longitude,
+            workDate,
+            workerRequest,
+            fileUrls,
+            details,
+            estimatedCost: {
+              baseCost: estimate.baseCost,
+              extraCostDetails: estimate.extraCostDetails,
+              totalCost: typeof estimate.totalCost === 'number' ? estimate.totalCost : '상담 필요'
+            },
             createdAt: Timestamp.fromDate(new Date()),
             status: 'pending'
           };
 
+          if (user) {
+            requestData.customerId = user.uid;
+          } else {
+            requestData.customerPassword = customerPassword;
+          }
+
+          console.log('Firestore에 전달할 데이터:', JSON.stringify(requestData, null, 2));
           await addDoc(collection(db, 'serviceRequests'), requestData);
+          console.log('신청 성공');
           alert('서비스 신청이 완료되었습니다!');
           document.getElementById('service-form').reset();
-          showStep(1); // 처음 단계로 돌아감
+          showStep(1);
         } catch (error) {
-          console.error('서비스 신청 실패:', error);
+          console.error('서비스 신청 실패:', error.stack);
           alert('서비스 신청에 실패했습니다: ' + error.message);
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('btn-loading');
+          submitBtn.textContent = '확인 후 제출';
         }
       });
 
-      // 이전 버튼 이벤트
-      [2, 3, 4, 5, 6, 7, 8].forEach(step => {
+      [2, 3, 4, 5, 6, 7, 8, 9].forEach(step => {
         document.getElementById(`prev-step${step}`).addEventListener('click', () => showStep(step - 1));
       });
 
       updateProgressBar();
+      let details = {};
     });
   </script>
 </body>

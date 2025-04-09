@@ -1,0 +1,209 @@
+.mypage-container {
+    display: flex;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    gap: 2rem;
+}
+
+.mypage-sidebar {
+    width: 250px;
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.mypage-sidebar h2 {
+    margin-bottom: 1.5rem;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+.mypage-sidebar nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+.mypage-sidebar nav li {
+    margin-bottom: 0.5rem;
+}
+
+.mypage-sidebar nav a {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: #666;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.mypage-sidebar nav a:hover,
+.mypage-sidebar nav li.active a {
+    background: #007bff;
+    color: white;
+}
+
+.mypage-content {
+    flex: 1;
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.profile-section,
+.service-requests-section {
+    margin-bottom: 2rem;
+}
+
+.profile-section h3,
+.service-requests-section h3 {
+    margin-bottom: 1.5rem;
+    color: #333;
+    font-size: 1.25rem;
+}
+
+.profile-info p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.service-requests-list table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.service-requests-list th,
+.service-requests-list td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.service-requests-list th {
+    background: #f8f9fa;
+    font-weight: 600;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 4px 0;
+}
+
+.status-badge i {
+    margin-right: 4px;
+}
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-pending i {
+    color: #ffc107;
+}
+
+.status-confirmed {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.status-confirmed i {
+    color: #007bff;
+}
+
+.status-in-progress {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-in-progress i {
+    color: #28a745;
+}
+
+.status-completed {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
+.status-completed i {
+    color: #6c757d;
+}
+
+.status-cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.status-cancelled i {
+    color: #dc3545;
+}
+
+@keyframes statusChange {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.status-change {
+    animation: statusChange 0.3s ease-in-out;
+}
+
+.status-details {
+    margin-top: 8px;
+    padding: 8px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.status-timestamp {
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+
+.status-reason {
+    margin-top: 4px;
+    color: #495057;
+}
+
+.view-details-btn {
+    padding: 0.5rem 1rem;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.view-details-btn:hover {
+    background: #0056b3;
+}
+
+.no-requests {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .mypage-container {
+        flex-direction: column;
+    }
+
+    .mypage-sidebar {
+        width: 100%;
+    }
+
+    .service-requests-list table {
+        display: block;
+        overflow-x: auto;
+    }
+} 
