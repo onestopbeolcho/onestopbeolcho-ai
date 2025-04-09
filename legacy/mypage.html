@@ -325,30 +325,44 @@
             const userQuery = query(collection(db, 'users'), where('uid', '==', user.uid));
             const userDocs = await getDocs(userQuery);
             let userData = {};
+            
             if (!userDocs.empty) {
               userData = userDocs.docs[0].data();
             } else {
-              throw new Error('사용자 데이터가 없습니다.');
+              // 사용자 데이터가 없는 경우 새로 생성
+              userData = {
+                uid: user.uid,
+                email: user.email,
+                name: user.displayName || '',
+                phone: '',
+                role: 'user',
+                createdAt: serverTimestamp(),
+                lastLoginAt: serverTimestamp()
+              };
+              await addDoc(collection(db, 'users'), userData);
             }
 
-            userInfoFields.innerHTML = `
-              <div class="field" data-field="email">
-                <label>이메일</label>
-                <span>${user.email}</span>
-              </div>
-              <div class="field" data-field="name">
-                <label>이름</label>
-                <span>${userData.name || '미등록'}</span>
-                <input type="text" value="${userData.name || ''}" style="display: none;">
-                <button class="edit-btn">수정</button>
-              </div>
-              <div class="field" data-field="phone">
-                <label>전화번호</label>
-                <span>${userData.phone || '미등록'}</span>
-                <input type="tel" value="${userData.phone || ''}" style="display: none;">
-                <button class="edit-btn">수정</button>
-              </div>
-            `;
+            const userInfoFields = document.getElementById('user-info-fields');
+            if (userInfoFields) {
+              userInfoFields.innerHTML = `
+                <div class="field" data-field="email">
+                  <label>이메일</label>
+                  <span>${user.email}</span>
+                </div>
+                <div class="field" data-field="name">
+                  <label>이름</label>
+                  <span>${userData.name || '미등록'}</span>
+                  <input type="text" value="${userData.name || ''}" style="display: none;">
+                  <button class="edit-btn">수정</button>
+                </div>
+                <div class="field" data-field="phone">
+                  <label>전화번호</label>
+                  <span>${userData.phone || '미등록'}</span>
+                  <input type="tel" value="${userData.phone || ''}" style="display: none;">
+                  <button class="edit-btn">수정</button>
+                </div>
+              `;
+            }
 
             userInfoFields.querySelectorAll('.edit-btn').forEach(btn => {
               btn.addEventListener('click', async () => {

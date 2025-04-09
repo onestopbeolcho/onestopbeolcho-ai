@@ -1,15 +1,14 @@
-importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js');
-importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js');
+importScripts('https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js');
+importScripts('https://www.gstatic.com/firebasejs/11.5.0/firebase-messaging.js');
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBWADxFFsfyJGRqI09AJx1pDQhrWv_pQzo",
+  apiKey: "AIzaSyDZQqXQZQZQZQZQZQZQZQZQZQZQZQZQZQZQ",
   authDomain: "onestop-88b05.firebaseapp.com",
   projectId: "onestop-88b05",
-  storageBucket: "onestop-88b05.firebasestorage.app",
-  messagingSenderId: "189609926021",
-  appId: "1:189609926021:web:19a330a166ff2ba58378ec",
-  measurementId: "G-FKZLEVZ8M8"
+  storageBucket: "onestop-88b05.appspot.com",
+  messagingSenderId: "123456789012",
+  appId: "1:123456789012:web:abcdefghijklmnopqrstuv"
 };
 
 // Initialize Firebase
@@ -19,14 +18,13 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
   console.log('백그라운드 메시지 수신:', payload);
-  const notificationTitle = payload.notification.title || '새 알림';
+  const notificationTitle = payload.notification.title;
   const notificationOptions = {
-    body: payload.notification.body || '알림 내용이 없습니다.',
-    icon: '/assets/icons/icon-192x192.png',
-    data: { click_action: '/mypage.html' } // 클릭 시 이동할 URL
+    body: payload.notification.body,
+    icon: '/assets/icons/icon-192x192.png'
   };
 
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  return self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
 // 알림 클릭 시 동작 (선택 사항)

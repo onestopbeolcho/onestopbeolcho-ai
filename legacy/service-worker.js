@@ -1,5 +1,5 @@
 // 캐시 버전 설정
-const CACHE_NAME = 'onestop-beolcho-v12';
+const CACHE_NAME = 'onestop-cache-v1';
 
 // 캐싱할 리소스 목록
 const urlsToCache = [
@@ -20,79 +20,78 @@ const urlsToCache = [
 ];
 
 // Install 이벤트: 캐시 생성 및 리소스 저장
-self.addEventListener('install', (event) => {
+self.addEventListener('install', event => {
+  console.log('Service Worker: 설치 시작');
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('Service Worker: 캐시 열기 및 리소스 저장 시작:', urlsToCache);
-      return cache.addAll(urlsToCache)
-        .then(() => {
-          console.log('Service Worker: 모든 리소스 캐싱 완료');
-          return self.skipWaiting();
-        })
-        .catch((error) => console.error('Service Worker: 캐싱 실패:', error));
-    })
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        console.log('Service Worker: 캐시 열기 및 리소스 저장 시작:', urlsToCache);
+        return Promise.all(
+          urlsToCache.map(url => {
+            return fetch(url)
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return cache.put(url, response);
+              })
+              .catch(error => {
+                console.error(`Service Worker: ${url} 캐싱 실패:`, error);
+                return Promise.resolve(); // 실패해도 계속 진행
+              });
+          })
+        );
+      })
+      .then(() => {
+        console.log('Service Worker: 모든 리소스 캐싱 완료');
+        return self.skipWaiting();
+      })
+      .catch(error => {
+        console.error('Service Worker: 캐싱 실패:', error);
+      })
   );
 });
 
 // Fetch 이벤트: 네트워크 우선, 캐시 대체 전략
-self.addEventListener('fetch', (event) => {
-  const requestUrl = event.request.url;
-  const requestMethod = event.request.method;
-
-  // chrome-extension 스킴 및 POST 메서드 제외
-  if (requestUrl.startsWith('chrome-extension:') || requestMethod !== 'GET') {
-    event.respondWith(fetch(event.request));
-    return;
-  }
-
-  // 외부 도메인 요청은 서비스 워커가 처리하지 않음
-  if (!requestUrl.startsWith(self.location.origin)) {
-    event.respondWith(fetch(event.request));
-    return;
-  }
-
+self.addEventListener('fetch', event => {
   event.respondWith(
-    fetch(event.request)
-      .then((networkResponse) => {
-        // 네트워크 응답이 성공한 경우 캐시 업데이트
-        if (networkResponse && networkResponse.status === 200) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            console.log('Service Worker: 캐시 업데이트:', requestUrl);
-            cache.put(event.request, responseToCache);
-          });
+    caches.match(event.request)
+      .then(response => {
+        if (response) {
+          return response;
         }
-        return networkResponse;
-      })
-      .catch(() => {
-        // 네트워크 실패 시 캐시에서 제공
-        return caches.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) {
-            console.log('Service Worker: 캐시에서 제공:', requestUrl);
-            return cachedResponse;
-          }
-          console.error('Service Worker: 네트워크 및 캐시 모두 실패:', requestUrl);
-          return caches.match('/index.html');
-        });
+        return fetch(event.request)
+          .then(response => {
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME)
+              .then(cache => {
+                cache.put(event.request, responseToCache);
+              });
+            return response;
+          });
       })
   );
 });
 
 // Activate 이벤트: 이전 캐시 정리
-self.addEventListener('activate', (event) => {
+self.addEventListener('activate', event => {
+  console.log('Service Worker: 활성화 시작');
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then(cacheNames => {
       return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            console.log('Service Worker: 이전 캐시 삭제:', cache);
-            return caches.delete(cache);
+        cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('Service Worker: 오래된 캐시 삭제:', cacheName);
+            return caches.delete(cacheName);
           }
         })
-      ).then(() => {
-        console.log('Service Worker: 캐시 정리 완료');
-        return self.clients.claim();
-      });
+      );
+    }).then(() => {
+      console.log('Service Worker: 캐시 정리 완료');
+      return self.clients.claim();
     })
   );
 });
