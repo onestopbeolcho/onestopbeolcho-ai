@@ -139,15 +139,15 @@
   <script src="scripts/common.js" defer></script>
   <script src="scripts/footer.js" type="module" defer></script>
   <script type="module">
-    import { auth, db } from '/scripts/firebase-config.js';
-    import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js'; // getAnalytics 임포트 유지
-    import { signOut, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-    import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
-    import { collection, query, where, getDocs, orderBy, updateDoc, doc, addDoc, deleteDoc, onSnapshot, serverTimestamp, documentId } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-    import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';    
+    import { auth, db, app } from '/scripts/firebase-config.js';
+    import { getAnalytics } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-analytics.js';
+    import { signOut, onAuthStateChanged, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js';
+    import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-storage.js';
+    import { collection, query, where, getDocs, orderBy, updateDoc, doc, addDoc, deleteDoc, onSnapshot, serverTimestamp, documentId } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js';
+    import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-messaging.js';    
     import { checkAuth } from '/scripts/auth.js';
 
-    // Firebase Analytics 초기화는 firebase-config.js 로드 후 실행
+    // Firebase Analytics 초기화
     const analytics = getAnalytics(app);
 
     const messaging = getMessaging();
