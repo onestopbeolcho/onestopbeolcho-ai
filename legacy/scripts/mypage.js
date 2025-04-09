@@ -115,6 +115,8 @@ async function loadServiceRequests() {
       throw new Error('로그인이 필요합니다.');
     }
 
+    console.log('사용자 UID:', user.uid); // 디버깅용 로그
+
     const db = firebase.firestore();
     const serviceRequestsQuery = db.collection('serviceRequests')
       .where('userId', '==', user.uid)
@@ -129,17 +131,21 @@ async function loadServiceRequests() {
       return;
     }
 
+    console.log('서비스 신청 내역 개수:', snapshot.size); // 디버깅용 로그
+
     snapshot.forEach(doc => {
       const request = doc.data();
+      console.log('서비스 신청 데이터:', request); // 디버깅용 로그
+
       const card = document.createElement('div');
       card.className = 'request-card';
       card.innerHTML = `
         <div class="fields">
-          <div class="field"><label>서비스 유형</label><span>${request.serviceType}</span></div>
-          <div class="field"><label>주소</label><span>${request.address}</span></div>
-          <div class="field"><label>희망 작업 날짜</label><span>${request.workDate}</span></div>
-          <div class="field"><label>상태</label><span>${request.status}</span></div>
-          <div class="field"><label>신청일</label><span>${formatDate(request.createdAt.toDate())}</span></div>
+          <div class="field"><label>서비스 유형</label><span>${request.serviceType || '미지정'}</span></div>
+          <div class="field"><label>주소</label><span>${request.address || '미지정'}</span></div>
+          <div class="field"><label>희망 작업 날짜</label><span>${request.workDate || '미지정'}</span></div>
+          <div class="field"><label>상태</label><span>${request.status || '미지정'}</span></div>
+          <div class="field"><label>신청일</label><span>${request.createdAt ? formatDate(request.createdAt.toDate()) : '미지정'}</span></div>
         </div>
         <div class="action-buttons">
           <button class="view-details-btn" data-id="${doc.id}">상세보기</button>
@@ -171,5 +177,12 @@ async function loadServiceRequests() {
 
 // 페이지 로드 시 서비스 신청 내역 불러오기
 document.addEventListener('DOMContentLoaded', () => {
-  loadServiceRequests();
+  firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+      console.log('사용자 인증 상태 변경:', user.uid); // 디버깅용 로그
+      loadServiceRequests();
+    } else {
+      console.log('사용자가 로그인하지 않았습니다.'); // 디버깅용 로그
+    }
+  });
 }); 
