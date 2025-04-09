@@ -180,5 +180,5 @@ async function saveUserData(user, provider, additionalData = {}) {
 }
 
 // 네이버 로그인
-// 두 함수 모두 내보내기
-export { googleSignIn, checkAuth };
+// checkAuth 함수만 내보내기 (googleSignIn은 이미 위에서 export됨)
+export { checkAuth };
