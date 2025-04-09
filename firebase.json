@@ -1,18 +1,31 @@
 {
   "firestore": {
-    "rules": "firestore.rules"
+    "rules": "legacy/firestore.rules"
   },
   "storage": {
-    "rules": "storage.rules"
+    "rules": "legacy/storage.rules"
   },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ],
   "hosting": {
-    "public": ".",
+    "public": "legacy",
     "ignore": [
       "firebase.json",
-      "firestore.rules",
-      "storage.rules",
+      "**/firestore.rules",
+      "**/storage.rules",
       "**/node_modules/**",
-      "unused/**"
+      "**/unused/**"
     ],
     "headers": [
       {

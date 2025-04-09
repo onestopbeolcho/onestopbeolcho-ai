@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="ko" prefix="og: http://ogp.me/ns#">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>관리자 대시보드 | 원스톱 벌초</title>
+  <meta name="description" content="원스톱 벌초 서비스 관리자 대시보드입니다. 서비스 신청 내역, 작업자 관리, 통계 등을 확인할 수 있습니다." />
+  <meta name="keywords" content="관리자, 원스톱 벌초, 신청 관리, 작업자 관리, 대시보드" />
+
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:title" content="관리자 대시보드 | 원스톱 벌초">
+  <meta property="og:description" content="원스톱 벌초 서비스 관리자 대시보드입니다. 서비스 신청 내역, 작업자 관리, 통계 등을 확인할 수 있습니다.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://onestopbeolcho.com/admin/admin.html">
+  <meta property="og:image" content="https://onestopbeolcho.com/assets/images/main.png">
+  <meta property="og:image:alt" content="원스톱벌초 서비스 메인 이미지">
+
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#1E88E5" />
+  <link rel="apple-touch-icon" sizes="192x192" href="/assets/icons/icon-192x192.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="/styles/common.css">
+  
+  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ef6b942fdad36e982c84eb0061d1d2ed"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f4f6f9;
+    }
+    .sidebar {
+      min-height: 100vh;
+      background-color: #1E88E5;
+      color: white;
+      position: fixed;
+      width: 250px;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      transition: all 0.3s;
+    }
+    .sidebar .nav-link {
+      color: white;
+      padding: 10px 20px;
+      font-size: 1rem;
+      transition: background-color 0.3s;
+    }
+    .sidebar .nav-link:hover,
+    .sidebar .nav-link.active {
+      background-color: #1565C0;
+    }
+    .sidebar .nav-link i {
+      margin-right: 10px;
+    }
+    .main-content {
+      margin-left: 250px;
+      padding: 20px;
+      transition: all 0.3s;
+    }
+    .dashboard-card {
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      background-color: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: transform 0.3s ease;
+    }
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+    }
+    .dashboard-card h5 {
+      font-size: 1.2rem;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .dashboard-card p {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1E88E5;
+      margin: 0;
+    }
+    .dashboard-card i {
+      font-size: 2rem;
+      color: #1E88E5;
+    }
+    .table-responsive {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+    }
+    .table th, .table td {
+      vertical-align: middle;
+      font-size: 0.9rem;
+    }
+    .btn-sm {
+      font-size: 0.85rem;
+      padding: 5px 10px;
+    }
+    .worker-card {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    .worker-card h5 {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+    }
+    .details-toggle {
+      color: #1E88E5;
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-top: 10px;
+      display: block;
+    }
+    .feedback-message {
+      margin-bottom: 15px;
+      padding: 10px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 0.9rem;
+      display: none;
+    }
+    .feedback-message.error {
+      background: #ffebee;
+      color: #c62828;
+      display: block;
+    }
+    @media (min-width: 768px){
+      #mapModal #map{
+          height: 800px;
+      }
+    }
+    .feedback-message.success {
+      background: #e3f2fd;
+      color: #1E88E5;
+      display: block;
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 200px;
+        left: -200px;
+      }
+      .sidebar.active {
+        left: 0;
+      }
+      .main-content {
+        margin-left: 0;
+      }
+      .main-content.active {
+        margin-left: 200px;
+      }
+      .table th, .table td {
+        font-size: 0.8rem;
+      }
+      .btn-sm {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+      }
+      .worker-card {
+        padding: 10px;
+      }
+      .worker-card h5 {
+        font-size: 1rem;
+      }
+      .dashboard-card p {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 사이드바 -->
+  <nav class="sidebar" id="sidebar">
+    <div class="p-4">
+      <h4 class="text-white mb-4">관리자 대시보드</h4>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link active" href="#" data-bs-toggle="tab" data-bs-target="#dashboard" aria-selected="true"><i class="fas fa-tachometer-alt"></i> 대시보드</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#request"><i class="fas fa-list"></i> 서비스 신청 내역</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#workers"><i class="fas fa-users"></i> 작업자 리스트</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#worker-applications"><i class="fas fa-user-plus"></i> 작업자 가입 신청</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#work-logs"><i class="fas fa-tasks"></i> 작업사항</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-bs-toggle="tab" data-bs-target="#portfolio"><i class="fas fa-images"></i> 포트폴리오 관리</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- 메인 콘텐츠 -->
+  <div class="main-content" id="main-content">
+    <div class="feedback-message" id="feedback-message"></div> <!-- 추가된 피드백 메시지 요소 -->
+    <!-- 네비게이션 토글 버튼 (모바일) 및 사용자 페이지로 이동 버튼 -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <button class="btn btn-primary d-md-none" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+      <button class="btn btn-outline-primary" id="goToUserPage"><i class="fas fa-external-link-alt"></i> 사용자 페이지로 이동</button>
+    </div>
+    <div class="tab-content" aria-live="polite">
+      <!-- 대시보드 탭 -->
+      <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+        <h3 class="mb-4">대시보드</h3>
+        <div class="row">
+          <div class="col-md-4 col-sm-6 mb-3">
+            <div class="dashboard-card text-center">
+              <i class="fas fa-list-alt mb-2"></i>
+              <h5>총 신청 건수</h5>
+              <p id="total-requests-admin">0</p>
+            </div>
+          </div>
+          <div class="col-md-4 col-sm-6 mb-3">
+            <div class="dashboard-card text-center">
+              <i class="fas fa-users mb-2"></i>
+              <h5>총 작업자 수</h5>
+              <p id="total-workers-admin">0</p>
+            </div>
+          </div>
+          <div class="col-md-4 col-sm-6 mb-3">
+            <div class="dashboard-card text-center">
+              <i class="fas fa-tasks mb-2"></i>
+              <h5>진행 중인 작업</h5>
+              <p id="ongoing-works-admin">0</p>
+            </div>
+          </div>
+          <div class="col-md-4 col-sm-6 mb-3">
+            <div class="dashboard-card text-center">
+              <i class="fas fa-user-plus mb-2"></i>
+              <h5>신규 작업자 신청</h5>
+              <p id="pending-workers">0</p>
+            </div>
+          </div>
+          <div class="col-md-4 col-sm-6 mb-3">
+            <div class="dashboard-card text-center">
+              <i class="fas fa-check-circle mb-2"></i>
+              <h5>완료된 작업</h5>
+              <p id="completed-works">0</p>
+            </div>
+          </div>
+          <div class="col-md-4 col-sm-6 mb-3">
+            <div class="dashboard-card text-center">
+              <i class="fas fa-exclamation-circle mb-2"></i>
+              <h5>대기 중인 신청</h5>
+              <p id="pending-requests">0</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 서비스 신청 내역 탭 -->
+      <div class="tab-pane fade" id="request" role="tabpanel">
+        <h3 class="mb-4">서비스 신청 내역</h3>
+        <div class="mb-3" role="group">
+          <label for="sortField" class="me-2">정렬 기준:</label>
+          <select id="sortField" class="me-2 form-select form-select-sm d-inline-block w-auto">
+            <option value="createdAt">시간순</option>
+            <option value="region">지역순</option>
+          </select>
+          <select id="sortOrder" class="me-2 form-select form-select-sm d-inline-block w-auto">
+            <option value="desc">내림차순</option>
+            <option value="asc">오름차순</option>
+          </select>
+          <button id="applySort" class="btn btn-secondary btn-sm">정렬 적용</button>
+        </div>
+        <div class="mb-3" role="group">
+          <label for="searchField" class="me-2">검색 조건:</label>
+          <select id="searchField" class="me-2 form-select form-select-sm d-inline-block w-auto">
+            <option value="status">상태</option>
+            <option value="region">지역</option>
+            <option value="customerName">고객 이름</option>
+          </select>
+          <input type="text" id="searchValue" placeholder="검색어 입력" class="me-2 form-control form-control-sm d-inline-block w-auto">
+          <button id="applySearch" class="btn btn-secondary btn-sm">검색</button>
+          <button id="resetSearch" class="btn btn-outline-secondary btn-sm">초기화</button>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>신청 ID</th>
+                <th>고객 이름</th>
+                <th>연락처</th>
+                <th>주소</th>
+                <th>지역</th>
+                <th>서비스 유형</th>
+                <th>세부 사항</th>
+                <th>사진</th>
+                <th>상태</th>
+                <th>작업자</th>
+                <th>작업 날짜</th>
+                <th>작업</th>
+              </tr>
+            </thead>
+            <tbody id="request-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 작업자 리스트 탭 -->
+      <div class="tab-pane fade" id="workers" role="tabpanel">
+        <h3 class="mb-4">작업자 리스트</h3>
+        <div class="mb-3" role="group">
+          <label for="workerSearchField" class="me-2">검색 조건:</label>
+          <select id="workerSearchField" class="me-2 form-select form-select-sm d-inline-block w-auto">
+            <option value="name">이름</option>
+            <option value="email">이메일</option>
+            <option value="status">상태</option>
+          </select>
+          <input type="text" id="workerSearchValue" placeholder="검색어 입력" class="me-2 form-control form-control-sm d-inline-block w-auto">
+          <button id="workerSearchBtn" class="btn btn-secondary btn-sm">검색</button>
+          <button id="workerResetSearch" class="btn btn-outline-secondary btn-sm">초기화</button>
+          <select id="workerFilterStatus" class="ms-2 form-select form-select-sm d-inline-block w-auto">
+            <option value="all">상태: 모두</option>
+            <option value="approved">승인됨</option>
+            <option value="pending">대기 중</option>
+          </select>
+          <select id="workerFilterRegion" class="ms-2 form-select form-select-sm d-inline-block w-auto">
+            <option value="all">지역: 모두</option>
+            <!-- 동적으로 지역 목록 채움 -->
+          </select>
+          <select id="workerFilterService" class="ms-2 form-select form-select-sm d-inline-block w-auto">
+            <option value="all">서비스: 모두</option>
+            <option value="벌초">벌초</option>
+            <option value="예초">예초</option>
+            <option value="태양광 예초 관리">태양광 예초 관리</option>
+            <option value="가지치기">가지치기</option>
+            <option value="제초제 살포">제초제 살포</option>
+            <option value="나무 제거(벌목)">나무 제거(벌목)</option>
+            <option value="기타">기타</option>
+          </select>
+          <button id="workerFilterBtn" class="btn btn-secondary btn-sm">필터 적용</button>
+        </div>
+        <div id="workers-container" class="row"></div>
+      </div>
+
+      <!-- 작업자 가입 신청 현황 탭 -->
+      <div class="tab-pane fade" id="worker-applications" role="tabpanel">
+        <h3 class="mb-4">작업자 가입 신청 현황</h3>
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>신청 ID</th>
+                <th>이름</th>
+                <th>이메일</th>
+                <th>연락처</th>
+                <th>지역</th>
+                <th>작업 종류</th>
+                <th>팀 인원</th>
+                <th>사업자 여부</th>
+                <th>신청 날짜</th>
+                <th>작업</th>
+              </tr>
+            </thead>
+            <tbody id="worker-applications-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 작업사항 탭 -->
+      <div class="tab-pane fade" id="work-logs" role="tabpanel">
+        <h3 class="mb-4">작업사항</h3>
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>신청 ID</th>
+                <th>작업자</th>
+                <th>서비스 유형</th>
+                <th>고객 이름</th>
+                <th>상태</th>
+                <th>작업 시작 시간</th>
+                <th>작업 종료 시간</th>
+                <th>업데이트 날짜</th>
+                <th>메모</th>
+                <th>작업</th>
+              </tr>
+            </thead>
+            <tbody id="work-logs-table"></tbody>
+          </table>
+        </div>
+      </div>
+      <!-- 포트폴리오 관리 탭 -->
+      <div class="tab-pane fade" id="portfolio" role="tabpanel">
+        <h3 class="mb-4">포트폴리오 관리</h3>
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>제목</th>
+                <th>설명</th>
+                <th>이미지</th>
+                <th>작업</th>
+              </tr>
+            </thead>
+            <tbody id="portfolio-create">
+              <tr>
+                <td colspan="5">
+                  <div class="d-flex align-items-center">
+                    <input type="text" class="form-control form-control-sm me-2" id="new-portfolio-title" placeholder="제목">
+                    <input type="text" class="form-control form-control-sm me-2" id="new-portfolio-description" placeholder="설명">
+                    <input type="text" class="form-control form-control-sm me-2" id="new-portfolio-image" placeholder="이미지 URL">
+                    <input type="text" class="form-control form-control-sm me-2" id="new-portfolio-content" placeholder="상세 내용">
+                    <button class="btn btn-success btn-sm" id="create-portfolio">추가</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+            <tbody id="portfolio-edit">
+              <tr>
+                <td colspan="5">
+                  <div class="d-flex align-items-center">
+                    <input type="text" class="form-control form-control-sm me-2" id="edit-portfolio-title" placeholder="제목">
+                    <input type="text" class="form-control form-control-sm me-2" id="edit-portfolio-description" placeholder="설명">
+                    <input type="text" class="form-control form-control-sm me-2" id="edit-portfolio-image" placeholder="이미지 URL">
+                    <input type="text" class="form-control form-control-sm me-2" id="edit-portfolio-content" placeholder="상세 내용">
+                  </div>
+                </td>
+              </tr>
+            <tbody id="portfolio-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 모달 -->
+  <div class="modal fade" id="editRequestModal" tabindex="-1" aria-labelledby="editRequestModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="editRequestModalLabel">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editRequestModalLabel" role="heading" aria-level="2">신청 내역 수정</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editRequestForm">
+            <input type="hidden" id="editRequestId">
+            <div class="mb-3">
+              <label for="editCustomerName" class="form-label">고객 이름</label>
+              <input type="text" class="form-control" id="editCustomerName" required>
+            </div>
+            <div class="mb-3">
+              <label for="editCustomerPhone" class="form-label">연락처</label>
+              <input type="text" class="form-control" id="editCustomerPhone" required>
+            </div>
+            <div class="mb-3">
+              <label for="editAddress" class="form-label">주소</label>
+              <input type="text" class="form-control" id="editAddress" required>
+            </div>
+            <div class="mb-3">
+              <label for="editRegion" class="form-label">지역</label>
+              <input type="text" class="form-control" id="editRegion" required>
+            </div>
+            <div class="mb-3">
+              <label for="editStatus" class="form-label">상태</label>
+              <select class="form-control" id="editStatus" required>
+                <option value="pending">대기중</option>
+                <option value="confirmed">확인됨</option>
+                <option value="completed">완료</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="editWorkDate" class="form-label">작업 날짜</label>
+              <input type="date" class="form-control" id="editWorkDate" required>
+            </div>
+            <div class="mb-3">
+              <label for="editLatitude" class="form-label">위도</label>
+              <input type="number" class="form-control" id="editLatitude" step="any">
+            </div>
+            <div class="mb-3">
+              <label for="editLongitude" class="form-label">경도</label>
+              <input type="number" class="form-control" id="editLongitude" step="any">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+          <button type="button" class="btn btn-primary" id="saveRequestChanges">저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" >
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="mapModalLabel">위치 보기</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="map" style="height: 400px; width: 100%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="editWorkerRegionsModal" tabindex="-1" aria-labelledby="editWorkerRegionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editWorkerRegionsModalLabel">작업자 지역 수정</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editWorkerRegionsForm">
+            <input type="hidden" id="editWorkerId">
+            <div class="mb-3">
+              <label for="editRegions" class="form-label">배정 지역 (최대 3개 선택)</label>
+              <select multiple class="form-control" id="editRegions" size="5">
+                <!-- 동적으로 지역 목록 채움 -->
+              </select>
+              <small class="form-text text-muted">Ctrl 또는 Shift를 사용해 여러 지역을 선택하세요.</small>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+          <button type="button" class="btn btn-primary" id="saveWorkerRegions">저장 및 배정</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="filePreviewModal" tabindex="-1" aria-labelledby="filePreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="filePreviewModalLabel">사진 미리보기</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="file-preview-container" class="row"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="assignWorkerModal" tabindex="-1" aria-labelledby="assignWorkerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="assignWorkerModalLabel">작업자 배정</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="assignWorkerForm">
+            <input type="hidden" id="assignRequestId">
+            <div class="mb-3">
+              <label for="workerSelect" class="form-label">작업자 선택</label>
+              <select class="form-control" id="workerSelect" required>
+                <option value="">작업자를 선택하세요</option>
+                <!-- 동적으로 작업자 목록 채움 -->
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+          <button type="button" class="btn btn-primary" id="saveWorkerAssignment">배정</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+  <script type="module">
+    import { auth, db } from '/scripts/firebase-config.js';
+    import { setPersistence, browserLocalPersistence, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js';
+    import { collection, query, where, orderBy, updateDoc, doc, onSnapshot, serverTimestamp, getDoc, getDocs, addDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js';
+
+    let currentMap;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // 사이드바 토글 (모바일)
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('main-content');
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+        mainContent.classList.toggle('active');
+      });
+
+      // 사용자 페이지로 이동 버튼
+      document.getElementById('goToUserPage').addEventListener('click', () => {
+        window.open('/index.html', '_blank');
+      });
+
+      setPersistence(auth, browserLocalPersistence)
+        .then(() => console.log('세션 영속성 설정 완료'))
+        .catch(error => console.error('세션 영속성 설정 오류:', error));
+
+      onAuthStateChanged(auth, async (user) => {
+        console.log('인증 상태 체크:', new Date().toLocaleString(), 'UID:', user?.uid || '없음');
+        if (!user) {
+          console.log('사용자 인증 없음, 로그인 페이지로 리다이렉션');
+          window.location.replace('/login.html');
+          return;
+        }
+        
+        // request-table 요소가 존재하는지 확인
+        const requestTable = document.getElementById('request-table');
+        if (!requestTable) {
+          console.error('request-table 요소가 존재하지 않습니다.');
+          return;
+        }
+        try {
+          console.log('Firestore getDoc 호출 시도 - UID:', user.uid);
+          console.log('db object in onAuthStateChanged:', db);
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          console.log('Firestore 응답:', userDoc.exists(), userDoc.data());
+
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            console.log('사용자 데이터 확인:', userData);
+            if (userData.isAdmin) {
+              console.log('관리자 확인 성공 - UID:', user.uid);
+              
+              // db 객체가 유효한지 확인한 후 loadDashboard 호출
+              if (!db) {
+                console.error('db 객체가 초기화되지 않았습니다.');
+                return;
+              }
+              loadDashboard();
+              const tabs = document.querySelectorAll('.nav-link');
+              tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                  const target = tab.getAttribute('data-bs-target');
+                  console.log('탭 전환:', target);
+                  if (target === '#dashboard') loadDashboard();
+                  else if (target === '#request') loadRequests();
+                  else if (target === '#workers') loadWorkers();
+                  else if (target === '#worker-applications') loadWorkerApplications();
+                  else if (target === '#work-logs') loadWorkLogs();
+                  else if(target === '#portfolio') loadPortfolio();
+                });
+              });
+            } else {
+              console.log('관리자 권한 없음, 로그인 페이지로 리다이렉션 - UID:', user.uid);
+              window.location.replace('/login.html');
+            }
+          } else {
+            console.log('사용자 문서 없음, 로그인 페이지로 리다이렉션 - UID:', user.uid);
+            window.location.replace('/login.html');
+          }
+        } catch (error) {
+          console.error('Firestore 오류:', error);
+          document.getElementById('feedback-message').textContent = 'Firestore 오류: ' + error.message;
+          document.getElementById('feedback-message').classList.add('error');
+          setTimeout(() => window.location.href = '/login.html', 2000);
+        }
+      });
+
+      function loadDashboard() {
+        console.log('loadDashboard 호출, db 상태:', db); // 디버깅 로그 추가
+        if (!db) {
+          console.error('db가 초기화되지 않았습니다.');
+          document.getElementById('feedback-message').textContent = '데이터베이스 초기화 오류';
+          document.getElementById('feedback-message').classList.add('error');
+          return;
+        }
+
+        // 총 신청 건수
+        const totalRequestsElement = document.getElementById('total-requests-admin');
+        getDocs(collection(db, 'serviceRequests'))
+          .then((snapshot) => {
+            document.getElementById('total-requests-admin').textContent = snapshot.size;
+          })
+          .catch((error) => {
+            console.error('총 신청 건수 로드 실패:', error);
+            document.getElementById('total-requests-admin').textContent = '0';
+          });
+
+        // 총 작업자 수
+        const totalWorkersElement = document.getElementById('total-workers-admin');
+        getDocs(query(collection(db, 'users'), where('isWorker', '==', true)))
+          .then((snapshot) => {
+            document.getElementById('total-workers-admin').textContent = snapshot.size;
+          })
+          .catch((error) => {
+            console.error('총 작업자 수 로드 실패:', error);
+            document.getElementById('total-workers-admin').textContent = '0';
+          });
+
+        // 진행 중인 작업 수
+        const ongoingWorksElement = document.getElementById('ongoing-works-admin');
+        getDocs(query(collection(db, 'serviceRequests'), where('status', '==', 'confirmed')))
+          .then((snapshot) => {
+            document.getElementById('ongoing-works-admin').textContent = snapshot.size;
+          })
+          .catch((error) => {
+            console.error('진행 중인 작업 수 로드 실패:', error);
+            document.getElementById('ongoing-works-admin').textContent = '0';
+          });
+
+        // 신규 작업자 신청 수
+        const pendingWorkersElement = document.getElementById('pending-workers');
+        getDocs(query(collection(db, 'workerApplications'), where('status', '==', 'pending')))
+          .then((snapshot) => {
+            document.getElementById('pending-workers').textContent = snapshot.size;
+          })
+          .catch((error) => {
+            console.error('신규 작업자 신청 수 로드 실패:', error);
+            document.getElementById('pending-workers').textContent = '0';
+          });
+
+        // 완료된 작업 수
+        const completedWorksElement = document.getElementById('completed-works');
+        getDocs(query(collection(db, 'serviceRequests'), where('status', '==', 'completed')))
+          .then((snapshot) => {
+            document.getElementById('completed-works').textContent = snapshot.size;
+          })
+          .catch((error) => {
+            console.error('완료된 작업 수 로드 실패:', error);
+            document.getElementById('completed-works').textContent = '0';
+          });
+
+        // 대기 중인 신청 수
+        const pendingRequestsElement = document.getElementById('pending-requests');
+        getDocs(query(collection(db, 'serviceRequests'), where('status', '==', 'pending')))
+          .then((snapshot) => {
+            document.getElementById('pending-requests').textContent = snapshot.size;
+          })
+          .catch((error) => {
+            console.error('대기 중인 신청 수 로드 실패:', error);
+            document.getElementById('pending-requests').textContent = '0';
+          });
+      }
+
+      function loadRequests() {
+        console.log('loadRequests 호출');
+        console.log('db object in loadRequests:', db);
+        const requestTable = document.getElementById('request-table');
+        requestTable.innerHTML = '';
+        let q = query(collection(db, 'serviceRequests'), orderBy('createdAt', 'desc'));
+        let currentQuery = q;
+
+        document.getElementById('applySort').addEventListener('click', () => {
+          const sortField = document.getElementById('sortField').value;
+          const sortOrder = document.getElementById('sortOrder').value;
+          let newQuery = query(collection(db, 'serviceRequests'), orderBy(sortField, sortOrder));
+          const searchField = document.getElementById('searchField').value;
+          const searchValue = document.getElementById('searchValue').value.trim();
+          if (searchValue) {
+            newQuery = query(newQuery, where(searchField, '==', searchValue));
+          }
+          currentQuery = newQuery;
+          applyQuery();
+        });
+
+        document.getElementById('applySearch').addEventListener('click', () => {
+          const searchField = document.getElementById('searchField').value;
+          const searchValue = document.getElementById('searchValue').value.trim();
+          let newQuery = query(collection(db, 'serviceRequests'));
+          if (searchValue) {
+            newQuery = query(newQuery, where(searchField, '==', searchValue));
+          }
+          const sortField = document.getElementById('sortField').value;
+          const sortOrder = document.getElementById('sortOrder').value;
+          newQuery = query(newQuery, orderBy(sortField, sortOrder));
+          currentQuery = newQuery;
+          applyQuery();
+        });
+
+        document.getElementById('resetSearch').addEventListener('click', () => {
+          document.getElementById('searchValue').value = '';
+          const sortField = document.getElementById('sortField').value;
+          const sortOrder = document.getElementById('sortOrder').value;
+          currentQuery = query(collection(db, 'serviceRequests'), orderBy(sortField, sortOrder));
+          applyQuery();
+        });
+
+        function applyQuery() {
+          console.log('applyQuery 실행');
+          try {
+            onSnapshot(currentQuery, (snapshot) => {
+              console.log('스냅샷 데이터:', snapshot.docs.map(doc => doc.data()));
+              requestTable.innerHTML = '';
+              snapshot.forEach((doc) => {
+                const request = doc.data();
+                const details = request.details || {};
+                const detailsStr = Object.entries(details).map(([key, value]) => `${key}: ${value}`).join(', ');
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                  <td>${doc.id}</td>
+                  <td>${request.customerName || '미등록'}</td>
+                  <td>${request.customerPhone || '미등록'}</td>
+                  <td>${request.address || '-'}</td>
+                  <td>${request.region || '-'}</td>
+                  <td>${request.serviceType || '-'}</td>
+                  <td>${detailsStr || '-'}</td>
+                  <td>
+                    ${request.fileUrls && request.fileUrls.length > 0
+                      ? `<button class="btn btn-info btn-sm view-files" data-files='${JSON.stringify(request.fileUrls)}'>사진 보기</button>`
+                      : '-'}
+                  </td>
+                  <td>${request.status || 'pending'}</td>
+                  <td>${request.workerName || request.workerId || '미배정'}</td>
+                  <td>${request.workDate || '-'}</td>
+                  <td>
+                    <button class="btn btn-primary btn-sm update-status" data-id="${doc.id}" data-status="confirmed">확인</button>
+                    <button class="btn btn-warning btn-sm edit-request" data-id="${doc.id}">수정</button>
+                    <button class="btn btn-info btn-sm show-map" data-lat="${request.latitude}" data-lng="${request.longitude}" data-address="${request.address || ''}">지도 보기</button>
+                    <button class="btn btn-secondary btn-sm assign-worker" data-id="${doc.id}" data-region="${request.region}">작업자 배정</button>
+                  </td>
+                `;
+                requestTable.appendChild(row);
+              });
+
+              // 이벤트 리스너 추가
+              document.querySelectorAll('.update-status').forEach(button => {
+                button.addEventListener('click', async () => {
+                  const id = button.getAttribute('data-id');
+                  const requestDoc = await getDoc(doc(db, 'serviceRequests', id));
+                  const request = requestDoc.data();
+                  if (!request.workerId) {
+                    alert('먼저 작업자를 배정해주세요.');
+                    return;
+                  }
+                  await updateDoc(doc(db, 'serviceRequests', id), { status: button.getAttribute('data-status') });
+                  // workLogs에 로그 추가
+                  await addDoc(collection(db, 'workLogs'), {
+                    requestId: id,
+                    workerId: request.workerId,
+                    workerName: request.workerName,
+                    status: button.getAttribute('data-status'),
+                    updatedAt: serverTimestamp(),
+                    requestDetails: {
+                      serviceType: request.serviceType,
+                      customerName: request.customerName,
+                      region: request.region
+                    }
+                  });
+                  alert('상태가 업데이트되었습니다.');
+                });
+              });
+
+              document.querySelectorAll('.edit-request').forEach(button => {
+                button.addEventListener('click', () => {
+                  const id = button.getAttribute('data-id');
+                  const request = snapshot.docs.find(doc => doc.id === id).data();
+                  document.getElementById('editRequestId').value = id;
+                  document.getElementById('editCustomerName').value = request.customerName || '';
+                  document.getElementById('editCustomerPhone').value = request.customerPhone || '';
+                  document.getElementById('editAddress').value = request.address || '';
+                  document.getElementById('editRegion').value = request.region || '';
+                  document.getElementById('editStatus').value = request.status || 'pending';
+                  document.getElementById('editWorkDate').value = request.workDate || '';
+                  document.getElementById('editLatitude').value = request.latitude || '';
+                  document.getElementById('editLongitude').value = request.longitude || '';
+                  new bootstrap.Modal(document.getElementById('editRequestModal')).show();
+                });
+              });
+
+              document.querySelectorAll('.show-map').forEach(button => {
+                button.addEventListener('click', () => {
+                  const lat = parseFloat(button.getAttribute('data-lat'));
+                  const lng = parseFloat(button.getAttribute('data-lng'));
+                  const address = button.getAttribute('data-address');
+                  showMap(lat, lng, address);
+                });
+              });
+
+              document.querySelectorAll('.view-files').forEach(button => {
+                button.addEventListener('click', () => {
+                  const fileUrls = JSON.parse(button.getAttribute('data-files'));
+                  const previewContainer = document.getElementById('file-preview-container');
+                  previewContainer.innerHTML = '';
+                  fileUrls.forEach(url => {
+                    const col = document.createElement('div');
+                    col.className = 'col-md-4 mb-3';
+                    col.innerHTML = `<img src="${url}" class="img-fluid rounded" alt="신청 사진">`;
+                    previewContainer.appendChild(col);
+                  });
+                  new bootstrap.Modal(document.getElementById('filePreviewModal')).show();
+                });
+              });
+
+              document.querySelectorAll('.assign-worker').forEach(button => {
+                button.addEventListener('click', async () => {
+                  const requestId = button.getAttribute('data-id');
+                  const region = button.getAttribute('data-region');
+                  document.getElementById('assignRequestId').value = requestId;
+
+                  // 해당 지역의 작업자 목록 가져오기
+                  const workerSelect = document.getElementById('workerSelect');
+                  workerSelect.innerHTML = '<option value="">작업자를 선택하세요</option>';
+                  const q = query(collection(db, 'users'), where('isWorker', '==', true), where('workerApproved', '==', true), where('regions', 'array-contains', region));
+                  const snapshot = await getDocs(q);
+                  snapshot.forEach(doc => {
+                    const worker = doc.data();
+                    const option = document.createElement('option');
+                    option.value = doc.id;
+                    option.text = worker.name || '이름 없음';
+                    option.setAttribute('data-name', worker.name || '이름 없음');
+                    workerSelect.appendChild(option);
+                  });
+
+                  new bootstrap.Modal(document.getElementById('assignWorkerModal')).show();
+                });
+              });
+            }, (error) => {
+              console.error('스냅샷 오류:', error);
+              requestTable.innerHTML = '<tr><td colspan="12">데이터 로드 실패: ' + error.message + '</td></tr>';
+            });
+          } catch (error) {
+            console.error('쿼리 실행 오류:', error);
+            requestTable.innerHTML = '<tr><td colspan="12">쿼리 실행 오류: ' + error.message + '</td></tr>';
+          }
+        }
+
+        document.getElementById('saveRequestChanges').addEventListener('click', async () => {
+          const id = document.getElementById('editRequestId').value;
+          const updatedData = {
+            customerName: document.getElementById('editCustomerName').value,
+            customerPhone: document.getElementById('editCustomerPhone').value,
+            address: document.getElementById('editAddress').value,
+            region: document.getElementById('editRegion').value,
+            status: document.getElementById('editStatus').value,
+            workDate: document.getElementById('editWorkDate').value,
+            latitude: parseFloat(document.getElementById('editLatitude').value),
+            longitude: parseFloat(document.getElementById('editLongitude').value),
+          };
+          await updateDoc(doc(db, 'serviceRequests', id), updatedData);
+          alert('신청 내역이 수정되었습니다.');
+          bootstrap.Modal.getInstance(document.getElementById('editRequestModal')).hide();
+        });
+
+        document.getElementById('saveWorkerAssignment').addEventListener('click', async () => {
+          const requestId = document.getElementById('assignRequestId').value;
+          const workerSelect = document.getElementById('workerSelect');
+          const workerId = workerSelect.value;
+          const workerName = workerSelect.options[workerSelect.selectedIndex].getAttribute('data-name');
+          if (!workerId) {
+            alert('작업자를 선택해주세요.');
+            return;
+          }
+          try {
+            await updateDoc(doc(db, 'serviceRequests', requestId), {
+              workerId: workerId,
+              workerName: workerName,
+              status: 'assigned'
+            });
+            // workLogs에 로그 추가
+            const requestDoc = await getDoc(doc(db, 'serviceRequests', requestId));
+            const request = requestDoc.data();
+            await addDoc(collection(db, 'workLogs'), {
+              requestId: requestId,
+              workerId: workerId,
+              workerName: workerName,
+              status: 'assigned',
+              updatedAt: serverTimestamp(),
+              requestDetails: {
+                serviceType: request.serviceType,
+                customerName: request.customerName,
+                region: request.region
+              }
+            });
+            alert('작업자가 배정되었습니다.');
+            bootstrap.Modal.getInstance(document.getElementById('assignWorkerModal')).hide();
+          } catch (error) {
+            console.error('작업자 배정 실패:', error);
+            alert('작업자 배정 실패: ' + error.message);
+          }
+        });
+
+        // 지도 표시 함수 수정
+        function showMap(lat, lng, address) {          
+          // 지도가 표시될 요소
+          const mapModal = document.getElementById('mapModal');
+          mapModal.addEventListener('shown.bs.modal', () => {
+              currentMap.relayout();
+          });
+          const mapElement = document.getElementById('map');
+        
+          // 지도가 로딩 중임을 표시하는 요소
+          const loadingIndicator = document.createElement('div');
+          loadingIndicator.textContent = '지도를 불러오는 중입니다...';
+          loadingIndicator.style.textAlign = 'center';
+          loadingIndicator.style.padding = '20px';
+          mapElement.appendChild(loadingIndicator);
+        
+          // 지도가 표시될 옵션
+          const mapOptions = {
+              center: new kakao.maps.LatLng(lat, lng),
+              level: 3,
+              mapTypeId: kakao.maps.MapTypeId.HYBRID
+          };
+        
+          // 지도가 완전히 로딩된 후에 지도를 표시
+          kakao.maps.load(() => {
+              // 지도 로딩이 완료되면 로딩 중 표시를 제거
+              mapElement.innerHTML = '';
+        
+              // 지도 객체 생성
+              currentMap = new kakao.maps.Map(mapElement, mapOptions);
+              // 모달 표시
+              new bootstrap.Modal(document.getElementById('mapModal')).show();
+          });
+          
+          // 마커를 추가하여 지도에 표시
+          const markerPosition = new kakao.maps.LatLng(lat, lng);
+          const marker = new kakao.maps.Marker({
+            position: markerPosition,
+            title: address
+          });
+          marker.setMap(currentMap);
+        }
+
+        applyQuery();
+      }
+
+      function loadWorkers() {
+        console.log('loadWorkers 호출');
+        const workersContainer = document.getElementById('workers-container');
+        workersContainer.innerHTML = '';
+
+        const regionList = [
+          "서울특별시", "부산광역시", "대구광역시", "인천광역시", "광주광역시", "대전광역시", "울산광역시", "세종특별자치시",
+          "대구광역시 달성군", "울산광역시 울주군",
+          "경기도 수원시", "경기도 성남시", "경기도 고양시", "경기도 용인시", "경기도 부천시", "경기도 안산시", "경기도 안양시", 
+          "경기도 남양주시", "경기도 화성시", "경기도 평택시", "경기도 의정부시", "경기도 시흥시", "경기도 파주시", "경기도 광명시", 
+          "경기도 김포시", "경기도 군포시", "경기도 광주시", "경기도 이천시", "경기도 양주시", "경기도 오산시", "경기도 구리시", 
+          "경기도 안성시", "경기도 포천시", "경기도 의왕시", "경기도 하남시", "경기도 여주시", "경기도 양평시", "경기도 동두천시", 
+          "경기도 과천시", "경기도 가평시",
+          "경기도 양평군", "경기도 연천군", "경기도 가평군",
+          "강원도 춘천시", "강원도 원주시", "강원도 강릉시", "강원도 동해시", "강원도 태백시", "강원도 속초시", "강원도 삼척시",
+          "강원도 홍천군", "강원도 횡성군", "강원도 영월군", "강원도 평창군", "강원도 정선군", "강원도 철원군", "강원도 화천군", 
+          "강원도 양구군", "강원도 인제군", "강원도 고성군", "강원도 양양군",
+          "충청북도 청주시", "충청북도 충주시", "충청북도 제천시",
+          "충청북도 보은군", "충청북도 옥천군", "충청북도 영동군", "충청북도 증평군", "충청북도 진천군", "충청북도 괴산군", 
+          "충청북도 음성군", "충청북도 단양군",
+          "충청남도 천안시", "충청남도 공주시", "충청남도 보령시", "충청남도 아산시", "충청남도 서산시", "충청남도 논산시", 
+          "충청남도 계룡시", "충청남도 당진시",
+          "충청남도 금산군", "충청남도 부여군", "충청남도 서천군", "충청남도 청양군", "충청남도 홍성군", "충청남도 예산군", 
+          "충청남도 태안군",
+          "전북특별자치도 전주시", "전북특별자치도 군산시", "전북특별자치도 익산시", "전북특별자치도 정읍시", 
+          "전북특별자치도 남원시", "전북특별자치도 김제시",
+          "전북특별자치도 진안군", "전북특별자치도 무주군", "전북특별자치도 장수군", "전북특별자치도 임실군", 
+          "전북특별자치도 순창군", "전북특별자치도 고창군", "전북특별자치도 부안군",
+          "전라남도 목포시", "전라남도 여수시", "전라남도 순천시", "전라남도 나주시", "전라남도 광양시",
+          "전라남도 담양군", "전라남도 곡성군", "전라남도 구례군", "전라남도 고흥군", "전라남도 보성군", "전라남도 화순군", 
+          "전라남도 장흥군", "전라남도 강진군", "전라남도 해남군", "전라남도 영암군", "전라남도 무안군", "전라남도 함평군", 
+          "전라남도 영광군", "전라남도 장성군", "전라남도 완도군", "전라남도 진도군", "전라남도 신안군",
+          "경상북도 포항시", "경상북도 경주시", "경상북도 김천시", "경상북도 안동시", "경상북도 구미시", "경상북도 영주시", 
+          "경상북도 영천시", "경상북도 상주시", "경상북도 문경시", "경상북도 경산시",
+          "경상북도 군위군", "경상북도 의성군", "경상북도 청송군", "경상북도 영양군", "경상북도 영덕군", "경상북도 청도군", 
+          "경상북도 고령군", "경상북도 성주군", "경상북도 칠곡군", "경상북도 예천군", "경상북도 봉화군", "경상북도 울진군", 
+          "경상북도 울릉군",
+          "경상남도 창원시", "경상남도 진주시", "경상남도 통영시", "경상남도 사천시", "경상남도 김해시", "경상남도 밀양시", 
+          "경상남도 거제시", "경상남도 양산시",
+          "경상남도 의령군", "경상남도 함안군", "경상남도 창녕군", "경상남도 고성군", "경상남도 남해군", "경상남도 하동군", 
+          "경상남도 산청군", "경상남도 함양군", "경상남도 거창군", "경상남도 합천군"
+        ];
+
+        let baseQuery = query(collection(db, 'users'), where('isWorker', '==', true), orderBy('createdAt', 'desc'));
+        let currentWorkers = [];
+
+        // 지역 필터 옵션 동적 생성
+        const regionFilter = document.getElementById('workerFilterRegion');
+        regionList.forEach(region => {
+          const option = document.createElement('option');
+          option.value = region;
+          option.text = region;
+          regionFilter.appendChild(option);
+        });
+
+        function renderWorkers(workers) {
+          workersContainer.innerHTML = '';
+          if (workers.length === 0) {
+            workersContainer.innerHTML = '<div class="col-12"><p>작업자가 없습니다.</p></div>';
+            return;
+          }
+          workers.forEach(worker => {
+            // 작업자별 진행 중인 작업 수 계산
+            getDocs(query(collection(db, 'serviceRequests'), where('workerId', '==', worker.id), where('status', '==', 'confirmed')))
+              .then((snapshot) => {
+                const ongoingCount = snapshot.size;
+                const card = document.createElement('div');
+                card.className = 'col-md-4 worker-card';
+                card.innerHTML = `
+                  <h5>${worker.name || '미등록'}</h5>
+                  <div role="group">
+                    <p><strong>상태:</strong> ${worker.workerApproved ? '승인됨' : '승인 대기'}</p>
+                    <p><strong>가입일:</strong> ${worker.createdAt ? new Date(worker.createdAt.toDate()).toLocaleString('ko-KR') : '미입력'}</p>
+                    <p><strong>진행 중인 작업:</strong> ${ongoingCount}</p>
+                    <span class="details-toggle">상세 정보 보기</span>
+                    <div class="details" style="display: none;">
+                      <p><strong>ID:</strong> ${worker.workerId || worker.id}</p>
+                      <p><strong>이메일:</strong> ${worker.email || '미등록'}</p>
+                      <p><strong>전화번호:</strong> ${worker.phone || '미등록'}</p>
+                      <p><strong>지역:</strong> ${worker.regions ? worker.regions.join(', ') : '미지정'}</p>
+                      <p><strong>팀 인원:</strong> ${worker.teamSize || '미입력'}</p>
+                      <p><strong>사업자 여부:</strong> ${worker.businessRegistered ? '예 (' + (worker.businessNumber || '미입력') + ')' : '아니오'}</p>
+                      <p><strong>작업 종류:</strong> ${worker.tasks ? worker.tasks.join(', ') : '미선택'}</p>
+                    </div>
+                  </div>
+                  <div class="actions mt-2">
+                    ${!worker.workerApproved ? `<button class="btn btn-success btn-sm approve-worker" data-id="${worker.id}">승인</button> <button class="btn btn-danger btn-sm reject-worker" data-id="${worker.id}">거절</button>` : ''}
+                    <button class="btn btn-info btn-sm edit-regions" data-id="${worker.id}">지역 수정</button>
+                  </div>
+                `;
+                workersContainer.appendChild(card);
+
+                // 상세 정보 토글 이벤트
+                card.querySelector('.details-toggle').addEventListener('click', () => {
+                  const details = card.querySelector('.details');
+                  details.style.display = details.style.display === 'block' ? 'none' : 'block';
+                });
+
+                // 승인/거절/지역 수정 이벤트
+                card.querySelectorAll('.approve-worker').forEach(button => {
+                  button.addEventListener('click', async () => {
+                    const workerId = button.getAttribute('data-id');
+                    try {
+                      await updateDoc(doc(db, 'users', workerId), { workerApproved: true });
+                      document.getElementById('feedback-message').textContent = '작업자가 승인되었습니다.';
+                      document.getElementById('feedback-message').classList.remove('error');
+                      document.getElementById('feedback-message').classList.add('success');
+                      setTimeout(() => document.getElementById('feedback-message').classList.remove('success'), 2000);
+                    } catch (error) {
+                      document.getElementById('feedback-message').textContent = '승인 실패: ' + error.message;
+                      document.getElementById('feedback-message').classList.add('error');
+                      setTimeout(() => document.getElementById('feedback-message').classList.remove('error'), 2000);
+                    }
+                  });
+                });
+
+                card.querySelectorAll('.reject-worker').forEach(button => {
+                  button.addEventListener('click', async () => {
+                    const workerId = button.getAttribute('data-id');
+                    try {
+                      await updateDoc(doc(db, 'users', workerId), { isWorker: false, workerApproved: false });
+                      document.getElementById('feedback-message').textContent = '작업자 승인이 거절되었습니다.';
+                      document.getElementById('feedback-message').classList.remove('error');
+                      document.getElementById('feedback-message').classList.add('success');
+                      setTimeout(() => document.getElementById('feedback-message').classList.remove('success'), 2000);
+                    } catch (error) {
+                      document.getElementById('feedback-message').textContent = '거절 실패: ' + error.message;
+                      document.getElementById('feedback-message').classList.add('error');
+                      setTimeout(() => document.getElementById('feedback-message').classList.remove('error'), 2000);
+                    }
+                  });
+                });
+
+                card.querySelectorAll('.edit-regions').forEach(button => {
+                  button.addEventListener('click', () => {
+                    const workerId = button.getAttribute('data-id');
+                    const worker = currentWorkers.find(w => w.id === workerId);
+                    
+                    document.getElementById('editWorkerId').value = workerId;
+                    const editRegionsSelect = document.getElementById('editRegions');
+                    editRegionsSelect.innerHTML = '';
+                    
+                    regionList.forEach(region => {
+                      const option = document.createElement('option');
+                      option.value = region;
+                      option.text = region;
+                      if (worker.regions && worker.regions.includes(region)) {
+                        option.selected = true;
+                      }
+                      editRegionsSelect.appendChild(option);
+                    });
+
+                    new bootstrap.Modal(document.getElementById('editWorkerRegionsModal')).show();
+                  });
+                });
+              })
+              .catch((error) => {
+                console.error('작업자 진행 중인 작업 수 로드 실패:', error);
+              });
+          });
+        }
+
+        onSnapshot(baseQuery, (snapshot) => {
+          currentWorkers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          renderWorkers(currentWorkers);
+        });
+
+        document.getElementById('workerSearchBtn').addEventListener('click', () => {
+          const searchField = document.getElementById('workerSearchField').value;
+          const searchValue = document.getElementById('workerSearchValue').value.trim().toLowerCase();
+          const filteredWorkers = currentWorkers.filter(worker => {
+            if (searchField === 'name') return worker.name?.toLowerCase().includes(searchValue);
+            if (searchField === 'email') return worker.email?.toLowerCase().includes(searchValue);
+            if (searchField === 'status') return worker.workerApproved === (searchValue === '승인됨');
+            return true;
+          });
+          renderWorkers(filteredWorkers);
+        });
+
+        document.getElementById('workerResetSearch').addEventListener('click', () => {
+          document.getElementById('workerSearchValue').value = '';
+          document.getElementById('workerFilterStatus').value = 'all';
+          document.getElementById('workerFilterRegion').value = 'all';
+          document.getElementById('workerFilterService').value = 'all';
+          renderWorkers(currentWorkers);
+        });
+
+        document.getElementById('workerFilterBtn').addEventListener('click', () => {
+          const filterStatus = document.getElementById('workerFilterStatus').value;
+          const filterRegion = document.getElementById('workerFilterRegion').value;
+          const filterService = document.getElementById('workerFilterService').value;
+
+          let filteredWorkers = currentWorkers;
+
+          // 상태 필터링
+          if (filterStatus !== 'all') {
+            filteredWorkers = filteredWorkers.filter(worker => {
+              if (filterStatus === 'approved') return worker.workerApproved;
+              if (filterStatus === 'pending') return !worker.workerApproved;
+              return true;
+            });
+          }
+
+          // 지역 필터링
+          if (filterRegion !== 'all') {
+            filteredWorkers = filteredWorkers.filter(worker => {
+              return worker.regions && worker.regions.includes(filterRegion);
+            });
+          }
+
+          // 서비스 종류 필터링
+          if (filterService !== 'all') {
+            filteredWorkers = filteredWorkers.filter(worker => {
+              return worker.tasks && worker.tasks.includes(filterService);
+            });
+          }
+
+          renderWorkers(filteredWorkers);
+        });
+      }
+
+      function loadWorkerApplications() {
+        console.log('loadWorkerApplications 호출');
+        const applicationsTable = document.getElementById('worker-applications-table');
+        applicationsTable.innerHTML = '';
+        const q = query(collection(db, 'workerApplications'), where('status', '==', 'pending'), orderBy('createdAt', 'desc'));
+        onSnapshot(q, (snapshot) => {
+          applicationsTable.innerHTML = '';
+          if (snapshot.empty) {
+            applicationsTable.innerHTML = '<tr><td colspan="10">신규 작업자 신청이 없습니다.</td></tr>';
+            return;
+          }
+          snapshot.forEach((doc) => {
+            const application = doc.data();
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${doc.id}</td>
+              <td>${application.name || '미등록'}</td>
+              <td>${application.email || '미등록'}</td>
+              <td>${application.phone || '미등록'}</td>
+              <td>${application.regions ? application.regions.join(', ') : '미지정'}</td>
+              <td>${application.tasks ? application.tasks.join(', ') : '미선택'}</td>
+              <td>${application.teamSize || '미입력'}</td>
+              <td>${application.businessRegistered ? '예 (' + (application.businessNumber || '미입력') + ')' : '아니오'}</td>
+              <td>${application.createdAt ? new Date(application.createdAt.toDate()).toLocaleString('ko-KR') : '-'}</td>
+              <td>
+                <button class="btn btn-success btn-sm approve-application" data-id="${doc.id}">수락</button>
+                <button class="btn btn-danger btn-sm reject-application" data-id="${doc.id}">거부</button>
+              </td>
+            `;
+            applicationsTable.appendChild(row);
+          });
+
+          // 수락 버튼 이벤트
+          document.querySelectorAll('.approve-application').forEach(button => {
+            button.addEventListener('click', async () => {
+              const id = button.getAttribute('data-id');
+              const applicationDoc = await getDoc(doc(db, 'workerApplications', id));
+              const application = applicationDoc.data();
+              try {
+                // users 컬렉션에 작업자 추가
+                await addDoc(collection(db, 'users'), {
+                  name: application.name,
+                  email: application.email,
+                  phone: application.phone,
+                  regions: application.regions,
+                  tasks: application.tasks,
+                  teamSize: application.teamSize,
+                  businessRegistered: application.businessRegistered,
+                  businessNumber: application.businessNumber,
+                  isWorker: true,
+                  workerApproved: true,
+                  createdAt: application.createdAt
+                });
+                // workerApplications에서 삭제
+                await deleteDoc(doc(db, 'workerApplications', id));
+                alert('작업자 신청이 수락되었습니다.');
+              } catch (error) {
+                console.error('수락 실패:', error);
+                alert('수락 실패: ' + error.message);
+              }
+            });
+          });
+
+          // 거부 버튼 이벤트
+          document.querySelectorAll('.reject-application').forEach(button => {
+            button.addEventListener('click', async () => {
+              const id = button.getAttribute('data-id');
+              try {
+                await deleteDoc(doc(db, 'workerApplications', id));
+                alert('작업자 신청이 거부되었습니다.');
+              } catch (error) {
+                console.error('거부 실패:', error);
+                alert('거부 실패: ' + error.message);
+              }
+            });
+          });
+        });
+      }
+
+      function loadPortfolio() {
+        console.log('loadPortfolio 호출');
+        const portfolioTable = document.getElementById('portfolio-table');
+        portfolioTable.innerHTML = '';
+        const q = query(collection(db, 'portfolio'));
+        onSnapshot(q, (snapshot) => {
+          portfolioTable.innerHTML = '';
+          snapshot.forEach((doc) => {
+            const portfolio = doc.data();
+            const row = document.createElement('tr');
+            const createButton = document.getElementById('create-portfolio');
+            createButton.addEventListener('click', async () => {
+              const newTitle = document.getElementById('new-portfolio-title').value;
+              const newDescription = document.getElementById('new-portfolio-description').value;
+              const newImageUrl = document.getElementById('new-portfolio-image').value;
+              const newContent = document.getElementById('new-portfolio-content').value;
+              if (newTitle) {
+                try {
+                  await addDoc(collection(db, 'portfolio'), {
+                    title: newTitle,
+                    description: newDescription || '',
+                    imageUrl: newImageUrl || '',
+                    content: newContent || ''
+                  });
+                  document.getElementById('new-portfolio-title').value = '';
+                  document.getElementById('new-portfolio-description').value = '';
+                  document.getElementById('new-portfolio-image').value = '';
+                  document.getElementById('new-portfolio-content').value = '';
+                  alert('포트폴리오가 추가되었습니다.');
+                } catch (error) {
+                  console.error('추가 실패:', error);
+                  alert('추가 실패: ' + error.message);
+                }
+              }
+            });
+            row.innerHTML = `
+              <td>${doc.id}</td>
+              <td>${portfolio.title || '제목 없음'}</td>
+              <td>${portfolio.description || '설명 없음'}</td>
+              <td>${portfolio.imageUrl ? `<img src="${portfolio.imageUrl}" alt="${portfolio.title}" style="width: 100px; height: auto;">` : '이미지 없음'}</td>
+              <td>
+                <button class="btn btn-warning btn-sm edit-portfolio" data-id="${doc.id}">수정</button>
+                <button class="btn btn-danger btn-sm delete-portfolio" data-id="${doc.id}">삭제</button>
+              </td>
+            `;
+            portfolioTable.appendChild(row);
+          });
+
+          // 수정 버튼 이벤트
+          const editButtons = document.querySelectorAll('.edit-portfolio');
+          document.querySelectorAll('.edit-portfolio').forEach(button => {
+            button.addEventListener('click', async () => {
+              const id = button.getAttribute('data-id');
+              const portfolioDoc = await getDoc(doc(db, 'portfolio', id));
+              const portfolioData = portfolioDoc.data();
+              document.getElementById('edit-portfolio-title').value = portfolioData.title || '';
+              document.getElementById('edit-portfolio-description').value = portfolioData.description || '';
+              document.getElementById('edit-portfolio-image').value = portfolioData.imageUrl || '';
+              document.getElementById('edit-portfolio-content').value = portfolioData.content || '';
+              const updatedData = {};
+              const newTitle = document.getElementById('edit-portfolio-title').value;
+              const newDescription = document.getElementById('edit-portfolio-description').value;
+              const newImageUrl = document.getElementById('edit-portfolio-image').value;
+              const newContent = document.getElementById('edit-portfolio-content').value;
+              if (newTitle || newDescription || newImageUrl || newContent) {
+                if (newTitle) updatedData.title = newTitle;
+                if (newDescription) updatedData.description = newDescription;
+                if (newImageUrl) updatedData.imageUrl = newImageUrl;
+                if (newContent) updatedData.content = newContent;
+                await updateDoc(doc(db, 'portfolio', id), updatedData);
+                alert('포트폴리오가 업데이트되었습니다.');
+              }
+            });
+          });
+
+          // 삭제 버튼 이벤트
+          document.querySelectorAll('.delete-portfolio').forEach(button => {
+            button.addEventListener('click', async () => {
+              const id = button.getAttribute('data-id');
+              const confirmDelete = confirm('정말로 포트폴리오를 삭제하시겠습니까?');
+              if (confirmDelete) {
+                try {
+                  await deleteDoc(doc(db, 'portfolio', id));
+                  alert('포트폴리오가 삭제되었습니다.');
+                } catch (error) {
+                  console.error('삭제 실패:', error);
+                  alert('삭제 실패: ' + error.message);
+                }
+              }
+            });
+          });
+        }, (error) => {
+          console.error('포트폴리오 데이터 로드 실패:', error);
+          portfolioTable.innerHTML = '<tr><td colspan="5">데이터 로드 실패: ' + error.message + '</td></tr>';
+        });
+      }
+
+      function loadWorkLogs() {
+        console.log('loadWorkLogs 호출');
+        const logsTable = document.getElementById('work-logs-table');
+        logsTable.innerHTML = '';
+        const q = query(collection(db, 'workLogs'), orderBy('updatedAt', 'desc'));
+        onSnapshot(q, (snapshot) => {
+          logsTable.innerHTML = '';
+          snapshot.forEach((doc) => {
+            const log = doc.data();
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${log.requestId}</td>
+              <td>${log.workerName || log.workerId}</td>
+              <td>${log.requestDetails ? log.requestDetails.serviceType : '-'}</td>
+              <td>${log.requestDetails ? log.requestDetails.customerName : '-'}</td>
+              <td>${log.status || 'pending'}</td>
+              <td>${log.startTime ? new Date(log.startTime.toDate()).toLocaleString('ko-KR') : '-'}</td>
+              <td>${log.endTime ? new Date(log.endTime.toDate()).toLocaleString('ko-KR') : '-'}</td>
+              <td>${log.updatedAt ? new Date(log.updatedAt.toDate()).toLocaleString('ko-KR') : '-'}</td>
+              <td>${log.notes || '-'}</td>
+              <td><button class="btn btn-primary btn-sm update-log" data-id="${doc.id}">업데이트</button></td>
+            `;
+            logsTable.appendChild(row);
+          });
+
+          document.querySelectorAll('.update-log').forEach(button => {
+            button.addEventListener('click', async () => {
+              const id = button.getAttribute('data-id');
+              const newStatus = prompt('새로운 상태 입력 (예: completed):');
+              const newNotes = prompt('작업 메모 입력 (선택):');
+              if (newStatus) {
+                const updateData = {
+                  status: newStatus,
+                  updatedAt: serverTimestamp()
+                };
+                if (newStatus === 'confirmed') {
+                  updateData.startTime = serverTimestamp();
+                } else if (newStatus === 'completed') {
+                  updateData.endTime = serverTimestamp();
+                }
+                if (newNotes) {
+                  updateData.notes = newNotes;
+                }
+                await updateDoc(doc(db, 'workLogs', id), updateData);
+                alert('작업사항이 업데이트되었습니다.');
+              }
+            });
+          });
+        });
+      }
+
+      document.getElementById('saveWorkerRegions').addEventListener('click', async () => {
+        const workerId = document.getElementById('editWorkerId').value;
+        const selectedRegions = Array.from(document.getElementById('editRegions').selectedOptions).map(option => option.value);
+        
+        if (selectedRegions.length > 3) {
+          document.getElementById('feedback-message').textContent = '최대 3개 지역만 선택 가능합니다.';
+          document.getElementById('feedback-message').classList.add('error');
+          setTimeout(() => document.getElementById('feedback-message').classList.remove('error'), 2000);
+          return;
+        }
+
+        try {
+          await updateDoc(doc(db, 'users', workerId), { regions: selectedRegions });
+          document.getElementById('feedback-message').textContent = '작업자 지역이 수정 및 배정되었습니다.';
+          document.getElementById('feedback-message').classList.remove('error');
+          document.getElementById('feedback-message').classList.add('success');
+          setTimeout(() => document.getElementById('feedback-message').classList.remove('success'), 2000);
+          bootstrap.Modal.getInstance(document.getElementById('editWorkerRegionsModal')).hide();
+        } catch (error) {
+          document.getElementById('feedback-message').textContent = '지역 수정 실패: ' + error.message;
+          document.getElementById('feedback-message').classList.add('error');
+          setTimeout(() => document.getElementById('feedback-message').classList.remove('error'), 2000);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
