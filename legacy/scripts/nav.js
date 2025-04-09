@@ -197,8 +197,10 @@ async function renderNav(user, userRole) {
                 <li class="nav-item">
                   <a class="nav-link" href="admin.html">관리자</a>
                 </li>
-              ` : ''}
-              ${userRole === 'worker' || userRole === 'admin' ? `
+                <li class="nav-item">
+                  <a class="nav-link" href="worker.html">작업자</a>
+                </li>
+              ` : userRole === 'worker' ? `
                 <li class="nav-item">
                   <a class="nav-link" href="worker.html">작업자</a>
                 </li>
