@@ -1,0 +1,585 @@
+/* 기본 스타일 */
+:root {
+    --primary-color: #4A90E2;
+    --secondary-color: #50E3C2;
+    --text-color: #2C3E50;
+    --light-bg: #F8F9FA;
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    --transition: all 0.3s ease;
+}
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text-color);
+    background: var(--light-bg);
+}
+
+/* 전체 페이지 스타일 */
+.guide-header {
+    padding: 4rem 0;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.guide-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(74, 144, 226, 0.1) 0%, rgba(80, 227, 194, 0.1) 100%);
+    z-index: 0;
+}
+
+.guide-header h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+    z-index: 1;
+}
+
+.guide-header p {
+    font-size: 1.25rem;
+    color: var(--text-color);
+    opacity: 0.8;
+    position: relative;
+    z-index: 1;
+}
+
+/* 서비스 카드 스타일 */
+.service-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    box-shadow: var(--card-shadow);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 3rem;
+}
+
+.service-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(74, 144, 226, 0.05) 0%, rgba(80, 227, 194, 0.05) 100%);
+    z-index: 0;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.card-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 1;
+}
+
+.card-icon i {
+    color: white;
+    font-size: 2rem;
+}
+
+.card-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.card-description {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--text-color);
+    opacity: 0.9;
+    position: relative;
+    z-index: 1;
+}
+
+/* 서비스 종류 스타일 */
+.service-types {
+    margin-bottom: 4rem;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 2.5rem;
+    text-align: center;
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    border-radius: 2px;
+}
+
+.feature-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: var(--card-shadow);
+    transition: var(--transition);
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card .card-icon {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 1.5rem;
+}
+
+.feature-card h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.feature-list li {
+    padding: 0.5rem 0;
+    font-size: 1.1rem;
+    color: var(--text-color);
+    opacity: 0.9;
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.feature-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+/* 서비스 장점 */
+.benefits-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.benefit-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(74, 144, 226, 0.05);
+    border-radius: 10px;
+    transition: var(--transition);
+}
+
+.benefit-item:hover {
+    transform: translateX(10px);
+    background: rgba(74, 144, 226, 0.1);
+}
+
+.benefit-item i {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.benefit-item span {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+/* 이용 방법 */
+.steps-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: var(--card-shadow);
+    transition: var(--transition);
+}
+
+.step-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.step-content {
+    flex: 1;
+}
+
+.step-content h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.step-content p {
+    font-size: 1.1rem;
+    color: var(--text-color);
+    opacity: 0.8;
+    margin: 0;
+}
+
+/* 가격 안내 스타일 */
+.pricing-table {
+    display: flex;
+    gap: 2rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.price-card {
+    flex: 1;
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    min-width: 250px;
+}
+
+.price-card.featured {
+    background: linear-gradient(to bottom right, #3498db, #2980b9);
+    color: white;
+    transform: scale(1.05);
+}
+
+.price-card h3 {
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+}
+
+.price {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 1rem 0;
+    color: #3498db;
+}
+
+.featured .price {
+    color: white;
+}
+
+.price-features {
+    list-style: none;
+    padding: 0;
+    margin: 2rem 0;
+}
+
+.price-features li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.featured .price-features li {
+    border-bottom-color: rgba(255,255,255,0.1);
+}
+
+.price-note {
+    text-align: center;
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+}
+
+/* 문의하기 섹션 스타일 */
+.contact-section {
+    background: #f8f9fa;
+    padding: 3rem;
+    border-radius: 15px;
+    margin: 4rem 0;
+}
+
+/* 댓글 섹션 스타일 */
+.comments-section {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-top: 4rem;
+}
+
+#comment-form textarea {
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    padding: 1rem;
+    resize: vertical;
+    min-height: 100px;
+}
+
+#comment-form button {
+    padding: 0.75rem 2rem;
+    font-weight: 500;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 992px) {
+    .guide-header h1 {
+        font-size: 2.5rem;
+    }
+    
+    .guide-header p {
+        font-size: 1.1rem;
+    }
+    
+    .service-card {
+        padding: 2rem;
+    }
+    
+    .card-title {
+        font-size: 1.8rem;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .guide-header {
+        padding: 3rem 0;
+    }
+    
+    .guide-header h1 {
+        font-size: 2rem;
+    }
+    
+    .card-icon {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .card-icon i {
+        font-size: 1.5rem;
+    }
+    
+    .portfolio-card {
+        height: 250px;
+    }
+    
+    .benefit-item {
+        padding: 0.8rem;
+    }
+    
+    .benefit-item i {
+        font-size: 1.2rem;
+    }
+    
+    .benefit-item span {
+        font-size: 1rem;
+    }
+    
+    .step-item {
+        padding: 1rem;
+    }
+    
+    .step-number {
+        width: 35px;
+        height: 35px;
+        font-size: 1rem;
+    }
+    
+    .step-content h3 {
+        font-size: 1.1rem;
+    }
+    
+    .step-content p {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .guide-header {
+        padding: 2rem 0;
+    }
+    
+    .guide-header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .service-card {
+        padding: 1.5rem;
+    }
+    
+    .card-title {
+        font-size: 1.5rem;
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+    }
+    
+    .portfolio-card {
+        height: 200px;
+    }
+    
+    .benefit-item {
+        padding: 0.7rem;
+    }
+    
+    .step-item {
+        padding: 0.8rem;
+    }
+    
+    .step-number {
+        width: 30px;
+        height: 30px;
+        font-size: 0.9rem;
+    }
+}
+
+/* 애니메이션 효과 */
+.service-card,
+.feature-card,
+.price-card {
+    transition: all 0.3s ease;
+}
+
+.service-card:hover,
+.feature-card:hover,
+.price-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+/* Portfolio Section Styles */
+.portfolio-section {
+    margin-bottom: 4rem;
+}
+
+.portfolio-card {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    transition: var(--transition);
+    height: 300px;
+    margin-bottom: 2rem;
+}
+
+.portfolio-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.portfolio-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition);
+}
+
+.portfolio-card:hover img {
+    transform: scale(1.05);
+}
+
+.portfolio-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 2rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    color: white;
+    transform: translateY(100%);
+    transition: var(--transition);
+}
+
+.portfolio-card:hover .portfolio-content {
+    transform: translateY(0);
+}
+
+.portfolio-content h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.portfolio-content p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .portfolio-card img {
+        height: 200px;
+    }
+    
+    .portfolio-content {
+        padding: 1rem;
+    }
+    
+    .portfolio-content h3 {
+        font-size: 1.1rem;
+    }
+    
+    .portfolio-content p {
+        font-size: 0.8rem;
+    }
+} 

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시스템 통합 - OneStop Platform</title>
+    <link rel="stylesheet" href="styles/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- 사이드바 시작 -->
+        <div class="admin-sidebar">
+            <div class="sidebar-header">
+                <img src="images/logo.png" alt="OneStop Logo" class="logo">
+                <h3>OneStop Platform</h3>
+                <button class="sidebar-toggle"><i class="fas fa-bars"></i></button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item">
+                        <a href="admin-dashboard.html"><i class="fas fa-tachometer-alt"></i> 대시보드</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-users.html"><i class="fas fa-users"></i> 사용자 관리</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-workers.html"><i class="fas fa-user-hard-hat"></i> 작업자 관리</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-customers.html"><i class="fas fa-user-tie"></i> 고객 관리</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-services.html"><i class="fas fa-concierge-bell"></i> 서비스 관리</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-payments.html"><i class="fas fa-credit-card"></i> 결제 관리</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-settlements.html"><i class="fas fa-calculator"></i> 정산 관리</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-analytics.html"><i class="fas fa-chart-bar"></i> 통계 분석</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-ai.html"><i class="fas fa-robot"></i> AI 분석</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-monitoring.html"><i class="fas fa-desktop"></i> 시스템 모니터링</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="admin-integration.html"><i class="fas fa-plug"></i> 시스템 통합</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="logout-btn"><i class="fas fa-sign-out-alt"></i> 로그아웃</button>
+            </div>
+        </div>
+        <!-- 사이드바 끝 -->
+
+        <!-- 메인 콘텐츠 영역 시작 -->
+        <div class="main-content">
+            <div class="content-header">
+                <h1><i class="fas fa-plug"></i> 시스템 통합</h1>
+                <div class="header-actions">
+                    <button class="refresh-btn"><i class="fas fa-sync"></i></button>
+                    <button class="export-btn"><i class="fas fa-file-export"></i> 내보내기</button>
+                    <div class="user-info">
+                        <span>관리자</span>
+                        <img src="images/admin-avatar.png" alt="Admin">
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-body">
+                <div class="integration-dashboard">
+                    <!-- API 통합 섹션 -->
+                    <div class="api-integration">
+                        <h2>API 통합</h2>
+                        <div class="api-cards">
+                            <div class="api-card">
+                                <div class="api-header">
+                                    <i class="fas fa-credit-card"></i>
+                                    <h3>결제 시스템</h3>
+                                    <span class="status-badge connected">연결됨</span>
+                                </div>
+                                <div class="api-details">
+                                    <p>PG사: KCP</p>
+                                    <p>API 버전: v2.0</p>
+                                    <p>마지막 동기화: 2023-06-15 14:30</p>
+                                </div>
+                                <div class="api-actions">
+                                    <button class="btn-small">설정</button>
+                                    <button class="btn-small">테스트</button>
+                                </div>
+                            </div>
+                            <div class="api-card">
+                                <div class="api-header">
+                                    <i class="fas fa-map-marked-alt"></i>
+                                    <h3>지도 서비스</h3>
+                                    <span class="status-badge connected">연결됨</span>
+                                </div>
+                                <div class="api-details">
+                                    <p>제공사: Kakao Maps</p>
+                                    <p>API 버전: v3.0</p>
+                                    <p>마지막 동기화: 2023-06-15 14:30</p>
+                                </div>
+                                <div class="api-actions">
+                                    <button class="btn-small">설정</button>
+                                    <button class="btn-small">테스트</button>
+                                </div>
+                            </div>
+                            <div class="api-card">
+                                <div class="api-header">
+                                    <i class="fas fa-sms"></i>
+                                    <h3>SMS 서비스</h3>
+                                    <span class="status-badge disconnected">연결 안됨</span>
+                                </div>
+                                <div class="api-details">
+                                    <p>제공사: 알리고</p>
+                                    <p>API 버전: v1.0</p>
+                                    <p>마지막 동기화: -</p>
+                                </div>
+                                <div class="api-actions">
+                                    <button class="btn-small">설정</button>
+                                    <button class="btn-small">테스트</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 데이터 동기화 섹션 -->
+                    <div class="data-sync">
+                        <h2>데이터 동기화</h2>
+                        <div class="sync-cards">
+                            <div class="sync-card">
+                                <div class="sync-header">
+                                    <i class="fas fa-database"></i>
+                                    <h3>사용자 데이터</h3>
+                                </div>
+                                <div class="sync-details">
+                                    <p>마지막 동기화: 2023-06-15 14:30</p>
+                                    <p>동기화 상태: 완료</p>
+                                    <p>다음 동기화: 2023-06-15 15:30</p>
+                                </div>
+                                <div class="sync-actions">
+                                    <button class="btn-small">수동 동기화</button>
+                                    <button class="btn-small">설정</button>
+                                </div>
+                            </div>
+                            <div class="sync-card">
+                                <div class="sync-header">
+                                    <i class="fas fa-file-invoice-dollar"></i>
+                                    <h3>결제 데이터</h3>
+                                </div>
+                                <div class="sync-details">
+                                    <p>마지막 동기화: 2023-06-15 14:30</p>
+                                    <p>동기화 상태: 완료</p>
+                                    <p>다음 동기화: 2023-06-15 15:30</p>
+                                </div>
+                                <div class="sync-actions">
+                                    <button class="btn-small">수동 동기화</button>
+                                    <button class="btn-small">설정</button>
+                                </div>
+                            </div>
+                            <div class="sync-card">
+                                <div class="sync-header">
+                                    <i class="fas fa-tasks"></i>
+                                    <h3>서비스 데이터</h3>
+                                </div>
+                                <div class="sync-details">
+                                    <p>마지막 동기화: 2023-06-15 14:30</p>
+                                    <p>동기화 상태: 완료</p>
+                                    <p>다음 동기화: 2023-06-15 15:30</p>
+                                </div>
+                                <div class="sync-actions">
+                                    <button class="btn-small">수동 동기화</button>
+                                    <button class="btn-small">설정</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 웹훅 설정 섹션 -->
+                    <div class="webhook-settings">
+                        <h2>웹훅 설정</h2>
+                        <div class="webhook-list">
+                            <div class="webhook-item">
+                                <div class="webhook-info">
+                                    <h3>결제 완료 알림</h3>
+                                    <p>URL: https://api.onestop.com/webhook/payment</p>
+                                    <p>상태: 활성화</p>
+                                </div>
+                                <div class="webhook-actions">
+                                    <button class="btn-small">수정</button>
+                                    <button class="btn-small">테스트</button>
+                                </div>
+                            </div>
+                            <div class="webhook-item">
+                                <div class="webhook-info">
+                                    <h3>서비스 상태 변경</h3>
+                                    <p>URL: https://api.onestop.com/webhook/service</p>
+                                    <p>상태: 활성화</p>
+                                </div>
+                                <div class="webhook-actions">
+                                    <button class="btn-small">수정</button>
+                                    <button class="btn-small">테스트</button>
+                                </div>
+                            </div>
+                            <div class="webhook-item">
+                                <div class="webhook-info">
+                                    <h3>사용자 활동</h3>
+                                    <p>URL: https://api.onestop.com/webhook/user</p>
+                                    <p>상태: 비활성화</p>
+                                </div>
+                                <div class="webhook-actions">
+                                    <button class="btn-small">수정</button>
+                                    <button class="btn-small">테스트</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-primary">새 웹훅 추가</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 메인 콘텐츠 영역 끝 -->
+    </div>
+
+    <script src="scripts/admin-integration.js"></script>
+</body>
+</html> 

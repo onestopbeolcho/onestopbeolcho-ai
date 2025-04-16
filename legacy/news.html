@@ -1,25 +1,72 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>벌초 소식</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>뉴스 | 원스톱 벌초</title>
+    <meta name="description" content="벌초, 예초, 태양광 관리 관련 최신 뉴스를 확인하세요.">
+    <meta name="keywords" content="벌초, 예초, 예초기, 태양광 예초, 묘지 관리, 산소 관리">
+    
+    <!-- Open Graph 태그 -->
+    <meta property="og:title" content="벌초 소식 | 원스톱 벌초">
+    <meta property="og:description" content="벌초, 예초, 태양광 관리 관련 최신 뉴스를 확인하세요.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="http://localhost:8000/news.html">
+    <meta property="og:image" content="assets/images/og-image.jpg">
+    
+    <!-- 구조화된 데이터 -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "벌초 소식",
+        "description": "벌초, 예초, 태양광 관리 관련 최신 뉴스를 확인하세요.",
+        "url": "http://localhost:8000/news.html"
+    }
+    </script>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="styles/common.css" rel="stylesheet">
+    <link href="styles/news.css" rel="stylesheet">
+    <link href="components/footer.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header>
-    <h1>벌초 소식</h1>
-    <nav>
-      <a href="index.html">홈</a>
-      <!-- 기타 메뉴 -->
-    </nav>
-  </header>
-  <main>
-    <!-- 자동으로 생성될 글 내용 -->
-    <section id="news-content">
-    </section>
-  </main>
-  <footer>
-    <p>&copy; 2024 원스톱 벌초</p>
-  </footer>
+    <!-- 네비게이션 -->
+    <div id="navbar-placeholder"></div>
+
+    <main class="container py-5">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <h1 class="text-center mb-4">뉴스</h1>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">공지사항</h5>
+                        <p class="card-text">서비스 이용 관련 공지사항을 확인하세요.</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">진행중인 이벤트</h5>
+                        <p class="card-text">현재 진행중인 이벤트를 확인하세요.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 푸터 -->
+    <div id="footer-container"></div>
+
+    <!-- 스크립트 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="scripts/firebase-config.js"></script>
+    <script type="module" src="scripts/auth.js"></script>
+    <script src="scripts/navbar.js"></script>
+    <script src="components/footer.js"></script>
 </body>
 </html>

@@ -1,0 +1,285 @@
+<!-- 작업자 상세 정보 -->
+<div class="worker-detail">
+    <div class="worker-header">
+        <img src="/assets/images/default-profile.png" alt="프로필 이미지" class="profile-image">
+        <div class="worker-info">
+            <h1 id="workerName"></h1>
+            <p class="worker-type" id="workerType"></p>
+            <p><i class="fas fa-envelope"></i> <span id="workerEmail"></span></p>
+            <p><i class="fas fa-phone"></i> <span id="workerPhone"></span></p>
+        </div>
+    </div>
+
+    <div class="detail-sections">
+        <!-- 팀 정보 -->
+        <section class="detail-section">
+            <h2><i class="fas fa-users"></i> 팀 정보</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>총 작업 인원</label>
+                    <p id="teamSize"></p>
+                </div>
+                <div class="info-item">
+                    <label>팀 구성</label>
+                    <p id="teamType"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 경력 및 자격사항 -->
+        <section class="detail-section">
+            <h2><i class="fas fa-award"></i> 경력 및 자격사항</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>총 경력</label>
+                    <p id="experience"></p>
+                </div>
+                <div class="info-item">
+                    <label>자격증</label>
+                    <div id="certifications" class="badge-list"></div>
+                </div>
+            </div>
+            <div class="info-item full-width">
+                <label>전문 분야</label>
+                <p id="specialties"></p>
+            </div>
+        </section>
+
+        <!-- 작업 정보 -->
+        <section class="detail-section">
+            <h2><i class="fas fa-tools"></i> 작업 정보</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>작업 가능 지역</label>
+                    <div id="regions" class="badge-list"></div>
+                </div>
+                <div class="info-item">
+                    <label>가능한 서비스</label>
+                    <div id="serviceTypes" class="badge-list"></div>
+                </div>
+            </div>
+            <div class="info-item full-width">
+                <label>보유 장비</label>
+                <p id="equipment"></p>
+            </div>
+        </section>
+
+        <!-- 대표 작업 경험 -->
+        <section class="detail-section">
+            <h2><i class="fas fa-briefcase"></i> 대표 작업 경험</h2>
+            <div id="previousWorks" class="work-experience"></div>
+        </section>
+
+        <!-- 추가 정보 -->
+        <section class="detail-section">
+            <h2><i class="fas fa-info-circle"></i> 추가 정보</h2>
+            <div id="additionalInfo" class="additional-info"></div>
+        </section>
+
+        <!-- 사업자 정보 (사업자인 경우에만 표시) -->
+        <section class="detail-section" id="businessInfoSection" style="display: none;">
+            <h2><i class="fas fa-building"></i> 사업자 정보</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>사업자등록번호</label>
+                    <p id="businessNumber"></p>
+                </div>
+                <div class="info-item">
+                    <label>대표자명</label>
+                    <p id="representative"></p>
+                </div>
+                <div class="info-item full-width">
+                    <label>사업장 소재지</label>
+                    <p id="businessAddress"></p>
+                </div>
+                <div class="info-item full-width">
+                    <label>세금계산서용 이메일</label>
+                    <p id="taxEmail"></p>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script type="module">
+    // ... existing code ...
+
+    // URL에서 작업자 ID 가져오기
+    const urlParams = new URLSearchParams(window.location.search);
+    const workerId = urlParams.get('id');
+
+    // 작업자 정보 로드
+    async function loadWorkerDetail() {
+        try {
+            const workerDoc = await getDoc(doc(db, 'users', workerId));
+            if (workerDoc.exists()) {
+                const worker = workerDoc.data();
+                
+                // 기본 정보
+                document.getElementById('workerName').textContent = worker.name;
+                document.getElementById('workerEmail').textContent = worker.email;
+                document.getElementById('workerPhone').textContent = worker.phone;
+                document.getElementById('workerType').textContent = worker.registrationType === 'business' ? '사업자' : '개인';
+                
+                // 팀 정보
+                document.getElementById('teamSize').textContent = `${worker.teamSize}명`;
+                document.getElementById('teamType').textContent = {
+                    'individual': '1인 작업',
+                    'family': '가족 단위',
+                    'team': '팀 구성',
+                    'company': '회사 소속'
+                }[worker.teamType] || worker.teamType;
+                
+                // 경력 및 자격사항
+                document.getElementById('experience').textContent = `${worker.experience || 0}년`;
+                document.getElementById('certifications').innerHTML = worker.certifications?.map(cert => 
+                    `<span class="badge bg-info">${cert}</span>`
+                ).join('') || '없음';
+                document.getElementById('specialties').textContent = worker.specialties || '없음';
+                
+                // 작업 정보
+                document.getElementById('regions').innerHTML = worker.regions?.map(region => 
+                    `<span class="badge bg-primary">${region}</span>`
+                ).join('') || '없음';
+                document.getElementById('serviceTypes').innerHTML = worker.serviceTypes?.map(service => 
+                    `<span class="badge bg-success">${service}</span>`
+                ).join('') || '없음';
+                document.getElementById('equipment').textContent = worker.equipment || '없음';
+                
+                // 대표 작업 경험
+                document.getElementById('previousWorks').innerHTML = worker.previousWorks ? 
+                    worker.previousWorks.split('\n').map(line => `<p>${line}</p>`).join('') : 
+                    '<p>없음</p>';
+                
+                // 추가 정보
+                document.getElementById('additionalInfo').innerHTML = worker.additionalInfo ? 
+                    worker.additionalInfo.split('\n').map(line => `<p>${line}</p>`).join('') : 
+                    '<p>없음</p>';
+                
+                // 사업자 정보
+                if (worker.registrationType === 'business') {
+                    document.getElementById('businessInfoSection').style.display = 'block';
+                    document.getElementById('businessNumber').textContent = worker.businessNumber;
+                    document.getElementById('representative').textContent = worker.representative;
+                    document.getElementById('businessAddress').textContent = worker.businessAddress;
+                    document.getElementById('taxEmail').textContent = worker.taxEmail;
+                }
+            }
+        } catch (error) {
+            console.error('작업자 정보 로드 실패:', error);
+        }
+    }
+
+    // 페이지 로드 시 작업자 정보 로드
+    loadWorkerDetail();
+</script>
+
+<style>
+    .worker-detail {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .worker-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .profile-image {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        margin-right: 30px;
+        object-fit: cover;
+    }
+
+    .worker-info h1 {
+        margin: 0 0 10px 0;
+        color: #333;
+    }
+
+    .worker-type {
+        color: #666;
+        margin-bottom: 10px;
+    }
+
+    .worker-info p {
+        margin: 5px 0;
+        color: #666;
+    }
+
+    .worker-info i {
+        width: 20px;
+        color: #1E88E5;
+    }
+
+    .detail-sections {
+        display: grid;
+        gap: 30px;
+    }
+
+    .detail-section {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+    }
+
+    .detail-section h2 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        color: #1E88E5;
+        font-size: 1.2em;
+    }
+
+    .detail-section h2 i {
+        margin-right: 10px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .info-item {
+        margin-bottom: 15px;
+    }
+
+    .info-item.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .info-item label {
+        display: block;
+        color: #666;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .info-item p {
+        margin: 0;
+        color: #333;
+    }
+
+    .badge-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .badge {
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+
+    .work-experience p,
+    .additional-info p {
+        margin: 5px 0;
+        color: #333;
+    }
+</style> 

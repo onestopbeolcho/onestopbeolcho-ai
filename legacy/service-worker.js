@@ -54,20 +54,27 @@ self.addEventListener('install', event => {
 
 // Fetch 이벤트: 네트워크 우선, 캐시 대체 전략
 self.addEventListener('fetch', event => {
+  // chrome-extension 스키마 제외
+  if (event.request.url.startsWith('chrome-extension://')) {
+    return;
+  }
+  
   event.respondWith(
     caches.match(event.request)
-      .then(response => {
+      .then((response) => {
         if (response) {
           return response;
         }
         return fetch(event.request)
-          .then(response => {
-            if (!response || response.status !== 200 || response.type !== 'basic') {
+          .then((response) => {
+            // 응답이 성공적이고, GET 요청이며, 같은 출처의 요청인 경우에만 캐시
+            if (!response || response.status !== 200 || response.type !== 'basic' || event.request.method !== 'GET') {
               return response;
             }
+            
             const responseToCache = response.clone();
             caches.open(CACHE_NAME)
-              .then(cache => {
+              .then((cache) => {
                 cache.put(event.request, responseToCache);
               });
             return response;

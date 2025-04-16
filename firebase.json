@@ -22,30 +22,105 @@
     "public": "legacy",
     "ignore": [
       "firebase.json",
-      "**/firestore.rules",
-      "**/storage.rules",
-      "**/node_modules/**",
-      "**/unused/**"
+      "**/.*",
+      "**/node_modules/**"
     ],
-    "headers": [
+    "rewrites": [
       {
-        "source": "**/*.@(html)",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "no-cache, no-store, must-revalidate"
-          }
-        ]
+        "source": "/admin",
+        "destination": "/admin.html"
       },
       {
-        "source": "**/*.@(js|css)",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "no-cache, no-store, must-revalidate"
-          }
-        ]
+        "source": "/admin-users",
+        "destination": "/admin-users.html"
+      },
+      {
+        "source": "/admin-workers",
+        "destination": "/admin-workers.html"
+      },
+      {
+        "source": "/admin-customers",
+        "destination": "/admin-customers.html"
+      },
+      {
+        "source": "/admin-services",
+        "destination": "/admin-services.html"
+      },
+      {
+        "source": "/admin-payments",
+        "destination": "/admin-payments.html"
+      },
+      {
+        "source": "/admin-settlements",
+        "destination": "/admin-settlements.html"
+      },
+      {
+        "source": "/admin-analytics",
+        "destination": "/admin-analytics.html"
+      },
+      {
+        "source": "/admin-ai",
+        "destination": "/admin-ai.html"
+      },
+      {
+        "source": "/admin-monitoring",
+        "destination": "/admin-monitoring.html"
+      },
+      {
+        "source": "/admin-integration",
+        "destination": "/admin-integration.html"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
       }
     ]
+  },
+  "emulators": {
+    "apphosting": {
+      "port": 9099,
+      "rootDirectory": "./"
+    },
+    "auth": {
+      "port": 9098,
+      "host": "127.0.0.1"
+    },
+    "functions": {
+      "port": 5002,
+      "host": "127.0.0.1"
+    },
+    "firestore": {
+      "port": 8088,
+      "host": "127.0.0.1"
+    },
+    "database": {
+      "port": 8089
+    },
+    "hosting": {
+      "port": 5001,
+      "host": "127.0.0.1"
+    },
+    "pubsub": {
+      "port": 8085
+    },
+    "storage": {
+      "port": 9199,
+      "host": "127.0.0.1"
+    },
+    "eventarc": {
+      "port": 9299
+    },
+    "dataconnect": {
+      "port": 9399
+    },
+    "tasks": {
+      "port": 9499
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000,
+      "host": "127.0.0.1"
+    },
+    "singleProjectMode": true
   }
 }

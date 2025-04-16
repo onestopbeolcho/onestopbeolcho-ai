@@ -1,0 +1,208 @@
+<!-- 필터 섹션 -->
+<div class="filter-section mb-4">
+    <div class="row">
+        <div class="col-md-3">
+            <label for="regionFilter" class="form-label">지역</label>
+            <select class="form-select" id="regionFilter">
+                <option value="">전체 지역</option>
+                <!-- 지역 옵션은 JavaScript에서 동적으로 추가 -->
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="serviceFilter" class="form-label">서비스 유형</label>
+            <select class="form-select" id="serviceFilter">
+                <option value="">전체 서비스</option>
+                <option value="벌초">벌초 서비스</option>
+                <option value="예초">예초 서비스</option>
+                <option value="태양광 예초 관리">태양광 예초 관리</option>
+                <option value="가지치기">가지치기</option>
+                <option value="제초제 살포">제초제 살포</option>
+                <option value="나무 제거(벌목)">나무 제거(벌목)</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="teamSizeFilter" class="form-label">팀 규모</label>
+            <select class="form-select" id="teamSizeFilter">
+                <option value="">전체 규모</option>
+                <option value="1">1인</option>
+                <option value="2-5">2-5인</option>
+                <option value="6-10">6-10인</option>
+                <option value="11+">11인 이상</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="experienceFilter" class="form-label">최소 경력</label>
+            <select class="form-select" id="experienceFilter">
+                <option value="">전체</option>
+                <option value="1">1년 이상</option>
+                <option value="3">3년 이상</option>
+                <option value="5">5년 이상</option>
+                <option value="10">10년 이상</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- 작업자 목록 -->
+<div class="worker-list" id="workerList">
+    <!-- 작업자 카드들은 JavaScript에서 동적으로 추가 -->
+</div>
+
+<script type="module">
+    // ... existing code ...
+
+    // 작업자 카드 생성 함수
+    function createWorkerCard(worker) {
+        return `
+            <div class="worker-card">
+                <div class="worker-header">
+                    <h3>${worker.name}</h3>
+                    <span class="badge ${worker.registrationType === 'business' ? 'bg-primary' : 'bg-secondary'}">
+                        ${worker.registrationType === 'business' ? '사업자' : '개인'}
+                    </span>
+                </div>
+                <div class="worker-info">
+                    <p><i class="fas fa-map-marker-alt"></i> ${worker.regions?.join(', ') || '지역 정보 없음'}</p>
+                    <p><i class="fas fa-users"></i> ${worker.teamSize}명 (${{
+                        'individual': '1인 작업',
+                        'family': '가족 단위',
+                        'team': '팀 구성',
+                        'company': '회사 소속'
+                    }[worker.teamType] || worker.teamType})</p>
+                    <p><i class="fas fa-briefcase"></i> ${worker.experience || 0}년 경력</p>
+                    <p><i class="fas fa-tools"></i> ${worker.serviceTypes?.join(', ') || '서비스 정보 없음'}</p>
+                </div>
+                <div class="worker-skills">
+                    ${worker.certifications?.map(cert => `
+                        <span class="badge bg-info">${cert}</span>
+                    `).join('') || ''}
+                </div>
+                <div class="worker-actions">
+                    <button class="btn btn-primary" onclick="viewWorkerDetail('${worker.uid}')">상세보기</button>
+                </div>
+            </div>
+        `;
+    }
+
+    // 필터 적용 함수
+    function applyFilters(workers) {
+        const regionFilter = document.getElementById('regionFilter').value;
+        const serviceFilter = document.getElementById('serviceFilter').value;
+        const teamSizeFilter = document.getElementById('teamSizeFilter').value;
+        const experienceFilter = document.getElementById('experienceFilter').value;
+
+        return workers.filter(worker => {
+            // 지역 필터
+            if (regionFilter && !worker.regions?.includes(regionFilter)) return false;
+            
+            // 서비스 필터
+            if (serviceFilter && !worker.serviceTypes?.includes(serviceFilter)) return false;
+            
+            // 팀 규모 필터
+            if (teamSizeFilter) {
+                const teamSize = worker.teamSize;
+                switch(teamSizeFilter) {
+                    case '1': if (teamSize !== 1) return false; break;
+                    case '2-5': if (teamSize < 2 || teamSize > 5) return false; break;
+                    case '6-10': if (teamSize < 6 || teamSize > 10) return false; break;
+                    case '11+': if (teamSize < 11) return false; break;
+                }
+            }
+            
+            // 경력 필터
+            if (experienceFilter && (worker.experience || 0) < parseInt(experienceFilter)) return false;
+            
+            return true;
+        });
+    }
+
+    // 필터 이벤트 리스너
+    document.querySelectorAll('.filter-section select').forEach(select => {
+        select.addEventListener('change', () => {
+            loadWorkers();
+        });
+    });
+
+    // 작업자 목록 로드 함수
+    async function loadWorkers() {
+        try {
+            const workersSnapshot = await getDocs(collection(db, 'users'));
+            let workers = [];
+            
+            workersSnapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.isWorker) {
+                    workers.push({ ...data, uid: doc.id });
+                }
+            });
+            
+            // 필터 적용
+            workers = applyFilters(workers);
+            
+            // 목록 업데이트
+            const workerList = document.getElementById('workerList');
+            workerList.innerHTML = workers.map(worker => createWorkerCard(worker)).join('');
+        } catch (error) {
+            console.error('작업자 목록 로드 실패:', error);
+        }
+    }
+
+    // 페이지 로드 시 작업자 목록 로드
+    loadWorkers();
+</script>
+
+<style>
+    .filter-section {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .worker-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .worker-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .worker-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .worker-info {
+        margin-bottom: 15px;
+    }
+
+    .worker-info p {
+        margin: 5px 0;
+        color: #666;
+    }
+
+    .worker-info i {
+        width: 20px;
+        color: #1E88E5;
+    }
+
+    .worker-skills {
+        margin-bottom: 15px;
+    }
+
+    .worker-skills .badge {
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+
+    .worker-actions {
+        text-align: right;
+    }
+</style> 

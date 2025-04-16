@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 - 작업자 관리 | 원스톱 벌초</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/common.css">
+    <link rel="stylesheet" href="components/footer.css">
+    <link rel="stylesheet" href="styles/admin.css">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.1.0/css/adminlte.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.1.0/js/adminlte.min.js"></script>
+    <style>
+        .worker-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .worker-table th, 
+        .worker-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .worker-table th {
+            background-color: #f8f9fa;
+            color: #495057;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .worker-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .worker-table .badge {
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .worker-table .badge.success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .worker-table .badge.warning {
+            background-color: #fff8e1;
+            color: #f57f17;
+        }
+
+        .worker-table .badge.error {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        .worker-table .badge.info {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .worker-table .btn-small {
+            padding: 5px 10px;
+            font-size: 12px;
+            margin: 2px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        .close-btn {
+            border: none;
+            background: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6c757d;
+        }
+
+        .close-btn:hover {
+            color: #343a40;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #e9ecef;
+            padding-top: 15px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 15px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background-color: #3f51b5;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #303f9f;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .danger:hover {
+            background-color: #c82333;
+        }
+
+        .search-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-filter input,
+        .search-filter select {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+
+        .search-filter input {
+            flex: 1;
+            min-width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- 사이드바 시작 -->
+        <div class="admin-sidebar">
+            <div class="sidebar-header">
+                <img src="images/logo.png" alt="OneStop Logo" class="logo">
+                <h3>OneStop Platform</h3>
+                <button class="sidebar-toggle"><i class="fas fa-bars"></i></button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item">
+                        <a href="admin-dashboard.html"><i class="fas fa-tachometer-alt"></i> 대시보드</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-users.html"><i class="fas fa-users"></i> 사용자 관리</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="admin-workers.html"><i class="fas fa-user-hard-hat"></i> 작업자 관리</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-customers.html"><i class="fas fa-user-tie"></i> 고객 관리</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-services.html"><i class="fas fa-concierge-bell"></i> 서비스 관리</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-payments.html"><i class="fas fa-credit-card"></i> 결제 관리</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-settlements.html"><i class="fas fa-calculator"></i> 정산 관리</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-analytics.html"><i class="fas fa-chart-bar"></i> 통계 분석</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-ai.html"><i class="fas fa-robot"></i> AI 분석</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-monitoring.html"><i class="fas fa-desktop"></i> 시스템 모니터링</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-integration.html"><i class="fas fa-plug"></i> 시스템 통합</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="logout-btn"><i class="fas fa-sign-out-alt"></i> 로그아웃</button>
+            </div>
+        </div>
+        <!-- 사이드바 끝 -->
+
+        <!-- 메인 콘텐츠 영역 시작 -->
+        <div class="main-content">
+            <div class="content-header">
+                <h1><i class="fas fa-user-hard-hat"></i> 작업자 관리</h1>
+                <div class="header-actions">
+                    <button class="refresh-btn"><i class="fas fa-sync"></i></button>
+                    <button class="add-worker-btn"><i class="fas fa-user-plus"></i> 작업자 추가</button>
+                    <div class="user-info">
+                        <span>관리자</span>
+                        <img src="images/admin-avatar.png" alt="Admin">
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-body">
+                <div class="worker-management">
+                    <!-- 작업자 검색 및 필터 -->
+                    <div class="search-filter">
+                        <input type="text" placeholder="작업자 검색..." class="search-input">
+                        <select class="filter-select">
+                            <option value="all">전체 작업자</option>
+                            <option value="active">활성 작업자</option>
+                            <option value="inactive">비활성 작업자</option>
+                            <option value="available">가용 작업자</option>
+                        </select>
+                    </div>
+
+                    <!-- 작업자 목록 -->
+                    <div class="worker-list">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>이름</th>
+                                    <th>연락처</th>
+                                    <th>전문분야</th>
+                                    <th>상태</th>
+                                    <th>등록일</th>
+                                    <th>마지막 작업</th>
+                                    <th>관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="workerTableBody">
+                                <!-- 작업자 데이터가 여기에 동적으로 로드됩니다 -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 페이지네이션 -->
+                    <div class="pagination">
+                        <button class="page-btn"><i class="fas fa-chevron-left"></i></button>
+                        <span class="page-info">1-10 / 100</span>
+                        <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 메인 콘텐츠 영역 끝 -->
+    </div>
+
+    <!-- 작업자 추가/수정 모달 -->
+    <div class="modal" id="workerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>작업자 정보</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="workerForm">
+                    <div class="form-group">
+                        <label for="workerName">이름</label>
+                        <input type="text" id="workerName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="workerPhone">연락처</label>
+                        <input type="tel" id="workerPhone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="workerSpecialty">전문분야</label>
+                        <select id="workerSpecialty" required>
+                            <option value="cleaning">벌초</option>
+                            <option value="maintenance">묘지 관리</option>
+                            <option value="both">벌초 및 묘지 관리</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="workerStatus">상태</label>
+                        <select id="workerStatus" required>
+                            <option value="active">활성</option>
+                            <option value="inactive">비활성</option>
+                            <option value="available">가용</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary cancel-btn">취소</button>
+                <button class="btn-primary save-btn">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 푸터 -->
+    <div id="footer-container"></div>
+
+    <!-- 스크립트 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="scripts/firebase-config.js"></script>
+    <script type="module" src="scripts/auth.js"></script>
+    <script src="scripts/navbar.js"></script>
+    <script src="components/footer.js"></script>
+    <script>
+        // Firebase 초기화
+        const firebaseConfig = {
+            apiKey: "AIzaSyBWADxFFsfyJGRqI09AJx1pDQhrWv_pQzo",
+            authDomain: "onestop-88b05.firebaseapp.com",
+            projectId: "onestop-88b05",
+            storageBucket: "onestop-88b05.appspot.com",
+            messagingSenderId: "189609926021",
+            appId: "1:189609926021:web:19a330a166ff2ba58378ec",
+            measurementId: "G-FKZLEVZ8M8"
+        };
+
+        // Firebase 초기화
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        
+        // 현재 사용자 확인 및 인증 상태 관리
+        let currentUser = null;
+
+        // 인증 상태 변경 감지
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // 사용자가 로그인한 상태
+                currentUser = user;
+                console.log('로그인 상태:', user.email);
+                loadWorkerData();
+            } else {
+                // 로그인되지 않은 상태
+                console.log('로그인되지 않음');
+                
+                // 개발 중에는 임시로 익명 로그인 사용
+                auth.signInAnonymously()
+                    .then(() => {
+                        console.log('익명 로그인 성공');
+                    })
+                    .catch(error => {
+                        console.error('익명 로그인 실패:', error);
+                    });
+            }
+        });
+        
+        // 사이드바 토글 기능
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.querySelector('.sidebar-toggle');
+            const sidebar = document.querySelector('.admin-sidebar');
+            const mainContent = document.querySelector('.admin-main');
+            
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+                mainContent.classList.toggle('sidebar-collapsed');
+            });
+
+            // 검색 및 필터링 이벤트 설정
+            setupSearchAndFilters();
+
+            // 작업자 추가 버튼 이벤트
+            document.getElementById('addWorkerBtn').addEventListener('click', openWorkerModal);
+
+            // 모달 닫기 버튼 이벤트
+            document.querySelector('.close-btn').addEventListener('click', closeWorkerModal);
+
+            // 작업자 폼 저장 이벤트
+            document.getElementById('saveWorkerBtn').addEventListener('click', saveWorkerData);
+            
+            // 작업자 삭제 버튼 이벤트
+            document.getElementById('deleteWorkerBtn').addEventListener('click', deleteWorker);
+            
+            // 로그아웃 버튼 이벤트
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                auth.signOut().then(() => {
+                    console.log('로그아웃 성공');
+                    window.location.href = 'login.html';
+                }).catch(error => {
+                    console.error('로그아웃 실패:', error);
+                });
+            });
+            
+            // 새로고침 버튼 이벤트
+            document.getElementById('refreshBtn').addEventListener('click', loadWorkerData);
+        });
+
+        // 전역 변수 선언
+        let allWorkers = [];
+        let currentPage = 1;
+        let workersPerPage = 10;
+        let currentWorkerId = null;
+        let editMode = false;
+        
+        // Firestore에서 작업자 데이터 로드 (isWorker = true인 사용자만)
+        function loadWorkerData() {
+            showLoading();
+            
+            // Firestore에서 isWorker가 true인 사용자만 조회
+            db.collection('users').where('isWorker', '==', true).get()
+                .then((snapshot) => {
+                    allWorkers = [];
+                    snapshot.forEach((doc) => {
+                        const userData = doc.data();
+                        userData.id = doc.id;
+                        allWorkers.push(userData);
+                    });
+                    
+                    renderWorkerTable(allWorkers);
+                    hideLoading();
+                })
+                .catch((error) => {
+                    console.error('작업자 데이터 로드 오류:', error);
+                    hideLoading();
+                    
+                    // 권한 오류 처리
+                    if (error.code === 'permission-denied') {
+                        console.log('권한 오류로 인해 테스트 데이터를 사용합니다.');
+                        useTestData();
+                    } else {
+                        showError('작업자 데이터를 로드하는 중 오류가 발생했습니다: ' + error.message);
+                    }
+                });
+        }
+        
+        // 테스트 데이터 사용 (권한 오류 시)
+        function useTestData() {
+            const testWorkers = [
+                {
+                    id: 'worker1',
+                    displayName: '김작업',
+                    name: '김작업',
+                    email: 'worker1@example.com',
+                    phone: '010-1234-5678',
+                    role: 'worker',
+                    status: 'active',
+                    isAdmin: false,
+                    isWorker: true,
+                    skills: ['벌초', '예초'],
+                    experience: '5년',
+                    region: '서울',
+                    createdAt: { seconds: Date.now() / 1000 },
+                    lastLoginAt: { seconds: Date.now() / 1000 }
+                },
+                {
+                    id: 'worker2',
+                    displayName: '이기술',
+                    name: '이기술',
+                    email: 'worker2@example.com',
+                    phone: '010-2345-6789',
+                    role: 'worker',
+                    status: 'active',
+                    isAdmin: false,
+                    isWorker: true,
+                    skills: ['가지치기', '태양광'],
+                    experience: '3년',
+                    region: '부산',
+                    createdAt: { seconds: Date.now() / 1000 - 86400 },
+                    lastLoginAt: { seconds: Date.now() / 1000 - 3600 }
+                },
+                {
+                    id: 'worker3',
+                    displayName: '박전문',
+                    name: '박전문',
+                    email: 'worker3@example.com',
+                    phone: '010-3456-7890',
+                    role: 'worker',
+                    status: 'inactive',
+                    isAdmin: false,
+                    isWorker: true,
+                    skills: ['벌초', '태양광'],
+                    experience: '7년',
+                    region: '대구',
+                    createdAt: { seconds: Date.now() / 1000 - 86400 * 7 },
+                    lastLoginAt: { seconds: Date.now() / 1000 - 86400 }
+                }
+            ];
+            
+            allWorkers = testWorkers;
+            renderWorkerTable(allWorkers);
+            showSuccess('테스트 데이터를 로드했습니다.');
+        }
+
+        // 작업자 테이블 렌더링
+        function renderWorkerTable(workers) {
+            const tableBody = document.getElementById('workerTableBody');
+            tableBody.innerHTML = '';
+            
+            if (workers.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="8">데이터가 없습니다.</td></tr>';
+                updatePagination(0);
+                return;
+            }
+            
+            const startIndex = (currentPage - 1) * workersPerPage;
+            const endIndex = Math.min(startIndex + workersPerPage, workers.length);
+            const paginatedWorkers = workers.slice(startIndex, endIndex);
+            
+            paginatedWorkers.forEach(worker => {
+                const row = document.createElement('tr');
+                
+                // 날짜 형식 변환
+                let joinDate = '-';
+                let lastLogin = '-';
+                
+                if (worker.createdAt) {
+                    if (worker.createdAt.seconds) {
+                        joinDate = new Date(worker.createdAt.seconds * 1000).toLocaleDateString();
+                    } else if (worker.createdAt.toDate) {
+                        joinDate = worker.createdAt.toDate().toLocaleDateString();
+                    } else if (worker.createdAt instanceof Date) {
+                        joinDate = worker.createdAt.toLocaleDateString();
+                    }
+                }
+                
+                if (worker.lastLoginAt) {
+                    if (worker.lastLoginAt.seconds) {
+                        lastLogin = new Date(worker.lastLoginAt.seconds * 1000).toLocaleDateString();
+                    } else if (worker.lastLoginAt.toDate) {
+                        lastLogin = worker.lastLoginAt.toDate().toLocaleDateString();
+                    } else if (worker.lastLoginAt instanceof Date) {
+                        lastLogin = worker.lastLoginAt.toLocaleDateString();
+                    }
+                }
+                
+                // 상태에 따른 배지 클래스
+                const statusClass = getStatusClass(worker.status || 'active');
+                
+                row.innerHTML = `
+                    <td>${worker.id || '-'}</td>
+                    <td>${worker.displayName || worker.name || '-'}</td>
+                    <td>${worker.email || '-'}</td>
+                    <td>${translateRole(worker.role || 'worker')}</td>
+                    <td><span class="badge ${statusClass}">${translateStatus(worker.status || 'active')}</span></td>
+                    <td>${joinDate}</td>
+                    <td>${lastLogin}</td>
+                    <td>
+                        <button class="btn-primary btn-small edit-worker" data-id="${worker.id}">
+                            <i class="fas fa-edit"></i> 편집
+                        </button>
+                        <button class="btn-secondary btn-small delete-worker" data-id="${worker.id}">
+                            <i class="fas fa-trash"></i> 삭제
+                        </button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // 페이지네이션 업데이트
+            updatePagination(workers.length);
+            
+            // 편집 및 삭제 버튼에 이벤트 리스너 추가
+            addButtonEventListeners();
+        }
+
+        // 페이지네이션 업데이트
+        function updatePagination(totalWorkers) {
+            const totalPages = Math.ceil(totalWorkers / workersPerPage);
+            document.getElementById('pageInfo').textContent = `${currentPage} / ${totalPages || 1}`;
+            
+            document.getElementById('prevPage').disabled = currentPage <= 1;
+            document.getElementById('nextPage').disabled = currentPage >= totalPages;
+            
+            document.getElementById('prevPage').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderWorkerTable(allWorkers);
+                }
+            });
+            
+            document.getElementById('nextPage').addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderWorkerTable(allWorkers);
+                }
+            });
+        }
+
+        // 편집 및 삭제 버튼에 이벤트 리스너 추가
+        function addButtonEventListeners() {
+            document.querySelectorAll('.edit-worker').forEach(button => {
+                button.addEventListener('click', function() {
+                    const workerId = this.getAttribute('data-id');
+                    editWorker(workerId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-worker').forEach(button => {
+                button.addEventListener('click', function() {
+                    const workerId = this.getAttribute('data-id');
+                    deleteWorker(workerId);
+                });
+            });
+        }
+
+        // 작업자 편집 함수
+        function editWorker(workerId) {
+            editMode = true;
+            currentWorkerId = workerId;
+            const worker = allWorkers.find(w => w.id === workerId);
+            
+            if (!worker) {
+                showError('작업자 정보를 찾을 수 없습니다.');
+                return;
+            }
+            
+            // 필드 값 설정
+            document.getElementById('workerId').value = worker.id || '';
+            document.getElementById('workerName').value = worker.displayName || worker.name || '';
+            document.getElementById('workerEmail').value = worker.email || '';
+            document.getElementById('workerPhone').value = worker.phone || '';
+            document.getElementById('workerRole').value = worker.role || 'worker';
+            document.getElementById('workerStatus').value = worker.status || 'active';
+            document.getElementById('workerExperience').value = worker.experience || '';
+            document.getElementById('workerRegion').value = worker.region || '';
+            
+            // 기술 체크박스 설정
+            const skillCheckboxes = document.querySelectorAll('input[name="skills"]');
+            skillCheckboxes.forEach(checkbox => {
+                checkbox.checked = worker.skills && 
+                  Array.isArray(worker.skills) && 
+                  worker.skills.includes(checkbox.value);
+            });
+            
+            // 날짜 표시
+            if (worker.createdAt) {
+                if (worker.createdAt.seconds) {
+                    document.getElementById('joinDate').value = new Date(worker.createdAt.seconds * 1000).toLocaleDateString();
+                } else if (worker.createdAt.toDate) {
+                    document.getElementById('joinDate').value = worker.createdAt.toDate().toLocaleDateString();
+                } else if (worker.createdAt instanceof Date) {
+                    document.getElementById('joinDate').value = worker.createdAt.toLocaleDateString();
+                }
+            } else {
+                document.getElementById('joinDate').value = '-';
+            }
+            
+            if (worker.lastLoginAt) {
+                if (worker.lastLoginAt.seconds) {
+                    document.getElementById('lastLogin').value = new Date(worker.lastLoginAt.seconds * 1000).toLocaleDateString();
+                } else if (worker.lastLoginAt.toDate) {
+                    document.getElementById('lastLogin').value = worker.lastLoginAt.toDate().toLocaleDateString();
+                } else if (worker.lastLoginAt instanceof Date) {
+                    document.getElementById('lastLogin').value = worker.lastLoginAt.toLocaleDateString();
+                }
+            } else {
+                document.getElementById('lastLogin').value = '-';
+            }
+            
+            openWorkerModal();
+        }
+
+        // 작업자 모달 열기
+        function openWorkerModal() {
+            if (!editMode) {
+                // 새 작업자 추가 모드
+                document.getElementById('workerForm').reset();
+                document.getElementById('workerId').value = '';
+                document.getElementById('joinDate').value = new Date().toLocaleDateString();
+                document.getElementById('lastLogin').value = '-';
+                currentWorkerId = null;
+            }
+            
+            document.getElementById('workerModal').style.display = 'block';
+        }
+
+        // 작업자 모달 닫기
+        function closeWorkerModal() {
+            document.getElementById('workerModal').style.display = 'none';
+            editMode = false;
+        }
+
+        // 작업자 데이터 저장
+        function saveWorkerData() {
+            showLoading();
+            
+            // 선택된 기술 가져오기
+            const selectedSkills = [];
+            document.querySelectorAll('input[name="skills"]:checked').forEach(checkbox => {
+                selectedSkills.push(checkbox.value);
+            });
+            
+            const workerData = {
+                displayName: document.getElementById('workerName').value,
+                name: document.getElementById('workerName').value,
+                email: document.getElementById('workerEmail').value,
+                phone: document.getElementById('workerPhone').value,
+                role: document.getElementById('workerRole').value,
+                status: document.getElementById('workerStatus').value,
+                skills: selectedSkills,
+                experience: document.getElementById('workerExperience').value,
+                region: document.getElementById('workerRegion').value,
+                isWorker: true,  // 항상 true로 설정
+                isAdmin: false,  // 작업자는 관리자가 아님
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            if (editMode && currentWorkerId) {
+                // 작업자 정보 업데이트
+                db.collection('users').doc(currentWorkerId).update(workerData)
+                    .then(() => {
+                        hideLoading();
+                        closeWorkerModal();
+                        showSuccess('작업자 정보가 업데이트되었습니다.');
+                        loadWorkerData();
+                    })
+                    .catch(error => {
+                        console.error('작업자 업데이트 오류:', error);
+                        hideLoading();
+                        
+                        // 권한 오류 처리
+                        if (error.code === 'permission-denied') {
+                            // 테스트 모드에서는 로컬에서 처리
+                            const index = allWorkers.findIndex(w => w.id === currentWorkerId);
+                            if (index !== -1) {
+                                allWorkers[index] = { ...allWorkers[index], ...workerData, id: currentWorkerId };
+                                closeWorkerModal();
+                                showSuccess('테스트 모드: 작업자 정보가 업데이트되었습니다.');
+                                renderWorkerTable(allWorkers);
+                            }
+                        } else {
+                            showError('작업자 정보 업데이트 중 오류가 발생했습니다: ' + error.message);
+                        }
+                    });
+            } else {
+                // 새 작업자 추가
+                workerData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                
+                db.collection('users').add(workerData)
+                    .then((docRef) => {
+                        hideLoading();
+                        closeWorkerModal();
+                        showSuccess('새 작업자가 추가되었습니다.');
+                        loadWorkerData();
+                    })
+                    .catch(error => {
+                        console.error('작업자 추가 오류:', error);
+                        hideLoading();
+                        
+                        // 권한 오류 처리
+                        if (error.code === 'permission-denied') {
+                            // 테스트 모드에서는 로컬에서 처리
+                            const newId = 'worker' + (allWorkers.length + 1);
+                            const newWorker = {
+                                ...workerData,
+                                id: newId,
+                                createdAt: { seconds: Date.now() / 1000 },
+                                lastLoginAt: { seconds: Date.now() / 1000 }
+                            };
+                            
+                            allWorkers.push(newWorker);
+                            closeWorkerModal();
+                            showSuccess('테스트 모드: 새 작업자가 추가되었습니다.');
+                            renderWorkerTable(allWorkers);
+                        } else {
+                            showError('작업자 추가 중 오류가 발생했습니다: ' + error.message);
+                        }
+                    });
+            }
+        }
+
+        // 작업자 삭제
+        function deleteWorker(workerId) {
+            // 삭제할 작업자 ID가 주어지지 않았다면 현재 편집 중인 ID 사용
+            if (!workerId) {
+                workerId = currentWorkerId;
+            }
+            
+            if (!workerId) {
+                showError('삭제할 작업자를 선택해주세요.');
+                return;
+            }
+            
+            if (!confirm('정말로 이 작업자를 삭제하시겠습니까?')) {
+                return;
+            }
+            
+            showLoading();
+            
+            db.collection('users').doc(workerId).delete()
+                .then(() => {
+                    hideLoading();
+                    closeWorkerModal();
+                    showSuccess('작업자가 삭제되었습니다.');
+                    loadWorkerData();
+                })
+                .catch(error => {
+                    console.error('작업자 삭제 오류:', error);
+                    hideLoading();
+                    
+                    // 권한 오류 처리
+                    if (error.code === 'permission-denied') {
+                        // 테스트 모드에서는 로컬에서 처리
+                        const index = allWorkers.findIndex(w => w.id === workerId);
+                        if (index !== -1) {
+                            allWorkers.splice(index, 1);
+                            closeWorkerModal();
+                            showSuccess('테스트 모드: 작업자가 삭제되었습니다.');
+                            renderWorkerTable(allWorkers);
+                        }
+                    } else {
+                        showError('작업자 삭제 중 오류가 발생했습니다: ' + error.message);
+                    }
+                });
+        }
+
+        // 검색 및 필터링 설정
+        function setupSearchAndFilters() {
+            const searchInput = document.querySelector('.search-input');
+            const skillFilter = document.querySelector('.filter-select');
+            
+            const applyFilters = () => {
+                const searchTerm = searchInput.value.toLowerCase();
+                const skill = skillFilter.value;
+                
+                const filteredWorkers = allWorkers.filter(worker => {
+                    const nameMatch = (worker.displayName || worker.name || '').toLowerCase().includes(searchTerm);
+                    const emailMatch = (worker.email || '').toLowerCase().includes(searchTerm);
+                    
+                    // 스킬 필터링
+                    let skillMatch = true;
+                    if (skill) {
+                        skillMatch = worker.skills && Array.isArray(worker.skills) && 
+                                    worker.skills.includes(skill);
+                    }
+                    
+                    return (nameMatch || emailMatch) && skillMatch;
+                });
+                
+                currentPage = 1;
+                renderWorkerTable(filteredWorkers);
+            };
+            
+            searchInput.addEventListener('input', applyFilters);
+            skillFilter.addEventListener('change', applyFilters);
+        }
+
+        // 상태 클래스 가져오기
+        function getStatusClass(status) {
+            switch (status) {
+                case 'active': return 'success';
+                case 'inactive': return 'warning';
+                case 'available': return 'success';
+                case 'working': return 'info';
+                case 'resting': return 'warning';
+                default: return 'info';
+            }
+        }
+
+        // 역할 번역
+        function translateRole(role) {
+            switch (role) {
+                case 'admin': return '관리자';
+                case 'worker': return '작업자';
+                case 'manager': return '매니저';
+                case 'user': return '일반 사용자';
+                default: return role;
+            }
+        }
+
+        // 상태 번역
+        function translateStatus(status) {
+            switch (status) {
+                case 'active': return '활성';
+                case 'inactive': return '비활성';
+                case 'available': return '대기 중';
+                case 'working': return '작업 중';
+                case 'resting': return '휴식 중';
+                default: return status;
+            }
+        }
+
+        // 로딩 표시
+        function showLoading() {
+            // 로딩 표시기 구현 (필요에 따라 구현)
+            console.log('로딩 중...');
+        }
+
+        // 로딩 숨기기
+        function hideLoading() {
+            // 로딩 표시기 숨기기 (필요에 따라 구현)
+            console.log('로딩 완료');
+        }
+
+        // 오류 메시지 표시
+        function showError(message) {
+            alert(message); // 간단한 구현. 필요에 따라 개선 가능
+        }
+
+        // 성공 메시지 표시
+        function showSuccess(message) {
+            alert(message); // 간단한 구현. 필요에 따라 개선 가능
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대시보드 - OneStop Platform</title>
+    <link rel="stylesheet" href="styles/admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- 사이드바 시작 -->
+        <div class="admin-sidebar">
+            <div class="sidebar-header">
+                <img src="images/logo.png" alt="OneStop Logo" class="logo">
+                <h3>OneStop Platform</h3>
+                <button class="sidebar-toggle"><i class="fas fa-bars"></i></button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item active">
+                        <a href="admin-dashboard.html"><i class="fas fa-tachometer-alt"></i> 대시보드</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-users.html"><i class="fas fa-users"></i> 사용자 관리</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-workers.html"><i class="fas fa-user-hard-hat"></i> 작업자 관리</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-customers.html"><i class="fas fa-user-tie"></i> 고객 관리</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-services.html"><i class="fas fa-concierge-bell"></i> 서비스 관리</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-payments.html"><i class="fas fa-credit-card"></i> 결제 관리</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-settlements.html"><i class="fas fa-calculator"></i> 정산 관리</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-analytics.html"><i class="fas fa-chart-bar"></i> 통계 분석</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-ai.html"><i class="fas fa-robot"></i> AI 분석</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-monitoring.html"><i class="fas fa-desktop"></i> 시스템 모니터링</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="admin-integration.html"><i class="fas fa-plug"></i> 시스템 통합</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="logout-btn"><i class="fas fa-sign-out-alt"></i> 로그아웃</button>
+            </div>
+        </div>
+        <!-- 사이드바 끝 -->
+
+        <!-- 메인 콘텐츠 영역 시작 -->
+        <div class="main-content">
+            <div class="content-header">
+                <h1><i class="fas fa-tachometer-alt"></i> 대시보드</h1>
+                <div class="header-actions">
+                    <button class="refresh-btn"><i class="fas fa-sync"></i></button>
+                    <div class="user-info">
+                        <span>관리자</span>
+                        <img src="images/admin-avatar.png" alt="Admin">
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-body">
+                <div class="dashboard-grid">
+                    <!-- 사용자 관리 카드 -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <i class="fas fa-users"></i>
+                            <h3>사용자 관리</h3>
+                        </div>
+                        <div class="card-content">
+                            <p>사용자 계정 관리 및 권한 설정</p>
+                            <ul>
+                                <li>사용자 등록/수정/삭제</li>
+                                <li>권한 관리</li>
+                                <li>사용자 활동 로그</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <a href="admin-users.html" class="btn">관리하기</a>
+                        </div>
+                    </div>
+
+                    <!-- 작업자 관리 카드 -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <i class="fas fa-hard-hat"></i>
+                            <h3>작업자 관리</h3>
+                        </div>
+                        <div class="card-content">
+                            <p>작업자 계정 및 작업 관리</p>
+                            <ul>
+                                <li>작업자 등록/수정/삭제</li>
+                                <li>작업 배정</li>
+                                <li>작업 현황 모니터링</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <a href="admin-workers.html" class="btn">관리하기</a>
+                        </div>
+                    </div>
+
+                    <!-- 서비스 관리 카드 -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <i class="fas fa-tasks"></i>
+                            <h3>서비스 관리</h3>
+                        </div>
+                        <div class="card-content">
+                            <p>서비스 유형 및 요금 관리</p>
+                            <ul>
+                                <li>서비스 등록/수정/삭제</li>
+                                <li>요금 설정</li>
+                                <li>서비스 상태 관리</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <a href="admin-services.html" class="btn">관리하기</a>
+                        </div>
+                    </div>
+
+                    <!-- 결제 관리 카드 -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <i class="fas fa-credit-card"></i>
+                            <h3>결제 관리</h3>
+                        </div>
+                        <div class="card-content">
+                            <p>결제 처리 및 내역 관리</p>
+                            <ul>
+                                <li>결제 처리</li>
+                                <li>결제 내역 조회</li>
+                                <li>환불 처리</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <a href="admin-payments.html" class="btn">관리하기</a>
+                        </div>
+                    </div>
+
+                    <!-- 정산 관리 카드 -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <h3>정산 관리</h3>
+                        </div>
+                        <div class="card-content">
+                            <p>작업자 정산 및 내역 관리</p>
+                            <ul>
+                                <li>정산 처리</li>
+                                <li>정산 내역 조회</li>
+                                <li>정산 보고서</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <a href="admin-settlements.html" class="btn">관리하기</a>
+                        </div>
+                    </div>
+
+                    <!-- 통계 분석 카드 -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <i class="fas fa-chart-bar"></i>
+                            <h3>통계 분석</h3>
+                        </div>
+                        <div class="card-content">
+                            <p>서비스 및 사용자 통계 분석</p>
+                            <ul>
+                                <li>서비스 이용 통계</li>
+                                <li>사용자 행동 분석</li>
+                                <li>수익 분석</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <a href="admin-analytics.html" class="btn">관리하기</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 메인 콘텐츠 영역 끝 -->
+    </div>
+
+    <script src="scripts/admin-dashboard.js"></script>
+</body>
+</html> 
