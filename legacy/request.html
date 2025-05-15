@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="ko">
+<!DOCTYPE html><html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -8,242 +7,546 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>서비스 신청 - 원스톱 벌초</title>
 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/11.5.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.5.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.5.0/firebase-storage-compat.js"></script>
+  <!-- Firebase Config -->
+  <script src="scripts/firebase-config.js"></script>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
   <link rel="manifest" href="/manifest.json?v=1">
   <meta name="theme-color" content="#1E88E5">
 
-  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ef6b942fdad36e982c84eb0061d1d2ed&libraries=services"></script>
+  <link rel="stylesheet" href="styles/common.css?v=1.0.0">
+  <link rel="stylesheet" href="components/footer.css?v=1.0.0">
+
+  <!-- 카카오맵 SDK -->
   <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-  <link rel="stylesheet" href="/styles/common.css?v=1">
+  <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=ef6b942fdad36e982c84eb0061d1d2ed&libraries=services&autoload=false"></script>
 
   <style>
     body { padding-top: 60px; }
+    .request-container { max-width: 1400px; margin: 0 auto; }
+    .form-section { padding-right: 30px; }
+    .map-section { padding-left: 30px; }
     .step-container { display: none; }
     .step-container.active { display: block; }
-    .progress-container { margin-bottom: 20px; }
-    .progress-bar { background-color: #6D4AFF; }
-    .progress-text { color: #1E88E5; font-weight: 500; }
-    .progress-arrow { position: absolute; top: -35px; left: 50%; transform: translateX(-50%); font-size: 1.2rem; color: #1E88E5; animation: bounce 1s infinite; }
-    @keyframes bounce { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-10px); } }
-    #nv-map { width: 100%; height: 500px; border-radius: 8px; margin-top: 10px; }
-    .service-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 15px; }
-    .service-card { background-color: #fff; border: 1px solid #dee2e6; border-radius: 10px; padding: 15px; text-align: center; cursor: pointer; transition: all 0.3s ease; position: relative; }
-    .service-card:hover { background-color: #1E88E5; color: white; border-color: #1E88E5; }
+    .service-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; }
+    .service-card { 
+      background-color: #fff; 
+      border: 1px solid #dee2e6; 
+      border-radius: 10px; 
+      padding: 15px; 
+      text-align: center; 
+      cursor: pointer; 
+      transition: all 0.3s ease; 
+      position: relative; 
+      min-width: 120px; 
+      white-space: normal; 
+    }
+    .service-card:hover { 
+      background-color: #1E88E5; 
+      color: white; 
+      border-color: #1E88E5; 
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
     .service-card input[type="radio"] { display: none; }
-    .service-card label { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; margin: 0; cursor: pointer; padding: 15px; }
-    .service-card input[type="radio"]:checked + label { background-color: #1E88E5; color: white; border-color: #1E88E5; }
+    .service-card label { 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      width: 100%; 
+      height: 100%; 
+      margin: 0; 
+      cursor: pointer; 
+      padding: 15px; 
+      pointer-events: auto; 
+    }
+    .service-card input[type="radio"]:checked + label { 
+      background-color: #1E88E5; 
+      color: white; 
+      border: 2px solid #1E88E5; 
+      box-shadow: 0 0 10px rgba(30, 136, 229, 0.5); 
+    }
     .service-card input[type="radio"]:checked + label .check-icon { display: block; }
-    .check-icon { display: none; position: absolute; top: 5px; right: 5px; color: #fff; font-size: 1rem; }
-    .service-text { display: block; width: 100%; }
-    .form-label { display: flex; align-items: center; gap: 0.5rem; }
+    .check-icon { 
+      display: none; 
+      position: absolute; 
+      top: 5px; 
+      right: 5px; 
+      color: #fff; 
+      font-size: 1rem; 
+    }
+    .service-text { 
+      display: block; 
+      width: 100%; 
+      font-size: 14px; 
+      margin-top: 8px;
+    }
+    .form-label { 
+      display: flex; 
+      align-items: center; 
+      gap: 0.5rem; 
+      font-size: 14px; 
+      font-weight: 500; 
+      color: #333; 
+    }
     .form-label i { color: #6D4AFF; }
-    .form-control { border-radius: 10px; padding: 0.75rem; font-size: 1rem; border: 1px solid #1E88E5; }
-    .form-control:focus { border-color: #6D4AFF; box-shadow: 0 0 5px rgba(109, 74, 255, 0.3); }
-    .btn-primary, .btn-secondary { padding: 0.5rem 1.5rem; font-size: 1rem; }
-    #address-search-btn { color: #1E88E5; border-color: #1E88E5; border-radius: 20px; padding: 0.5rem 1rem; font-size: 0.9rem; }
-    #address-search-btn:hover { background-color: #1E88E5; color: white; border-color: #1E88E5; }
-    .btn-loading::after { content: ' '; display: inline-block; width: 16px; height: 16px; margin-left: 8px; border: 2px solid #fff; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    @media (min-width: 768px) { .service-cards { grid-template-columns: repeat(3, 1fr); } #nv-map { height: 400px; } }
-    @media (max-width: 768px) { .service-cards { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 10px; } .service-card { padding: 10px; } .service-card label { padding: 10px; } .check-icon { font-size: 0.8rem; } .form-control { padding: 0.6rem; font-size: 0.9rem; } .btn-primary, .btn-secondary { padding: 0.4rem 1.2rem; font-size: 0.9rem; } #address-search-btn { padding: 0.4rem 0.8rem; font-size: 0.8rem; } }
+    .form-control { 
+      border-radius: 10px; 
+      padding: 0.75rem; 
+      font-size: 14px; 
+      border: 1px solid #1E88E5; 
+    }
+    .form-control:focus { 
+      border-color: #6D4AFF; 
+      box-shadow: 0 0 5px rgba(109, 74, 255, 0.3); 
+    }
+    .form-control.is-invalid { 
+      border-color: #dc3545; 
+      background-image: none;
+    }
+    .invalid-feedback {
+      font-size: 12px;
+      color: #dc3545;
+      margin-top: 4px;
+    }
+    .btn-primary, .btn-secondary, #address-search-btn { 
+      padding: 0.5rem 1.5rem; 
+      font-size: 14px; 
+      border-radius: 20px; 
+    }
+    #address-search-btn { 
+      color: #1E88E5; 
+      border-color: #1E88E5; 
+    }
+    #address-search-btn:hover { 
+      background-color: #1E88E5; 
+      color: white; 
+    }
+    .map-container { 
+      position: relative; 
+      width: 100%; 
+      height: 500px; 
+      border-radius: 8px; 
+      overflow: hidden; 
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+      background-color: #f8f9fa; 
+    }
+    #nv-map { 
+      width: 100%; 
+      height: 100%; 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      z-index: 1; 
+    }
+    .service-info, .service-detail-form { 
+      background-color: #f1f3f5; 
+      border: 1px solid #e0e0e0; 
+      padding: 20px; 
+      border-radius: 8px; 
+      margin-bottom: 20px; 
+    }
+    .summary-item { 
+      margin-bottom: 10px; 
+      display: flex; 
+      justify-content: space-between; 
+    }
+    .summary-label { 
+      font-weight: 500; 
+      color: #666; 
+    }
+    .summary-value { 
+      color: #333; 
+    }
+    .form-group { 
+      margin-bottom: 15px; 
+    }
+    .loading { 
+      text-align: center; 
+      padding: 20px; 
+    }
+    .step-indicator {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+    .step {
+      display: flex;
+      align-items: center;
+      margin: 0 15px;
+    }
+    .step-number {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background-color: #e9ecef;
+      color: #6c757d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+      margin-right: 8px;
+    }
+    .step.active .step-number {
+      background-color: #1E88E5;
+      color: white;
+    }
+    .step-text {
+      font-size: 14px;
+      color: #6c757d;
+    }
+    .step.active .step-text {
+      color: #1E88E5;
+      font-weight: 500;
+    }
+    .step-line {
+      width: 50px;
+      height: 2px;
+      background-color: #e9ecef;
+      margin: 0 10px;
+    }
+    .step.active .step-line {
+      background-color: #1E88E5;
+    }
+
+    @media (max-width: 768px) {
+      .form-section, .map-section { padding: 0; }
+      .service-cards { grid-template-columns: repeat(2, 1fr); }
+      .map-container { height: 350px; }
+      .form-label, .service-text { font-size: 14px; }
+      .step { margin: 0 5px; }
+      .step-text { display: none; }
+      .step-line { width: 20px; }
+    }
+
+    .service-type-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .service-type-item {
+      text-align: center;
+    }
+    .service-type-item .btn {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    .service-type-item .btn i {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .service-type-item .btn span {
+      font-size: 0.9rem;
+    }
+    .service-type-item .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .btn-check:checked + .btn {
+      background-color: #1E88E5;
+      border-color: #1E88E5;
+      color: white;
+    }
+    .step-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .step-buttons .btn {
+      min-width: 100px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+    }
+    .step-buttons .btn i {
+      font-size: 0.875rem;
+    }
+    @media (max-width: 768px) {
+      .step-buttons {
+        flex-wrap: wrap;
+      }
+      .step-buttons .btn {
+        min-width: 80px;
+        font-size: 0.875rem;
+      }
+    }
   </style>
 </head>
 <body>
   <div id="navbar-placeholder" style="position: fixed; top: 0; left: 0; right: 0; z-index: 1000;"></div>
 
-  <div class="container">
+  <div class="container mt-4">
     <h2 class="text-center mb-4 fw-bold">서비스 신청</h2>
-    <div class="progress-container">
-      <div class="progress">
-        <div class="progress-bar bg-primary" id="progressBar" style="width: 0%"></div>
+    
+    <div class="step-indicator">
+      <div class="step active" data-step="1">
+        <div class="step-number">1</div>
+        <div class="step-text">서비스 선택</div>
       </div>
-      <div class="progress-text text-center" id="progressText"></div>
-      <div class="progress-arrow">▼</div>
+      <div class="step-line"></div>
+      <div class="step" data-step="2">
+        <div class="step-number">2</div>
+        <div class="step-text">상세 정보</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" data-step="3">
+        <div class="step-number">3</div>
+        <div class="step-text">최종 확인</div>
+      </div>
     </div>
 
     <div class="request-container">
       <form id="service-form">
-        <div class="step-container active" id="step1">
-          <div class="form-group">
-            <label class="form-label"><i class="fas fa-cut"></i> 서비스 유형 <span class="text-danger">*</span></label>
-            <div class="service-cards">
-              <div class="service-card">
-                <input type="radio" id="service-type1" name="service-type" value="벌초" required>
-                <label for="service-type1">
-                  <span class="service-text">벌초 서비스</span>
-                  <i class="fas fa-check check-icon"></i>
+        <div class="row">
+          <!-- 좌측 입력폼 영역 -->
+          <div class="col-md-5">
+            <div id="step1" class="step-container active">
+              <div class="form-section">
+                <!-- 서비스 종류 선택 -->
+                <div class="form-group mb-4">
+                  <label class="form-label">서비스 종류</label>
+                  <div class="service-type-grid">
+                    <div class="service-type-item">
+                      <input type="radio" class="btn-check" name="serviceType" id="grave-cleaning" value="벌초" autocomplete="off">
+                      <label class="btn btn-outline-primary w-100" for="grave-cleaning">
+                        <i class="fas fa-mound"></i>
+                        <span>벌초</span>
                 </label>
               </div>
-              <div class="service-card">
-                <input type="radio" id="service-type2" name="service-type" value="예초">
-                <label for="service-type2">
-                  <span class="service-text">예초 서비스</span>
-                  <i class="fas fa-check check-icon"></i>
+                    <div class="service-type-item">
+                      <input type="radio" class="btn-check" name="serviceType" id="grass-cutting" value="예초" autocomplete="off">
+                      <label class="btn btn-outline-primary w-100" for="grass-cutting">
+                        <i class="fas fa-cut"></i>
+                        <span>예초</span>
                 </label>
               </div>
-              <div class="service-card">
-                <input type="radio" id="service-type3" name="service-type" value="태양광 예초 관리">
-                <label for="service-type3">
-                  <span class="service-text">태양광 예초 관리</span>
-                  <i class="fas fa-check check-icon"></i>
+                    <div class="service-type-item">
+                      <input type="radio" class="btn-check" name="serviceType" id="solar-cutting" value="태양광 전문 예초" autocomplete="off">
+                      <label class="btn btn-outline-primary w-100" for="solar-cutting">
+                        <i class="fas fa-solar-panel"></i>
+                        <span>태양광 예초</span>
                 </label>
               </div>
-              <div class="service-card">
-                <input type="radio" id="service-type4" name="service-type" value="가지치기">
-                <label for="service-type4">
-                  <span class="service-text">가지치기</span>
-                  <i class="fas fa-check check-icon"></i>
+                    <div class="service-type-item">
+                      <input type="radio" class="btn-check" name="serviceType" id="pruning" value="가지치기" autocomplete="off">
+                      <label class="btn btn-outline-primary w-100" for="pruning">
+                        <i class="fas fa-leaf"></i>
+                        <span>가지치기</span>
                 </label>
               </div>
-              <div class="service-card">
-                <input type="radio" id="service-type5" name="service-type" value="제초제 살포">
-                <label for="service-type5">
-                  <span class="service-text">제초제 살포</span>
-                  <i class="fas fa-check check-icon"></i>
+                    <div class="service-type-item">
+                      <input type="radio" class="btn-check" name="serviceType" id="tree-cutting" value="벌목" autocomplete="off">
+                      <label class="btn btn-outline-primary w-100" for="tree-cutting">
+                        <i class="fas fa-tree"></i>
+                        <span>벌목</span>
                 </label>
               </div>
-              <div class="service-card">
-                <input type="radio" id="service-type6" name="service-type" value="나무 제거(벌목)">
-                <label for="service-type6">
-                  <span class="service-text">나무 제거(벌목)</span>
-                  <i class="fas fa-check check-icon"></i>
+                    <div class="service-type-item">
+                      <input type="radio" class="btn-check" name="serviceType" id="herbicide" value="제초제 살포" autocomplete="off">
+                      <label class="btn btn-outline-primary w-100" for="herbicide">
+                        <i class="fas fa-flask"></i>
+                        <span>제초제 살포</span>
                 </label>
               </div>
-              <div class="service-card">
-                <input type="radio" id="service-type7" name="service-type" value="기타">
-                <label for="service-type7">
-                  <span class="service-text">기타</span>
-                  <i class="fas fa-check check-icon"></i>
-                </label>
+                  </div>
+                </div>
+                <!-- 다음 단계 버튼 추가 -->
+                <div class="step-buttons mt-4 text-center">
+                  <button type="button" id="next-to-step2" class="btn btn-primary">
+                    다음 단계 <i class="fas fa-arrow-right"></i>
+                  </button>
+                </div>
               </div>
             </div>
-            <small class="form-text text-muted">원하는 서비스를 선택하세요: 벌초(묘지 관리), 예초(일반 풀 제거), 태양광 예초 관리(패널 주변), 가지치기(나뭇가지 정리), 제초제 살포(잡초 제거), 나무 제거(벌목), 기타(직접 입력). <br>기타를 선택한 경우 아래 입력창에 구체적인 서비스 내용을 작성해 주세요.</small>
-            <input type="text" id="custom-service" class="form-control mt-2" placeholder="기타 서비스 입력" style="display: none;">
+
+            <div id="step2" class="step-container">
+              <div class="service-detail-form">
+                <h3>세부 정보 입력</h3>
+                <div class="mb-3">
+                    <label for="grave-type" class="form-label">묘지 유형</label>
+                    <select class="form-select" id="grave-type" name="grave-type" required>
+                        <option value="">묘지 유형 선택</option>
+                        <option value="mound">일반봉분묘</option>
+                        <option value="individual">평장묘</option>
+                        <option value="joint">공동묘지</option>
+                    </select>
+                </div>
+                <div id="mound-grave-options" class="mb-3" style="display: none;">
+                    <label for="grave-count" class="form-label">기수</label>
+                    <select class="form-select" id="grave-count" name="grave-count">
+                        <option value="">기수 선택</option>
+                        <option value="1">1기</option>
+                        <option value="2">2기</option>
+                        <option value="3">3기</option>
+                        <option value="4">4기</option>
+                        <option value="5">5기</option>
+                        <option value="6">6기</option>
+                        <option value="custom">직접 입력</option>
+                    </select>
+                    <input type="number" class="form-control mt-2" id="custom-grave-count" name="custom-grave-count" style="display: none;" min="7" placeholder="7기 이상 입력">
+                </div>
+                <div class="mb-3">
+                    <label for="area-size" class="form-label">면적 (평)</label>
+                    <input type="number" class="form-control" id="area-size" name="area-size" min="1" step="0.1" placeholder="평수를 입력하세요">
+                    <small class="form-text text-muted">제곱미터: <span id="area-size-m2">0</span>㎡</small>
           </div>
-          <div class="d-flex justify-content-between mt-3">
-            <button type="button" class="btn btn-secondary rounded-pill" disabled>이전</button>
-            <button type="button" class="btn btn-primary rounded-pill" id="next-step1">다음</button>
           </div>
         </div>
 
-        <div class="step-container" id="step2">
-          <div class="form-group">
-            <label for="customer-name" class="form-label"><i class="fas fa-user"></i> 이름 <span class="text-danger">*</span></label>
-            <input type="text" id="customer-name" class="form-control" placeholder="예: 홍길동" required autocomplete="off">
-            <small class="form-text text-muted">개인 또는 기업명을 입력하세요. 신청 확인 시 사용됩니다. <br>예: 홍길동, (주)메타아이엠</small>
+            <div id="step3" class="step-container">
+              <div class="service-info mb-4">
+                <h3>신청자 정보</h3>
+                <form id="applicant-form">
+                  <div class="form-group mb-3">
+                    <label for="applicant-name" class="form-label" data-label="신청자명">신청자명/회사명</label>
+                    <input type="text" id="applicant-name" class="form-control" required>
           </div>
-          <div class="d-flex justify-content-between mt-3">
-            <button type="button" class="btn btn-secondary rounded-pill" id="prev-step2">이전</button>
-            <button type="button" class="btn btn-primary rounded-pill" id="next-step2">다음</button>
+                  <div class="form-group mb-3">
+                    <label for="applicant-phone" class="form-label" data-label="연락처">연락처</label>
+                    <input type="tel" id="applicant-phone" class="form-control" required>
+          </div>
+                  <div class="form-group mb-3">
+                    <label for="applicant-notes" class="form-label" data-label="참고사항">참고사항</label>
+                    <textarea id="applicant-notes" class="form-control" rows="3" placeholder="현장 상황이나 특별한 요청사항을 입력해주세요."></textarea>
+        </div>
+                  <div class="form-group mb-3">
+                    <label for="site-photos" class="form-label" data-label="현장 사진">현장 사진</label>
+                    <input type="file" id="site-photos" class="form-control" multiple accept="image/*">
+                    <small class="form-text text-muted">최대 5장까지 첨부 가능합니다.</small>
+          </div>
+                </form>
           </div>
         </div>
 
-        <div class="step-container" id="step3">
-          <div class="form-group">
-            <label for="customer-phone" class="form-label"><i class="fas fa-phone"></i> 연락처 <span class="text-danger">*</span></label>
-            <input type="tel" id="customer-phone" class="form-control" placeholder="예: 01012345678" maxlength="13" required autocomplete="off">
-            <small class="form-text text-muted">작업자와 연락 시 사용할 번호를 입력하세요. <br>형식: 01012345678 (하이픈 없이 입력)</small>
+            <div id="step4" class="step-container">
+              <div class="service-info mb-4">
+                <h3>견적서 확인</h3>
+                <div id="estimate-content" class="estimate-content">
+                  <!-- 견적서 내용이 동적으로 채워짐 -->
           </div>
-          <div class="d-flex justify-content-between mt-3">
-            <button type="button" class="btn btn-secondary rounded-pill" id="prev-step3">이전</button>
-            <button type="button" class="btn btn-primary rounded-pill" id="next-step3">다음</button>
           </div>
         </div>
 
-        <div class="step-container" id="step4">
-          <div class="form-group">
-            <label for="customer-password" class="form-label"><i class="fas fa-lock"></i> 비밀번호</label>
-            <input type="password" id="customer-password" class="form-control" placeholder="신청 조회용" autocomplete="new-password">
-            <small class="form-text text-muted">신청 내역 조회 시 사용할 비밀번호입니다. <br>4~8자리로 설정해 주세요. 나중에 비회원 재신청 시 필요합니다. <br><strong>회원가입 하시면 비밀번호 입력을 안하셔도 됩니다.</strong></small>
+            <div id="step5" class="step-container">
+              <div class="service-info mb-4">
+                <h3>최종 확인</h3>
+                <div class="form-group mb-3">
+                  <div class="form-check">
+                    <input type="checkbox" id="privacy-agree" class="form-check-input" required>
+                    <label for="privacy-agree" class="form-check-label">
+                      개인정보 수집 및 이용에 동의합니다.
+                      <button type="button" class="btn btn-link btn-sm p-0" data-bs-toggle="modal" data-bs-target="#privacyModal">
+                        [자세히 보기]
+                      </button>
+                    </label>
           </div>
-          <div class="d-flex justify-content-between mt-3">
-            <button type="button" class="btn btn-secondary rounded-pill" id="prev-step4">이전</button>
-            <button type="button" class="btn btn-primary rounded-pill" id="next-step4">다음</button>
+        </div>
+                <div class="form-group mb-3">
+                  <div class="form-check">
+                    <input type="checkbox" id="terms-agree" class="form-check-input" required>
+                    <label for="terms-agree" class="form-check-label">
+                      서비스 이용약관에 동의합니다.
+                      <button type="button" class="btn btn-link btn-sm p-0" data-bs-toggle="modal" data-bs-target="#termsModal">
+                        [자세히 보기]
+                      </button>
+                    </label>
+                  </div>
+          </div>
           </div>
         </div>
 
-        <div class="step-container" id="step5">
-          <div class="form-group">
-            <label class="form-label"><i class="fas fa-map-marker-alt"></i> 위치 정보 <span class="text-danger">*</span></label>
-            <button type="button" id="address-search-btn" class="btn btn-outline-primary btn-sm mb-2">주소 검색</button>
-            <input type="text" id="address" class="form-control" placeholder="주소를 검색하세요" readonly required autocomplete="off">
-            <div id="nv-map"></div>
-            <small class="form-text text-muted">주소를 검색한 후 지도에서 정확한 위치를 선택하세요. <br>위성사진 모드에서 핀을 이동하여 작업 위치를 지정할 수 있습니다.</small>
-          </div>
-          <div class="d-flex justify-content-between mt-3">
-            <button type="button" class="btn btn-secondary rounded-pill" id="prev-step5">이전</button>
-            <button type="button" class="btn btn-primary rounded-pill" id="next-step5">다음</button>
-          </div>
-        </div>
-
-        <div class="step-container" id="step6">
-          <div class="form-group" id="service-details">
-            <label class="form-label"><i class="fas fa-info-circle"></i> 세부 사항</label>
-            <small class="form-text text-muted">선택한 서비스 유형에 따라 필요한 세부 정보를 입력하세요. <br>예: 벌초의 경우 묘지 종류와 분묘 수를 입력해야 합니다.</small>
-          </div>
-          <div class="d-flex justify-content-between mt-3">
-            <button type="button" class="btn btn-secondary rounded-pill" id="prev-step6">이전</button>
-            <button type="button" class="btn btn-primary rounded-pill" id="next-step6">다음</button>
-          </div>
-        </div>
-
-        <div class="step-container" id="step7">
-          <div class="form-group">
-            <label for="work-date" class="form-label"><i class="fas fa-calendar-alt"></i> 희망 작업 날짜 <span class="text-danger">*</span></label>
-            <input type="date" id="work-date" class="form-control" required>
-            <small class="form-text text-muted">작업을 원하는 날짜를 선택하세요. <br>작업 가능 여부는 작업자와 상의 후 확정됩니다.</small>
-          </div>
-          <div class="d-flex justify-content-between mt-3">
-            <button type="button" class="btn btn-secondary rounded-pill" id="prev-step7">이전</button>
-            <button type="button" class="btn btn-primary rounded-pill" id="next-step7">다음</button>
+            <div class="text-center mt-4">
+              <div class="step-buttons" style="display: flex !important; justify-content: center; gap: 0.5rem;">
+                <button type="button" id="prev-to-step1" class="btn btn-secondary me-2" style="display: none;">
+                  <i class="fas fa-arrow-left"></i> 이전
+                </button>
+                <button type="button" id="next-to-step2" class="btn btn-primary" style="display: none;">
+                  다음 <i class="fas fa-arrow-right"></i>
+                </button>
+                <button type="button" id="prev-to-step2" class="btn btn-secondary me-2" style="display: none;">
+                  <i class="fas fa-arrow-left"></i> 이전
+                </button>
+                <button type="button" id="next-to-step3" class="btn btn-primary" style="display: none;">
+                  다음 <i class="fas fa-arrow-right"></i>
+                </button>
+                <button type="button" id="prev-to-step3" class="btn btn-secondary me-2" style="display: none;">
+                  <i class="fas fa-arrow-left"></i> 이전
+                </button>
+                <button type="button" id="next-to-step4" class="btn btn-primary" style="display: none;">
+                  다음 <i class="fas fa-arrow-right"></i>
+                </button>
+                <button type="button" id="prev-to-step4" class="btn btn-secondary me-2" style="display: none;">
+                  <i class="fas fa-arrow-left"></i> 이전
+                </button>
+                <button type="button" id="next-to-step5" class="btn btn-primary" style="display: none;">
+                  다음 <i class="fas fa-arrow-right"></i>
+                </button>
+                <button type="button" id="prev-to-step5" class="btn btn-secondary me-2" style="display: none;">
+                  <i class="fas fa-arrow-left"></i> 이전
+                </button>
+                <button type="submit" id="submit-btn" class="btn btn-primary rounded-pill px-5" style="display: none;">
+                  신청하기
+                </button>
           </div>
         </div>
-
-        <div class="step-container" id="step8">
-          <div class="form-group">
-            <label for="additional-notes" class="form-label"><i class="fas fa-comment"></i> 추가 요청사항</label>
-            <textarea id="additional-notes" class="form-control" rows="4" placeholder="작업 시 참고할 사항이나 특별한 요청사항이 있다면 입력해 주세요."></textarea>
-            <small class="form-text text-muted">작업 시 참고할 사항이나 특별한 요청사항이 있다면 입력해 주세요. <br>예: 특정 시간대 작업 희망, 특별한 주의사항 등</small>
           </div>
-          <div class="d-flex justify-content-between mt-3">
-            <button type="button" class="btn btn-secondary rounded-pill" id="prev-step8">이전</button>
-            <button type="button" class="btn btn-primary rounded-pill" id="next-step8">다음</button>
+
+          <!-- 우측 지도 영역 -->
+          <div class="col-md-7">
+            <div class="map-section">
+              <div class="form-group mb-3">
+                <label for="address" class="form-label">주소</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="address" readonly required>
+                  <button type="button" id="address-search-btn" class="btn btn-outline-primary">주소 검색</button>
           </div>
         </div>
-
-        <div class="step-container" id="step9">
-          <div class="form-group">
-            <label class="form-label"><i class="fas fa-check-circle"></i> 최종 확인</label>
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title">신청 내용 확인</h5>
-                <div id="summary-content"></div>
+              <div class="map-container">
+                <div id="nv-map"></div>
               </div>
+              <input type="hidden" id="lat" name="lat">
+              <input type="hidden" id="lng" name="lng">
+              <input type="hidden" id="markerLat" name="markerLat">
+              <input type="hidden" id="markerLng" name="markerLng">
             </div>
-            <div class="form-check mt-3">
-              <input class="form-check-input" type="checkbox" id="terms-agreement" required>
-              <label class="form-check-label" for="terms-agreement">
-                <a href="/terms.html" target="_blank">이용약관</a>과 <a href="/privacy.html" target="_blank">개인정보처리방침</a>에 동의합니다.
-              </label>
-            </div>
-          </div>
-          <div class="d-flex justify-content-between mt-3">
-            <button type="button" class="btn btn-secondary rounded-pill" id="prev-step9">이전</button>
-            <button type="submit" class="btn btn-primary rounded-pill" id="submit-request">신청하기</button>
           </div>
         </div>
       </form>
     </div>
   </div>
 
-  <footer id="footer-container"></footer>
+  <footer id="footer-placeholder"></footer>
 
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-  <script src="scripts/navbar.js"></script>
-  <script type="module" src="scripts/firebase-config.js"></script>
-  <script type="module" src="scripts/auth.js"></script>
-  <script type="module" src="scripts/request.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+  
+  <!-- 사용자 스크립트 -->
+  <script src="scripts/auth.js?v=1.0.0"></script>
+  <script src="scripts/navbar.js?v=1.0.0"></script>
+  <script src="components/footer.js?v=1.0.0"></script>
+  <script src="scripts/service-request.js?v=1.0.0"></script>
+  
+  <!-- html2pdf.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </body>
 </html>
+

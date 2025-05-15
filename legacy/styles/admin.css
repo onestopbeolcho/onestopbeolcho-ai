@@ -3061,7 +3061,7 @@ body {
 /* 인사이트 스타일 */
 .insights-container {
     display: flex;
-    flex-direction: column;
+        flex-direction: column;
     gap: 15px;
 }
 

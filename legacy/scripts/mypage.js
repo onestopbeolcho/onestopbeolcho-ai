@@ -1,12 +1,344 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js';
-import { getAuth } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js';
-import { getFirestore, collection, query, where, getDocs, orderBy } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js';
+import { getFirestore, collection, query, where, getDocs, orderBy, doc, getDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-storage.js';
 import { firebaseConfig } from './firebase-config.js';
 
 // Firebase 초기화
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
+
+// DOM 요소
+const profileImage = document.getElementById('profile-image');
+const userName = document.getElementById('user-name');
+const userEmail = document.getElementById('user-email');
+const userPhone = document.getElementById('user-phone');
+const userJoinDate = document.getElementById('user-join-date');
+const serviceRequestsList = document.getElementById('service-requests');
+const profileUpload = document.getElementById('profile-upload');
+const changePasswordBtn = document.querySelector('.change-password-btn');
+const passwordModal = document.querySelector('.password-change-modal');
+const closePasswordModal = document.querySelector('.close-password-modal');
+const passwordForm = document.querySelector('.password-form');
+
+// 사용자 인증 상태 확인
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        // 로그인되지 않은 경우 로그인 페이지로 리디렉션
+        window.location.href = 'login.html';
+        return;
+    }
+
+    // 사용자 정보 로드
+    try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            
+            // 프로필 이미지 설정
+            if (userData.photoURL) {
+                profileImage.src = userData.photoURL;
+            }
+            
+            // 사용자 정보 표시
+            userName.textContent = userData.displayName || '사용자';
+            userEmail.textContent = user.email;
+            userPhone.textContent = userData.phone || '전화번호 없음';
+            userJoinDate.textContent = userData.createdAt ? 
+                new Date(userData.createdAt.toDate()).toLocaleDateString() : 
+                '가입일 정보 없음';
+        }
+
+        // 서비스 요청 목록 로드
+        await loadServiceRequests(user.uid);
+    } catch (error) {
+        console.error('사용자 정보 로드 오류:', error);
+        alert('사용자 정보를 불러오는 중 오류가 발생했습니다.');
+    }
+});
+
+// 서비스 요청 목록 로드
+async function loadServiceRequests(userId) {
+    try {
+        console.log('서비스 요청 조회 시작 - 사용자 ID:', userId);
+
+        // 사용자의 서비스 요청 조회
+        const serviceRequestsRef = collection(db, 'serviceRequests');
+        const q = query(
+            serviceRequestsRef,
+            where('customerId', '==', userId),
+            orderBy('createdAt', 'desc')
+        );
+
+        const querySnapshot = await getDocs(q);
+        console.log('조회된 서비스 요청 수:', querySnapshot.size);
+
+        if (querySnapshot.empty) {
+            console.log('서비스 요청이 없습니다.');
+            serviceRequestsList.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-list"></i>
+                    <h3>서비스 내역이 없습니다</h3>
+                    <p>아직 서비스를 신청하지 않았습니다. 서비스를 신청하면 이곳에서 확인할 수 있습니다.</p>
+                    <a href="request.html" class="btn btn-primary">서비스 신청하기</a>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        querySnapshot.forEach((doc) => {
+            const request = doc.data();
+            const statusClass = getStatusClass(request.status);
+            const date = request.createdAt ? 
+                new Date(request.createdAt.toDate()).toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }) : '날짜 정보 없음';
+
+            // 견적 정보 포맷팅
+            const estimatedCost = request.estimatedCost || {};
+            const totalCost = estimatedCost.totalCost || 0;
+            const baseCost = estimatedCost.baseCost || 0;
+            const areaExtra = estimatedCost.extraCostDetails?.areaExtra || 0;
+            const graveExtra = estimatedCost.extraCostDetails?.graveExtra || 0;
+
+            // 상세 정보 포맷팅
+            const details = request.details || {};
+            const areaSize = details.areaSize || '0';
+            const graveCount = details.graveCount || '0';
+            const graveType = getGraveTypeText(details.graveType);
+
+            html += `
+                <div class="service-request-card">
+                    <div class="service-request-header">
+                        <h5 class="service-request-title">${request.serviceType || '서비스 유형 없음'}</h5>
+                        <span class="service-request-status ${statusClass}">${getStatusText(request.status)}</span>
+                    </div>
+                    <div class="service-request-details">
+                        <p><i class="fas fa-user"></i> 신청자: ${request.customerName || '이름 없음'}</p>
+                        <p><i class="fas fa-phone"></i> 연락처: ${request.phone || '연락처 없음'}</p>
+                        <p><i class="fas fa-map-marker-alt"></i> 주소: ${request.address || '주소 없음'}</p>
+                        <p><i class="fas fa-calendar"></i> 희망 작업일: ${request.workDate || '날짜 없음'}</p>
+                        <div class="estimate-details">
+                            <p class="estimate-title"><i class="fas fa-won-sign"></i> 견적 상세:</p>
+                            <p class="estimate-item">- 기본 비용: ${baseCost.toLocaleString()}원</p>
+                            ${areaExtra > 0 ? `<p class="estimate-item">- 면적 추가 비용: ${areaExtra.toLocaleString()}원</p>` : ''}
+                            ${graveExtra > 0 ? `<p class="estimate-item">- 묘지 수 추가 비용: ${graveExtra.toLocaleString()}원</p>` : ''}
+                            <p class="estimate-total">총 예상 금액: ${totalCost.toLocaleString()}원</p>
+                        </div>
+                        <div class="service-details">
+                            <p class="service-title"><i class="fas fa-info-circle"></i> 서비스 상세:</p>
+                            <p class="service-item">- 면적: ${areaSize}평</p>
+                            <p class="service-item">- 묘지 수: ${graveCount}기</p>
+                            <p class="service-item">- 묘지 유형: ${graveType}</p>
+                        </div>
+                        <p><i class="fas fa-clock"></i> 신청일: ${date}</p>
+                    </div>
+                    <div class="service-request-actions">
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewServiceDetails('${doc.id}')">
+                            <i class="fas fa-eye"></i> 상세보기
+                        </button>
+                        ${request.status === 'pending' ? `
+                            <button class="btn btn-sm btn-outline-danger" onclick="cancelServiceRequest('${doc.id}')">
+                                <i class="fas fa-times"></i> 취소
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        });
+
+        serviceRequestsList.innerHTML = html;
+    } catch (error) {
+        console.error('서비스 요청 목록 로드 오류:', error);
+        serviceRequestsList.innerHTML = `
+            <div class="alert alert-danger">
+                서비스 요청 목록을 불러오는 중 오류가 발생했습니다.
+            </div>
+        `;
+    }
+}
+
+// 서비스 상태에 따른 클래스 반환
+function getStatusClass(status) {
+    switch (status) {
+        case 'pending':
+            return 'status-pending';
+        case 'in_progress':
+            return 'status-in-progress';
+        case 'completed':
+            return 'status-completed';
+        case 'cancelled':
+            return 'status-cancelled';
+        default:
+            return 'status-pending';
+    }
+}
+
+// 서비스 상태 텍스트 반환
+function getStatusText(status) {
+    switch (status) {
+        case 'pending':
+            return '대기중';
+        case 'in_progress':
+            return '진행중';
+        case 'completed':
+            return '완료';
+        case 'cancelled':
+            return '취소';
+        default:
+            return '대기중';
+    }
+}
+
+// 통화 포맷 함수
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('ko-KR', {
+        style: 'currency',
+        currency: 'KRW',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(amount);
+}
+
+// 서비스 상세 보기
+function viewServiceDetails(requestId) {
+    window.location.href = `service-detail.html?id=${requestId}`;
+}
+
+// 서비스 요청 취소
+async function cancelServiceRequest(requestId) {
+    if (!confirm('정말로 서비스 신청을 취소하시겠습니까?')) {
+        return;
+    }
+
+    try {
+        const requestRef = doc(db, 'serviceRequests', requestId);
+        await updateDoc(requestRef, {
+            status: 'cancelled',
+            updatedAt: serverTimestamp()
+        });
+
+        alert('서비스 신청이 취소되었습니다.');
+        loadServiceRequests(auth.currentUser.uid);
+    } catch (error) {
+        console.error('서비스 취소 오류:', error);
+        alert('서비스 취소 중 오류가 발생했습니다.');
+    }
+}
+
+// 프로필 이미지 업로드
+profileUpload.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // 이미지 파일 검증
+    if (!file.type.match('image/*')) {
+        alert('이미지 파일만 업로드할 수 있습니다.');
+        return;
+    }
+
+    // 파일 크기 제한 (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        alert('이미지 크기는 5MB 이하여야 합니다.');
+        return;
+    }
+
+    try {
+        const user = auth.currentUser;
+        if (!user) throw new Error('로그인되지 않았습니다.');
+
+        // Storage에 이미지 업로드
+        const storageRef = ref(storage, `profiles/${user.uid}/${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        
+        // 이미지 URL 가져오기
+        const downloadURL = await getDownloadURL(storageRef);
+        
+        // 프로필 이미지 업데이트
+        profileImage.src = downloadURL;
+        
+        // Firestore 사용자 정보 업데이트
+        await updateDoc(doc(db, 'users', user.uid), {
+            photoURL: downloadURL,
+            updatedAt: serverTimestamp()
+        });
+
+        alert('프로필 이미지가 업데이트되었습니다.');
+    } catch (error) {
+        console.error('이미지 업로드 오류:', error);
+        alert('이미지 업로드 중 오류가 발생했습니다.');
+    }
+});
+
+// 비밀번호 변경 모달
+changePasswordBtn.addEventListener('click', () => {
+    passwordModal.style.display = 'block';
+});
+
+closePasswordModal.addEventListener('click', () => {
+    passwordModal.style.display = 'none';
+});
+
+// 비밀번호 변경
+passwordForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const currentPassword = document.getElementById('current-password').value;
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+
+    // 입력값 검증
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        alert('모든 필드를 입력해주세요.');
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        alert('새 비밀번호가 일치하지 않습니다.');
+        return;
+    }
+
+    if (newPassword.length < 6) {
+        alert('비밀번호는 최소 6자 이상이어야 합니다.');
+        return;
+    }
+
+    try {
+        const user = auth.currentUser;
+        if (!user) throw new Error('로그인되지 않았습니다.');
+
+        // 현재 비밀번호 확인 (재인증)
+        const credential = firebase.auth.EmailAuthProvider.credential(
+            user.email,
+            currentPassword
+        );
+        await user.reauthenticateWithCredential(credential);
+
+        // 새 비밀번호로 업데이트
+        await user.updatePassword(newPassword);
+
+        // 폼 초기화 및 모달 닫기
+        passwordForm.reset();
+        passwordModal.style.display = 'none';
+
+        alert('비밀번호가 성공적으로 변경되었습니다.');
+    } catch (error) {
+        console.error('비밀번호 변경 오류:', error);
+        
+        if (error.code === 'auth/wrong-password') {
+            alert('현재 비밀번호가 올바르지 않습니다.');
+        } else {
+            alert('비밀번호 변경 중 오류가 발생했습니다: ' + error.message);
+        }
+    }
+});
 
 // 상태 변경 이력 불러오기
 async function loadStatusHistory(serviceRequestId) {
@@ -85,58 +417,40 @@ function formatDate(date) {
 }
 
 // 서비스 요청 상태 변경 시 이력 기록
-async function updateServiceRequestStatus(serviceRequestId, newStatus) {
-  try {
-    const user = auth.currentUser;
-    if (!user) {
-      throw new Error('로그인이 필요합니다.');
+async function updateServiceRequestStatus(requestId, newStatus) {
+    try {
+        const serviceRequestRef = doc(db, 'serviceRequests', requestId);
+        const serviceRequestDoc = await getDoc(serviceRequestRef);
+        
+        if (!serviceRequestDoc.exists()) {
+            throw new Error('서비스 요청을 찾을 수 없습니다.');
+        }
+
+        const currentData = serviceRequestDoc.data();
+        const statusHistory = currentData.statusHistory || [];
+        
+        // 현재 상태를 히스토리에 추가
+        statusHistory.push({
+            status: newStatus,
+            timestamp: serverTimestamp(),
+            updatedBy: auth.currentUser.uid
+        });
+
+        // 상태 업데이트
+        await updateDoc(serviceRequestRef, {
+            status: newStatus,
+            statusHistory: statusHistory,
+            updatedAt: serverTimestamp()
+        });
+
+        // 서비스 요청 목록 새로고침
+        await loadServiceRequests(auth.currentUser.uid);
+        
+        alert('서비스 요청 상태가 업데이트되었습니다.');
+    } catch (error) {
+        console.error('상태 업데이트 중 오류 발생:', error);
+        alert('상태 업데이트 중 오류가 발생했습니다.');
     }
-    
-    const userDoc = await db
-      .collection('users')
-      .doc(user.uid)
-      .get();
-    
-    const changedBy = userDoc.data().displayName || user.email;
-    
-    const updateStatus = firebase.functions().httpsCallable('onServiceRequestStatusChange');
-    await updateStatus({
-      serviceRequestId,
-      newStatus,
-      changedBy
-    });
-    
-    // 상태 변경 이력 새로고침
-    await loadStatusHistory(serviceRequestId);
-    
-    return true;
-  } catch (error) {
-    console.error('서비스 요청 상태 변경 실패:', error);
-    throw error;
-  }
-}
-
-// 서비스 요청 상태 관리
-function updateServiceRequestStatus(requestId, newStatus) {
-  const requestItem = document.querySelector(`[data-request-id="${requestId}"]`);
-  if (!requestItem) return;
-
-  const statusBadge = requestItem.querySelector('.status-badge');
-  const previousStatus = statusBadge.className.split(' ').find(cls => cls.startsWith('status-'));
-  
-  // 상태 변경 애니메이션 적용
-  statusBadge.classList.add('status-change');
-  
-  // 상태 뱃지 업데이트
-  statusBadge.className = `status-badge status-${newStatus}`;
-  
-  // 상태 변경 이력 추가
-  addStatusHistory(requestId, previousStatus, newStatus);
-  
-  // 애니메이션 완료 후 클래스 제거
-  setTimeout(() => {
-    statusBadge.classList.remove('status-change');
-  }, 500);
 }
 
 // 상태 변경 이력 추가
@@ -161,479 +475,6 @@ function addStatusHistory(requestId, previousStatus, newStatus) {
   `;
   
   historyList.insertBefore(historyItem, historyList.firstChild);
-}
-
-// 상태 텍스트 변환
-function getStatusText(status) {
-  const statusMap = {
-    'pending': '대기 중',
-    'confirmed': '확인됨',
-    'in-progress': '진행 중',
-    'completed': '완료됨',
-    'cancelled': '취소됨'
-  };
-  
-  return statusMap[status] || status;
-}
-
-// 서비스 요청 로드 함수
-async function loadServiceRequests() {
-  try {
-    const serviceRequestsList = document.getElementById('serviceRequests');
-    if (!serviceRequestsList) {
-      console.error('서비스 요청 목록 요소를 찾을 수 없습니다.');
-      return;
-    }
-
-    serviceRequestsList.innerHTML = '<p>데이터를 불러오는 중...</p>';
-
-    if (!auth.currentUser) {
-      console.error('사용자가 로그인되어 있지 않습니다.');
-      serviceRequestsList.innerHTML = '<p>로그인이 필요합니다.</p>';
-      return;
-    }
-
-    console.log('현재 사용자 ID:', auth.currentUser.uid);
-
-    const q = query(
-      collection(db, 'serviceRequests'), 
-      where('customerId', '==', auth.currentUser.uid),
-      orderBy('createdAt', 'desc')
-    );
-    
-    const snapshot = await getDocs(q);
-    console.log('조회된 문서 수:', snapshot.size);
-    
-    if (snapshot.empty) {
-      serviceRequestsList.innerHTML = '<p>서비스 요청 내역이 없습니다.</p>';
-      return;
-    }
-
-    let html = '';
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      console.log('문서 데이터:', data);
-      html += createRequestCard(data);
-    });
-
-    serviceRequestsList.innerHTML = html;
-    
-    // 아코디언 기능 초기화
-    document.querySelectorAll('.service-request-card').forEach(card => {
-      card.addEventListener('click', function(e) {
-        if (!e.target.closest('.service-actions')) {
-          this.classList.toggle('active');
-        }
-      });
-    });
-  } catch (error) {
-    console.error('데이터 로드 오류:', error);
-    const serviceRequestsList = document.getElementById('serviceRequests');
-    if (serviceRequestsList) {
-      serviceRequestsList.innerHTML = '<p>데이터를 불러오는 중 오류가 발생했습니다.</p>';
-    }
-  }
-}
-
-function createRequestCard(request) {
-  const card = document.createElement('div');
-  card.className = 'col-md-4';
-  card.innerHTML = `
-    <div class="card h-100 service-request-card">
-      <div class="card-body">
-        <div class="service-type-badge">
-          <i class="fas fa-${getServiceIcon(request.serviceType)}"></i>
-          <span>${request.serviceType}</span>
-        </div>
-        <div class="request-info">
-          <div class="location">
-            <i class="fas fa-map-marker-alt"></i>
-            <span>${extractRegion(request.address)}</span>
-          </div>
-          <div class="date">
-            <i class="far fa-calendar-alt"></i>
-            <span>${formatDate(request.createdAt)}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-  return card;
-}
-
-function getServiceIcon(serviceType) {
-  const icons = {
-    '벌초': 'tree',
-    '예초': 'cut',
-    '태양광 예초': 'solar-panel',
-    '기타': 'ellipsis-h'
-  };
-  return icons[serviceType] || 'ellipsis-h';
-}
-
-function getStatusClass(status) {
-  switch (status) {
-    case 'pending':
-      return 'status-pending';
-    case 'approved':
-      return 'status-approved';
-    case 'rejected':
-      return 'status-rejected';
-    case 'completed':
-      return 'status-completed';
-    default:
-      return 'status-default';
-  }
-}
-
-function getStatusText(status) {
-  switch (status) {
-    case 'pending':
-      return '대기중';
-    case 'approved':
-      return '승인됨';
-    case 'rejected':
-      return '거절됨';
-    case 'completed':
-      return '완료됨';
-    default:
-      return '알 수 없음';
-  }
-}
-
-function formatCurrency(amount) {
-  return new Intl.NumberFormat('ko-KR', {
-    style: 'currency',
-    currency: 'KRW'
-  }).format(amount);
-}
-
-// 서비스 상세 정보 표시 함수
-function showServiceDetails(serviceId) {
-    const modal = document.getElementById('serviceDetailModal');
-    if (!modal) return;
-
-    // 서비스 정보 로드
-    db.collection('serviceRequests').doc(serviceId).get()
-        .then((doc) => {
-            if (!doc.exists) {
-                alert('서비스 정보를 찾을 수 없습니다.');
-                return;
-            }
-
-            const service = doc.data();
-            const modalContent = `
-                <div class="modal-header">
-                    <h3>서비스 상세 정보</h3>
-                    <button class="close-modal">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="service-info">
-                        <div class="info-group">
-                            <label>서비스 유형</label>
-                            <p>${service.serviceType}</p>
-                        </div>
-                        <div class="info-group">
-                            <label>주소</label>
-                            <p>${service.address}</p>
-                            <button class="btn btn-sm btn-info" onclick="showMap(${service.location.latitude}, ${service.location.longitude}, '${service.address}')">
-                                <i class="fas fa-map-marker-alt"></i> 지도 보기
-                            </button>
-                        </div>
-                        <div class="info-group">
-                            <label>예상 비용</label>
-                            <p>${formatCurrency(service.expectedCost)}</p>
-                        </div>
-                        <div class="info-group">
-                            <label>신청일</label>
-                            <p>${formatDate(service.createdAt)}</p>
-                        </div>
-                        <div class="info-group">
-                            <label>마감일</label>
-                            <p>${formatDate(service.deadline)}</p>
-                        </div>
-                        <div class="info-group">
-                            <label>상태</label>
-                            <span class="status-badge ${getStatusClass(service.status)}">
-                                ${getStatusText(service.status)}
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- 작업자 통신 섹션 -->
-                    <div class="worker-communication">
-                        <div class="communication-tabs">
-                            <button class="tab-btn active" data-tab="chat">채팅</button>
-                            <button class="tab-btn" data-tab="estimates">추가 견적</button>
-                            <button class="tab-btn" data-tab="updates">작업 현황</button>
-                            <button class="tab-btn" data-tab="requests">추가 요청</button>
-                        </div>
-                        <div class="tab-content">
-                            <div id="chat" class="tab-pane active">
-                                <div class="chat-messages"></div>
-                                <div class="chat-input">
-                                    <input type="text" placeholder="메시지를 입력하세요...">
-                                    <button class="send-btn">
-                                        <i class="fas fa-paper-plane"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div id="estimates" class="tab-pane">
-                                <div class="estimates-list"></div>
-                                <button class="btn btn-primary" onclick="requestNewEstimate('${serviceId}')">
-                                    새 견적 요청
-                                </button>
-                            </div>
-                            <div id="updates" class="tab-pane">
-                                <div class="updates-timeline"></div>
-                            </div>
-                            <div id="requests" class="tab-pane">
-                                <div class="requests-list"></div>
-                                <button class="btn btn-primary" onclick="addNewRequest('${serviceId}')">
-                                    새 요청 추가
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            modal.innerHTML = modalContent;
-            modal.style.display = 'block';
-
-            // 탭 전환 이벤트 리스너
-            const tabButtons = modal.querySelectorAll('.tab-btn');
-            tabButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const tabId = button.dataset.tab;
-                    switchTab(tabId);
-                });
-            });
-
-            // 채팅 전송 이벤트 리스너
-            const sendButton = modal.querySelector('.send-btn');
-            const chatInput = modal.querySelector('.chat-input input');
-            sendButton.addEventListener('click', () => {
-                sendMessage(serviceId, chatInput.value);
-                chatInput.value = '';
-            });
-
-            // 통신 데이터 로드
-            loadCommunicationData(serviceId);
-        })
-        .catch((error) => {
-            console.error('서비스 정보 로드 오류:', error);
-            alert('서비스 정보를 불러오는 중 오류가 발생했습니다.');
-        });
-}
-
-// 통신 데이터 로드 함수
-function loadCommunicationData(serviceId) {
-    // 채팅 메시지 로드
-    db.collection('serviceRequests').doc(serviceId)
-        .collection('messages')
-        .orderBy('timestamp', 'asc')
-        .onSnapshot((snapshot) => {
-            const chatMessages = document.querySelector('.chat-messages');
-            chatMessages.innerHTML = '';
-            
-            snapshot.forEach(doc => {
-                const message = doc.data();
-                const messageElement = document.createElement('div');
-                messageElement.className = `message ${message.sender === auth.currentUser.uid ? 'sent' : 'received'}`;
-                messageElement.innerHTML = `
-                    <div class="message-content">${message.content}</div>
-                    <div class="message-time">${formatTime(message.timestamp)}</div>
-                `;
-                chatMessages.appendChild(messageElement);
-            });
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        });
-
-    // 추가 견적 로드
-    db.collection('serviceRequests').doc(serviceId)
-        .collection('estimates')
-        .orderBy('createdAt', 'desc')
-        .get()
-        .then((snapshot) => {
-            const estimatesList = document.querySelector('.estimates-list');
-            estimatesList.innerHTML = '';
-            
-            snapshot.forEach(doc => {
-                const estimate = doc.data();
-                const estimateElement = document.createElement('div');
-                estimateElement.className = 'estimate-item';
-                estimateElement.innerHTML = `
-                    <div class="estimate-amount">${formatCurrency(estimate.amount)}</div>
-                    <div class="estimate-description">${estimate.description}</div>
-                    <div class="estimate-date">${formatDate(estimate.createdAt)}</div>
-                `;
-                estimatesList.appendChild(estimateElement);
-            });
-        });
-
-    // 작업 현황 로드
-    db.collection('serviceRequests').doc(serviceId)
-        .collection('updates')
-        .orderBy('timestamp', 'desc')
-        .get()
-        .then((snapshot) => {
-            const updatesTimeline = document.querySelector('.updates-timeline');
-            updatesTimeline.innerHTML = '';
-            
-            snapshot.forEach(doc => {
-                const update = doc.data();
-                const updateElement = document.createElement('div');
-                updateElement.className = 'timeline-item';
-                updateElement.innerHTML = `
-                    <div class="timeline-marker"></div>
-                    <div class="timeline-content">
-                        <div class="update-text">${update.text}</div>
-                        <div class="update-time">${formatTime(update.timestamp)}</div>
-                    </div>
-                `;
-                updatesTimeline.appendChild(updateElement);
-            });
-        });
-
-    // 추가 요청 로드
-    db.collection('serviceRequests').doc(serviceId)
-        .collection('additionalRequests')
-        .orderBy('createdAt', 'desc')
-        .get()
-        .then((snapshot) => {
-            const requestsList = document.querySelector('.requests-list');
-            requestsList.innerHTML = '';
-            
-            snapshot.forEach(doc => {
-                const request = doc.data();
-                const requestElement = document.createElement('div');
-                requestElement.className = 'request-item';
-                requestElement.innerHTML = `
-                    <div class="request-title">${request.title}</div>
-                    <div class="request-description">${request.description}</div>
-                    <div class="request-status ${request.status}">${getStatusText(request.status)}</div>
-                    <div class="request-date">${formatDate(request.createdAt)}</div>
-                `;
-                requestsList.appendChild(requestElement);
-            });
-        });
-}
-
-// 메시지 전송 함수
-function sendMessage(serviceId, content) {
-    if (!content.trim()) return;
-
-    db.collection('serviceRequests').doc(serviceId)
-        .collection('messages')
-        .add({
-            content: content,
-            sender: auth.currentUser.uid,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        })
-        .catch((error) => {
-            console.error('메시지 전송 오류:', error);
-            alert('메시지 전송에 실패했습니다.');
-        });
-}
-
-// 새 견적 요청 함수
-function requestNewEstimate(serviceId) {
-    const amount = prompt('추가 견적 금액을 입력하세요:');
-    if (!amount) return;
-
-    const description = prompt('견적 설명을 입력하세요:');
-    if (!description) return;
-
-    db.collection('serviceRequests').doc(serviceId)
-        .collection('estimates')
-        .add({
-            amount: parseFloat(amount),
-            description: description,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            status: 'pending'
-        })
-        .catch((error) => {
-            console.error('견적 요청 오류:', error);
-            alert('견적 요청에 실패했습니다.');
-        });
-}
-
-// 새 요청 추가 함수
-function addNewRequest(serviceId) {
-    const title = prompt('요청 제목을 입력하세요:');
-    if (!title) return;
-
-    const description = prompt('요청 내용을 입력하세요:');
-    if (!description) return;
-
-    db.collection('serviceRequests').doc(serviceId)
-        .collection('additionalRequests')
-        .add({
-            title: title,
-            description: description,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            status: 'pending'
-        })
-        .catch((error) => {
-            console.error('요청 추가 오류:', error);
-            alert('요청 추가에 실패했습니다.');
-        });
-}
-
-// 탭 전환 함수
-function switchTab(tabId) {
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabPanes = document.querySelectorAll('.tab-pane');
-
-    tabButtons.forEach(button => {
-        button.classList.remove('active');
-        if (button.dataset.tab === tabId) {
-            button.classList.add('active');
-        }
-    });
-
-    tabPanes.forEach(pane => {
-        pane.classList.remove('active');
-        if (pane.id === tabId) {
-            pane.classList.add('active');
-        }
-    });
-}
-
-// 시간 포맷팅 함수
-function formatTime(timestamp) {
-    if (!timestamp) return '';
-    const date = timestamp.toDate();
-    return date.toLocaleTimeString('ko-KR', {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-}
-
-// 서비스 요청 아이템 생성
-function createServiceRequestItem(requestId, request) {
-  const item = document.createElement('div');
-  item.className = 'service-request-item';
-  item.dataset.requestId = requestId;
-  
-  item.innerHTML = `
-    <div class="status-badge status-${request.status}">${getStatusText(request.status)}</div>
-    <h4>${request.serviceType}</h4>
-    <p>위치: ${request.address || '미지정'}</p>
-    <p>면적: ${request.area}㎡</p>
-    <p>요청일: ${request.createdAt ? formatDate(request.createdAt.toDate()) : '미지정'}</p>
-    <div class="request-actions">
-      <button class="btn btn-primary" onclick="showRequestDetails('${requestId}')">상세보기</button>
-      ${request.status === 'pending' ? `
-        <button class="btn btn-danger" onclick="cancelRequest('${requestId}')">취소</button>
-      ` : ''}
-    </div>
-  `;
-  
-  return item;
 }
 
 // 서비스 요청 상세보기
@@ -757,28 +598,20 @@ function initializeEstimates() {
     estimatesList.innerHTML = '';
     snapshot.forEach(doc => {
       const estimate = doc.data();
-      const estimateElement = createEstimateItem(doc.id, estimate);
+      const estimateElement = document.createElement('div');
+      estimateElement.className = 'estimate-item';
+      estimateElement.innerHTML = `
+        <h4>추가 견적 요청</h4>
+        <p>금액: ${estimate.amount.toLocaleString()}원</p>
+        <p>사유: ${estimate.reason}</p>
+        <div class="estimate-actions">
+          <button class="btn btn-success" onclick="approveEstimate('${estimate.id}')">승인</button>
+          <button class="btn btn-danger" onclick="rejectEstimate('${estimate.id}')">거절</button>
+        </div>
+      `;
       estimatesList.appendChild(estimateElement);
     });
   });
-}
-
-// 견적 아이템 생성
-function createEstimateItem(estimateId, estimate) {
-  const item = document.createElement('div');
-  item.className = 'estimate-item';
-  
-  item.innerHTML = `
-    <h4>추가 견적 요청</h4>
-    <p>금액: ${estimate.amount.toLocaleString()}원</p>
-    <p>사유: ${estimate.reason}</p>
-    <div class="estimate-actions">
-      <button class="btn btn-success" onclick="approveEstimate('${estimateId}')">승인</button>
-      <button class="btn btn-danger" onclick="rejectEstimate('${estimateId}')">거절</button>
-    </div>
-  `;
-  
-  return item;
 }
 
 // 견적 승인
@@ -1086,7 +919,8 @@ async function testAdditionalRequests() {
 
 // 초기화
 document.addEventListener('DOMContentLoaded', () => {
-  loadServiceRequests();
+  console.log('마이페이지 초기화 시작');
+  loadServiceRequests(auth.currentUser.uid);
   initializeWorkerCommunication();
   
   // 상태 변경 이벤트 리스너 설정
@@ -1147,16 +981,6 @@ function getStatusBadgeClass(status) {
     case 'completed': return 'success';
     case 'cancelled': return 'danger';
     default: return 'secondary';
-  }
-}
-
-function getStatusText(status) {
-  switch (status) {
-    case 'pending': return '대기중';
-    case 'in_progress': return '진행중';
-    case 'completed': return '완료';
-    case 'cancelled': return '취소';
-    default: return '알 수 없음';
   }
 }
 
@@ -1283,157 +1107,13 @@ async function reapplyService(serviceId) {
       });
       
       alert('서비스가 재신청되었습니다.');
-      loadServiceRequests(); // 목록 새로고침
+      loadServiceRequests(auth.currentUser.uid); // 목록 새로고침
     }
   } catch (error) {
     console.error('재신청 오류:', error);
     alert('서비스 재신청 중 오류가 발생했습니다.');
   }
 }
-
-// 프로필 이미지 업로드 기능
-const profileUploadInput = document.getElementById('profile-upload');
-const profileImage = document.getElementById('profile-image');
-
-if (profileUploadInput && profileImage) {
-  profileUploadInput.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    // 파일 타입 검증
-    const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    if (!validImageTypes.includes(file.type)) {
-      showFeedbackModal('이미지 파일만 업로드 가능합니다 (JPEG, PNG, GIF, WEBP).', 'error');
-      return;
-    }
-
-    // 파일 크기 검증 (5MB 제한)
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-      showFeedbackModal('파일 크기가 너무 큽니다. 5MB 이하의 이미지를 선택해주세요.', 'error');
-      return;
-    }
-
-    try {
-      const loadingToast = showToast('프로필 이미지 업로드 중...', 'info');
-      
-      // Firebase Storage에 이미지 업로드
-      const userId = auth.currentUser.uid;
-      const storageRef = ref(storage, `profile_images/${userId}`);
-      await uploadBytes(storageRef, file);
-      
-      // 업로드된 이미지 URL 가져오기
-      const downloadURL = await getDownloadURL(storageRef);
-      
-      // Firestore 사용자 문서에 이미지 URL 저장
-      await updateDoc(doc(db, 'users', userId), {
-        profileImageURL: downloadURL,
-        updatedAt: serverTimestamp()
-      });
-      
-      // 이미지 표시 업데이트
-      profileImage.src = downloadURL;
-      
-      hideToast(loadingToast);
-      showToast('프로필 이미지가 업데이트되었습니다.', 'success');
-    } catch (error) {
-      console.error('프로필 이미지 업로드 오류:', error);
-      showFeedbackModal('이미지 업로드 중 오류가 발생했습니다.', 'error');
-    }
-  });
-}
-
-// 비밀번호 변경 기능
-const changePasswordBtn = document.querySelector('.change-password-btn');
-const passwordChangeModal = document.querySelector('.password-change-modal');
-const passwordForm = document.querySelector('.password-form');
-const closePasswordModal = document.querySelector('.close-password-modal');
-
-if (changePasswordBtn && passwordChangeModal) {
-  changePasswordBtn.addEventListener('click', () => {
-    passwordChangeModal.classList.add('active');
-  });
-
-  closePasswordModal.addEventListener('click', () => {
-    passwordChangeModal.classList.remove('active');
-  });
-
-  passwordForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const currentPassword = document.getElementById('current-password').value;
-    const newPassword = document.getElementById('new-password').value;
-    const confirmPassword = document.getElementById('confirm-password').value;
-
-    if (newPassword !== confirmPassword) {
-      showFeedbackModal('새 비밀번호가 일치하지 않습니다.', 'error');
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      showFeedbackModal('비밀번호는 6자 이상이어야 합니다.', 'error');
-      return;
-    }
-
-    try {
-      const user = auth.currentUser;
-      if (!user) {
-        throw new Error('로그인이 필요합니다.');
-      }
-
-      // 현재 비밀번호로 재인증
-      const credential = EmailAuthProvider.credential(user.email, currentPassword);
-      await reauthenticateWithCredential(user, credential);
-
-      // 비밀번호 변경
-      await updatePassword(user, newPassword);
-
-      showFeedbackModal('비밀번호가 성공적으로 변경되었습니다.', 'success');
-      passwordForm.reset();
-      passwordChangeModal.classList.remove('active');
-    } catch (error) {
-      console.error('비밀번호 변경 오류:', error);
-      showFeedbackModal('비밀번호 변경에 실패했습니다. 현재 비밀번호를 확인해주세요.', 'error');
-    }
-  });
-}
-
-// 사용자 정보 로드
-async function loadUserProfile() {
-  try {
-    const user = auth.currentUser;
-    if (!user) {
-      console.error('사용자가 로그인되어 있지 않습니다.');
-      return;
-    }
-
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
-    if (userDoc.exists()) {
-      const userData = userDoc.data();
-      
-      // 사용자 정보 표시
-      document.getElementById('user-name').textContent = userData.name || '-';
-      document.getElementById('user-email').textContent = userData.email || '-';
-      document.getElementById('user-phone').textContent = userData.phone || '-';
-      document.getElementById('user-join-date').textContent = userData.createdAt 
-        ? userData.createdAt.toDate().toLocaleDateString() 
-        : '-';
-      
-      // 프로필 이미지 표시
-      if (userData.profileImageURL) {
-        profileImage.src = userData.profileImageURL;
-      }
-    }
-  } catch (error) {
-    console.error('사용자 정보 로드 오류:', error);
-    showFeedbackModal('사용자 정보를 불러오는 중 오류가 발생했습니다.', 'error');
-  }
-}
-
-// 페이지 로드 시 사용자 정보 로드
-document.addEventListener('DOMContentLoaded', () => {
-  loadUserProfile();
-});
 
 // 지도 표시 함수
 function showMap(latitude, longitude, address) {
@@ -1495,4 +1175,18 @@ function searchAddress(address) {
             alert('주소를 찾을 수 없습니다.');
         }
     });
+}
+
+// 묘 유형 텍스트 반환
+function getGraveTypeText(type) {
+    switch (type) {
+        case 'mound':
+            return '봉분';
+        case 'flat':
+            return '평장';
+        case 'other':
+            return '기타';
+        default:
+            return '알 수 없음';
+    }
 } 

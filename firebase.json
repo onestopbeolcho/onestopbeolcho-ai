@@ -27,54 +27,27 @@
     ],
     "rewrites": [
       {
-        "source": "/admin",
-        "destination": "/admin.html"
-      },
-      {
-        "source": "/admin-users",
-        "destination": "/admin-users.html"
-      },
-      {
-        "source": "/admin-workers",
-        "destination": "/admin-workers.html"
-      },
-      {
-        "source": "/admin-customers",
-        "destination": "/admin-customers.html"
-      },
-      {
-        "source": "/admin-services",
-        "destination": "/admin-services.html"
-      },
-      {
-        "source": "/admin-payments",
-        "destination": "/admin-payments.html"
-      },
-      {
-        "source": "/admin-settlements",
-        "destination": "/admin-settlements.html"
-      },
-      {
-        "source": "/admin-analytics",
-        "destination": "/admin-analytics.html"
-      },
-      {
-        "source": "/admin-ai",
-        "destination": "/admin-ai.html"
-      },
-      {
-        "source": "/admin-monitoring",
-        "destination": "/admin-monitoring.html"
-      },
-      {
-        "source": "/admin-integration",
-        "destination": "/admin-integration.html"
+        "source": "/login",
+        "destination": "/login.html"
       },
       {
         "source": "**",
         "destination": "/index.html"
       }
-    ]
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(js|css)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=31536000"
+          }
+        ]
+      }
+    ],
+    "cleanUrls": true,
+    "trailingSlash": false
   },
   "emulators": {
     "apphosting": {

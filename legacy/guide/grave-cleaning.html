@@ -9,19 +9,34 @@
     <link rel="stylesheet" href="../styles/guide.css">
 </head>
 <body>
-    <!-- 네비게이션 컨테이너 -->
-    <div id="nav-container"></div>
+    <!-- 네비게이션 -->
+    <div id="navbar-placeholder"></div>
+
+    <!-- 네비게이션 오버레이 -->
+    <div class="navbar-overlay"></div>
 
     <!-- 메인 컨텐츠 -->
     <main>
         // ... existing code ...
     </main>
 
-    <!-- 푸터 컨테이너 -->
-    <div id="footer-container"></div>
+    <!-- 푸터 -->
+    <div id="footer-placeholder"></div>
 
+    <!-- 스크립트 -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../components/load-components.js"></script>
-    <script src="../scripts/guide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/11.5.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.5.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.5.0/firebase-storage-compat.js"></script>
+    
+    <!-- 사용자 스크립트 -->
+    <script src="../scripts/firebase-config.js"></script>
+    <script src="../scripts/auth.js"></script>
+    <script src="../scripts/navbar.js"></script>
+    <script src="../components/footer.js"></script>
 </body>
 </html> 

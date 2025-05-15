@@ -55,85 +55,66 @@
 </head>
 <body>
   <!-- 네비게이션 -->
-  <div id="nav-container"><nav id="nav-container">
-    <div class="navbar navbar-expand-lg">
-      <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="index.html">
-          <img src="/images/mainlogo.webp" alt="원스톱 벌초 로고" height="40">
-          <span class="ms-2 fs-4 fw-bold">원스톱 벌초</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="index.html">홈</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="request.html">서비스 신청</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="grave-cleaning.html">서비스 이용안내</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="news.html">뉴스</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="contact.html">문의하기</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="admin.html" id="adminLink" style="display: none;">관리자</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="login.html" id="loginButton" style="display: none;">로그인</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#" id="logoutButton" style="display: block;">로그아웃</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </nav></div>
+  <div id="navbar-placeholder"></div>
 
-  <div class="container mt-5">
-    <h1 class="text-center mb-4">AI 원스톱 벌초 비서</h1>
-    <div class="row justify-content-center">
-      <div class="col-md-8">
-        <div class="card">
-          <div class="card-body">
-            <div id="chat-messages" class="mb-3" style="height: 400px; overflow-y: auto;">
-              <div class="message assistant-message">
-                안녕하세요! AI 원스톱 벌초 비서입니다.<br><br>
-                저는 묘지 관리, 잔디 관리, 나무 관리 등 다양한 서비스에 대해<br>
-                전문적인 도움을 드리는 AI 비서입니다.<br><br>
-                어떤 서비스가 필요하신지 설명해주시면,<br>
-                - 적절한 서비스 추천<br>
-                - 예상 비용 안내<br>
-                - 작업 소요시간<br>
-                - 주의사항<br>
-                등을 상세히 알려드리겠습니다.<br><br>
-                예시: "묘지 잡초가 너무 많아요", "나무 가지가 길어서 잘라주세요"
+  <!-- 네비게이션 오버레이 -->
+  <div class="navbar-overlay"></div>
+
+  <main>
+    <div class="container mt-5">
+      <h1 class="text-center mb-4">AI 원스톱 벌초 비서</h1>
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-body">
+              <div id="chat-messages" class="mb-3" style="height: 400px; overflow-y: auto;">
+                <div class="message assistant-message">
+                  안녕하세요! AI 원스톱 벌초 비서입니다.<br><br>
+                  저는 묘지 관리, 잔디 관리, 나무 관리 등 다양한 서비스에 대해<br>
+                  전문적인 도움을 드리는 AI 비서입니다.<br><br>
+                  어떤 서비스가 필요하신지 설명해주시면,<br>
+                  - 적절한 서비스 추천<br>
+                  - 예상 비용 안내<br>
+                  - 작업 소요시간<br>
+                  - 주의사항<br>
+                  등을 상세히 알려드리겠습니다.<br><br>
+                  예시: "묘지 잡초가 너무 많아요", "나무 가지가 길어서 잘라주세요"
+                </div>
               </div>
-            </div>
-            <form id="chatForm" class="d-flex">
-              <input type="text" id="userInput" class="form-control me-2" placeholder="서비스 요구사항을 입력하세요">
-              <button type="submit" class="btn btn-primary">전송</button>
-            </form>
-            <div id="loading" class="text-center mt-3" style="display: none;">
-              <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
+              <form id="chatForm" class="d-flex">
+                <input type="text" id="userInput" class="form-control me-2" placeholder="서비스 요구사항을 입력하세요">
+                <button type="submit" class="btn btn-primary">전송</button>
+              </form>
+              <div id="loading" class="text-center mt-3" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </main>
 
   <!-- 푸터 -->
-  <div id="footer-container"></div>
+  <div id="footer-placeholder"></div>
+
+  <!-- 스크립트 -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/11.5.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.5.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.5.0/firebase-storage-compat.js"></script>
+  
+  <!-- 사용자 스크립트 -->
+  <script src="scripts/firebase-config.js"></script>
+  <script src="scripts/auth.js"></script>
+  <script src="scripts/navbar.js"></script>
+  <script src="components/footer.js"></script>
 
   <script type="module">
     import { loadNav } from '/scripts/nav.js';

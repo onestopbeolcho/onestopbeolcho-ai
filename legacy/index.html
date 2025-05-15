@@ -7,6 +7,9 @@
   <meta name="description" content="온라인으로 간편하게 신청하는 원스톱 벌초 서비스! 벌초, 예초, 태양광 관리까지 한 번에 해결하세요.">
   <meta name="keywords" content="벌초, 예초, 태양광 관리, 원스톱 서비스, 온라인 벌초, 간편 벌초, 묘지 관리, 태양광 예초, 벌초 신청, 예초 신청">
   <meta name="robots" content="index, follow">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>원스톱 벌초 | 온라인 벌초, 예초, 태양광 관리 서비스</title>
 
   <!-- Open Graph 태그 -->
@@ -38,16 +41,246 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="styles/common.css">
-  <link rel="stylesheet" href="components/footer.css">
+  <link rel="stylesheet" href="styles/common.css?v=1.0.3">
+  <link rel="stylesheet" href="components/footer.css?v=1.0.3">
 
   <!-- PWA 설정 -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#6D4AFF">
+  <meta name="theme-color" content="#1E88E5">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/11.5.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.5.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.5.0/firebase-storage-compat.js"></script>
+
+  <!-- Firebase Config -->
+  <script type="module" src="scripts/firebase-config.js"></script>
+
+  <!-- 스크립트 -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+  <script type="module" src="scripts/auth.js"></script>
+  <script type="module" src="scripts/navbar.js"></script>
+  <script type="module" src="scripts/footer.js"></script>
+  <script type="module" src="scripts/index.js"></script>
+
+  <!-- 카카오맵 API -->
+  <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef6b942fdad36e982c84eb0061d1d2ed&libraries=services"></script>
+
+  <style>
+    .index-page {
+      font-family: 'Noto Sans KR', sans-serif;
+      color: #333;
+      background-color: #f8f9fa;
+    }
+    .index-page .hero-section {
+      background: linear-gradient(180deg, #E3F2FD 0%, #fff 100%);
+      padding: 120px 0 80px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      transition: padding-top 0.3s ease;
+    }
+    .index-page .hero-section h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .index-page .hero-section p {
+      font-size: 1.2rem;
+      color: #666;
+      max-width: 600px;
+      margin: 0 auto 30px;
+    }
+    .index-page .service-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 15px;
+      justify-content: center;
+    }
+    .index-page .service-item {
+      background-color: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .index-page .service-item:hover {
+      background-color: #1E88E5;
+      color: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .index-page .service-item a {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .index-page .service-item i {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      color: #1E88E5;
+    }
+    .index-page .service-item:hover i {
+      color: #fff;
+    }
+    .index-page .service-item p {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+    .index-page .portfolio-section {
+      padding: 60px 0;
+    }
+    .index-page .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .index-page .portfolio-card {
+      background-color: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+    .index-page .portfolio-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .index-page .portfolio-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    .index-page .portfolio-content {
+      padding: 15px;
+      text-align: center;
+    }
+    .index-page .portfolio-content h5 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .index-page .portfolio-content p {
+      font-size: 1rem;
+      color: #666;
+    }
+    .index-page .recent-requests-section {
+      background-color: #f8f9fa;
+      padding: 60px 0;
+    }
+    .index-page .recent-requests-section .card {
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+      background-color: #fff;
+    }
+    .index-page .recent-requests-section .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #333;
+    }
+    .index-page .recent-requests-section .card-text {
+      font-size: 1rem;
+      color: #666;
+    }
+    .index-page .reviews-section {
+      padding: 60px 0;
+    }
+    .index-page .btn-outline-primary {
+      border-color: #1E88E5;
+      color: #1E88E5;
+      border-radius: 20px;
+      padding: 10px 20px;
+    }
+    .index-page .btn-outline-primary:hover {
+      background-color: #1E88E5;
+      color: #fff;
+    }
+    .index-page .modal-content {
+      border-radius: 10px;
+      background-color: #fff;
+    }
+    .index-page .modal-header {
+      border-bottom: 1px solid #dee2e6;
+      padding: 15px;
+    }
+    .index-page .modal-body {
+      padding: 20px;
+    }
+    .index-page .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #666;
+    }
+    .index-page .address-info {
+      margin-top: 15px;
+    }
+    .navbar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      display: none;
+    }
+    .navbar-overlay.show {
+      display: block;
+    }
+    @media (max-width: 768px) {
+      .index-page { background-color: #fff; }
+      .index-page .hero-section {
+        padding: 100px 0 40px;
+        background: #fff;
+      }
+      .index-page .hero-section.menu-open {
+        padding-top: 300px;
+      }
+      .index-page .hero-section h1 {
+        font-size: 1.8rem;
+      }
+      .index-page .hero-section p {
+        font-size: 1rem;
+      }
+      .index-page .service-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      .index-page .service-item {
+        padding: 15px;
+      }
+      .index-page .service-item i {
+        font-size: 1.5rem;
+        color: #7986CB;
+      }
+      .index-page .service-item:hover i {
+        color: #fff;
+      }
+      .index-page .portfolio-card img {
+        height: 150px;
+      }
+      .index-page .recent-requests-section, .index-page .reviews-section {
+        padding: 40px 0;
+      }
+      .index-page .btn-outline-primary {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
 </head>
-<body itemscope itemtype="http://schema.org/WebPage">
+<body class="index-page" itemscope itemtype="http://schema.org/WebPage">
   <!-- 네비게이션 -->
   <div id="navbar-placeholder"></div>
+
+  <!-- 네비게이션 오버레이 -->
+  <div class="navbar-overlay"></div>
 
   <main>
     <!-- Hero Section -->
@@ -158,141 +391,146 @@
         </div>
       </div>
     </section>
-
-    <!-- Stats Section -->
-    <section class="stats-section py-4 text-white text-center">
-      <div class="container">
-        <p class="fs-5" id="stats-text" aria-live="polite">
-          지난 30일 동안 <span id="total-requests" class="fw-bold"></span>건의 서비스가 신청되었습니다!
-        </p>
-      </div>
-    </section>
   </main>
 
   <!-- 푸터 -->
-  <footer id="footer-container"></footer>
+  <footer id="footer-placeholder"></footer>
 
-  <!-- 스크립트 -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="scripts/navbar.js"></script>
-  <script type="module" src="scripts/firebase-config.js"></script>
-  <script type="module" src="scripts/auth.js"></script>
-  <script type="module" src="scripts/index.js"></script>
-  <script type="module" src="components/footer.js"></script>
-
-  <!-- JavaScript -->
-  <script type="module">
-    import { checkAuth } from './scripts/auth.js';
-    import { db } from './scripts/firebase-config.js';
-    import { collection, query, orderBy, limit, onSnapshot, getDocs, where, Timestamp } from 'https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js';
-
-    checkAuth(false);
-
-    function extractRegion(address) {
-      if (!address) return "";
-      const parts = address.split(" ");
-      if (parts[0] === "세종특별자치시") {
-        return parts[0];
-      }
-      return parts.length >= 2 ? `${parts[0]} ${parts[1]}` : parts[0];
-    }
-
-    function formatDate(timestamp) {
-      if (!timestamp) return "";
-      const date = timestamp.toDate();
-      return date.toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    }
-
-    function createRequestCard(request) {
-      const card = document.createElement('div');
-      card.className = 'col-md-4';
-      card.innerHTML = `
-        <div class="card h-100">
-          <div class="card-body">
-            <h5 class="card-title">${request.serviceType}</h5>
-            <p class="card-text">
-              <small class="text-muted">${formatDate(request.createdAt)}</small><br>
-              <strong>지역:</strong> ${extractRegion(request.address)}<br>
-              <strong>상태:</strong> ${request.status}
-            </p>
-          </div>
-        </div>
-      `;
-      return card;
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const reviewList = document.getElementById('review-list');
-      const requestList = document.getElementById('request-list');
-      const moreReviewsButton = document.getElementById('more-reviews-button');
-      const moreRequestsButton = document.getElementById('more-requests-button');
-
-      // 최신 신청 내역
-      const requestQuery = query(collection(db, 'serviceRequests'), orderBy('createdAt', 'desc'), limit(6));
-      onSnapshot(requestQuery, (snapshot) => {
-        console.log('최신 신청내역 조회 결과:', snapshot.size);
-        requestList.innerHTML = '';
-        if (snapshot.empty) {
-          requestList.innerHTML = '<div class="col-12 text-center">아직 신청된 서비스가 없습니다.</div>';
-          return;
-        }
-
-        snapshot.forEach(doc => {
-          const request = doc.data();
-          console.log('신청내역 데이터:', request);
-          request.id = doc.id;
-          const card = createRequestCard(request);
-          requestList.appendChild(card);
-        });
-      }, (error) => {
-        console.error('최신 신청내역 조회 오류:', error);
-        requestList.innerHTML = '<div class="col-12 text-center">데이터를 불러오는 중 오류가 발생했습니다.</div>';
-      });
-
-      // 더보기 버튼 클릭 이벤트
-      moreRequestsButton.addEventListener('click', () => {
-        window.location.href = '/mypage.html';
-      });
-
-      // 통계 데이터 로드
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
-      const statsQuery = query(
-        collection(db, 'serviceRequests'),
-        where('createdAt', '>=', Timestamp.fromDate(thirtyDaysAgo))
-      );
-
-      getDocs(statsQuery).then(snapshot => {
-        const totalRequests = snapshot.size;
-        document.getElementById('total-requests').textContent = totalRequests;
-      });
-    });
-  </script>
-
-  <!-- 카카오맵 API -->
-  <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_KAKAO_MAP_API_KEY&libraries=services"></script>
-  
   <!-- 지도 모달 -->
   <div id="mapModal" class="modal">
-      <div class="modal-content">
-          <div class="modal-header">
-              <h3>서비스 위치</h3>
-              <button class="close-modal">
-                  <i class="fas fa-times"></i>
-              </button>
-          </div>
-          <div class="modal-body">
-              <div id="map" style="width:100%;height:400px;"></div>
-              <div class="address-info">
-                  <p><strong>주소:</strong> <span id="mapAddress"></span></p>
-              </div>
-          </div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>서비스 위치</h3>
+        <button class="close-modal">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
+      <div class="modal-body">
+        <div id="map" style="width:100%;height:400px;"></div>
+        <div class="address-info">
+          <p><strong>주소:</strong> <span id="mapAddress"></span></p>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <!-- JavaScript -->
+  <script>
+    console.log('index.html 로드됨');
+    
+    // Firebase 초기화가 완료되면 실행
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.firebaseInitialized) {
+        initializePage();
+      } else {
+        window.addEventListener('firebaseInitialized', () => {
+          console.log('Firebase 초기화 완료');
+          initializePage();
+        });
+      }
+    });
+
+    function initializePage() {
+      // 페이지 초기화 로직
+      console.log('페이지 초기화 완료');
+
+      // 네비게이션 메뉴 토글 시 본문 밀림 및 오버레이
+      const navbarToggler = document.querySelector('.navbar-toggler');
+      const navbarCollapse = document.querySelector('.navbar-collapse');
+      const navbarOverlay = document.querySelector('.navbar-overlay');
+      const heroSection = document.querySelector('.hero-section');
+
+      if (navbarToggler && navbarCollapse && navbarOverlay && heroSection) {
+        navbarToggler.addEventListener('click', () => {
+          const isExpanded = navbarToggler.getAttribute('aria-expanded') === 'true';
+          if (isExpanded) {
+            heroSection.classList.remove('menu-open');
+            navbarOverlay.classList.remove('show');
+          } else {
+            heroSection.classList.add('menu-open');
+            navbarOverlay.classList.add('show');
+          }
+        });
+
+        navbarOverlay.addEventListener('click', () => {
+          navbarCollapse.classList.remove('show');
+          heroSection.classList.remove('menu-open');
+          navbarOverlay.classList.remove('show');
+          navbarToggler.setAttribute('aria-expanded', 'false');
+          navbarToggler.classList.add('collapsed');
+        });
+      }
+
+      // 최신 신청 내역 로딩
+      if (firebase && firebase.firestore) {
+        const db = firebase.firestore();
+        const requestQuery = db.collection('serviceRequests').orderBy('createdAt', 'desc').limit(6);
+        const requestList = document.getElementById('request-list');
+
+        requestQuery.onSnapshot((snapshot) => {
+          console.log('최신 신청내역 조회 결과:', snapshot.size);
+          if (requestList) {
+            requestList.innerHTML = '';
+            if (snapshot.empty) {
+              requestList.innerHTML = '<div class="col-12 text-center">아직 신청된 서비스가 없습니다.</div>';
+              return;
+            }
+
+            snapshot.forEach(doc => {
+              const request = doc.data();
+              request.id = doc.id;
+              const card = createRequestCard(request);
+              requestList.appendChild(card);
+            });
+          }
+        }, (error) => {
+          console.error('최신 신청내역 조회 오류:', error);
+          if (requestList) {
+            requestList.innerHTML = '<div class="col-12 text-center">데이터를 불러오는 중 오류가 발생했습니다.</div>';
+          }
+        });
+
+        // 더보기 버튼 클릭 이벤트
+        const moreRequestsButton = document.getElementById('more-requests-button');
+        if (moreRequestsButton) {
+          moreRequestsButton.addEventListener('click', () => {
+            window.location.href = '/mypage.html';
+          });
+        }
+      }
+
+      // 유틸리티 함수
+      function extractRegion(address) {
+        if (!address) return "";
+        const parts = address.split(" ");
+        if (parts[0] === "세종특별자치시") return parts[0];
+        return parts.length >= 2 ? `${parts[0]} ${parts[1]}` : parts[0];
+      }
+
+      function formatDate(timestamp) {
+        if (!timestamp) return "";
+        const date = timestamp.toDate();
+        return date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+      }
+
+      function createRequestCard(request) {
+        const card = document.createElement('div');
+        card.className = 'col-md-4';
+        card.innerHTML = `
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title">${request.serviceType}</h5>
+              <p class="card-text">
+                <small class="text-muted">${formatDate(request.createdAt)}</small><br>
+                <strong>지역:</strong> ${extractRegion(request.address)}<br>
+                <strong>상태:</strong> ${request.status}
+              </p>
+            </div>
+          </div>
+        `;
+        return card;
+      }
+    }
+  </script>
 </body>
 </html>

@@ -85,7 +85,7 @@ exports.onServiceRequestStatusChange = onCall(async (request) => {
 });
 
 // 뉴스 기사 수집 및 관리 함수
-exports.collectNews = onSchedule("every 24 hours", async (event) => {
+async function collectNews() {
     try {
         const db = admin.firestore();
         const keywords = ['벌초', '예초', '예초기', '태양광 예초', '묘지 관리', '산소 관리'];
@@ -112,7 +112,7 @@ exports.collectNews = onSchedule("every 24 hours", async (event) => {
                 params: {
                     query: keyword,
                     sort: 'date',
-                    display: 5 // 기사 수를 10개에서 5개로 줄임
+                    display: 5
                 },
                 headers: {
                     'X-Naver-Client-Id': functions.config().naver.client_id,
@@ -123,7 +123,7 @@ exports.collectNews = onSchedule("every 24 hours", async (event) => {
             const newsItems = response.data.items.map(item => ({
                 title: item.title,
                 link: item.link,
-                description: item.description.substring(0, 200), // 설명 길이 제한
+                description: item.description.substring(0, 200),
                 pubDate: new Date(item.pubDate),
                 keyword: keyword,
                 createdAt: admin.firestore.FieldValue.serverTimestamp()
@@ -161,9 +161,25 @@ exports.collectNews = onSchedule("every 24 hours", async (event) => {
 
         await saveBatch.commit();
         console.log(`Successfully saved ${newsToSave.length} news articles`);
-        return null;
+        return true;
     } catch (error) {
         console.error('Error collecting news:', error);
-        return null;
+        throw error;
     }
+}
+
+// 매일 자정에 뉴스 수집
+exports.scheduledNewsCollection = functions.scheduler.onSchedule('0 0 * * *', async (context) => {
+  await collectNews();
+});
+
+// 수동으로 뉴스 수집을 실행할 수 있는 HTTP 함수
+exports.manualNewsCollection = functions.https.onRequest(async (req, res) => {
+  try {
+    await collectNews();
+    res.status(200).send('뉴스 수집이 완료되었습니다.');
+  } catch (error) {
+    console.error('뉴스 수집 중 오류 발생:', error);
+    res.status(500).send('뉴스 수집 중 오류가 발생했습니다.');
+  }
 });

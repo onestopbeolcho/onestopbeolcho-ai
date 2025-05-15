@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@google-cloud/vertexai": "^1.9.3",
+    "@google/generative-ai": "^0.24.1",
     "firebase": "^10.8.0"
   },
   "devDependencies": {

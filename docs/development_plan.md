@@ -1,6 +1,156 @@
 # 원스톱 벌초 플랫폼 개발 계획
 
-## 최근 변경사항 (2024-04-16)
+## 최근 변경사항 (2025-05-10)
+- 개인정보 처리방침 업데이트
+  - 원스톱벌초(주식회사 메타아이엠) 개인정보 처리방침 내용 업데이트
+  - 개인정보 수집 및 이용 목적 상세화
+  - 개인정보 보유기간 및 파기절차 명시
+  - 개인정보 보호책임자 정보 추가
+  - 권익침해 구제방법 상세화
+  - 2025년 4월 시행 예정
+
+## 최근 변경사항 (2025-05-09)
+- Firebase SDK 버전 통일 (11.5.0):
+  - 현재 사용 중인 다양한 버전(8.10.1 ~ 11.5.0)을 최신 버전 11.5.0으로 통일
+  - 수정 대상 파일:
+    - mypage.html (8.10.1 → 11.5.0)
+    - index.html (8.10.1 → 11.5.0)
+    - admin-workers.html (9.6.0 → 11.5.0)
+    - news.js (9.6.0 → 11.5.0)
+    - login.html (9.6.1 → 11.5.0)
+    - signup.html (10.8.0 → 11.5.0)
+    - guide.js (10.8.0 → 11.5.0)
+    - mypage.js (10.8.1 → 11.5.0)
+    - worker-signup.html (10.12.0 → 11.5.0)
+  - 목적:
+    - API 일관성 유지
+    - 최신 기능 및 보안 업데이트 활용
+    - 버전 불일치로 인한 문제 방지
+  - 결과: 모든 페이지에서 동일한 Firebase SDK 버전 사용
+
+### 1. 메인 페이지 초기화 개선
+- Firebase 모듈 시스템 적용
+- 페이지 초기화 로직 개선
+- 통계 업데이트 기능 개선
+- 인증 상태 감지 추가
+
+### 2. Firebase 설정 업데이트
+- Firebase API 키 및 프로젝트 설정 복구
+- 실제 프로젝트 설정으로 업데이트
+- 인증 오류 해결
+
+### 3. Google 로그인 기능 개선
+- Google 로그인 버튼 스타일 개선
+- 구체적인 에러 메시지 처리 추가
+- 로그인 상태 표시 개선
+- 팝업 차단 및 취소 처리 추가
+
+### 4. 로그인 기능 개선
+- 로그인 폼 DOM 요소 ID 추가
+- Google 로그인 버튼 추가 및 스타일링
+- DOM 로드 완료 후 스크립트 실행으로 변경
+- 에러 처리 및 사용자 피드백 개선
+
+### 5. Firestore 설정 업데이트
+- enableIndexedDbPersistence를 새로운 방식으로 대체
+- persistentLocalCache와 persistentMultipleTabManager 사용
+- 오프라인 지속성 지원 개선
+
+### 6. 로그인 스크립트 개선
+- 중복된 로그인 스크립트 제거
+- 모듈 기반 로그인 로직으로 통합
+- 에러 처리 및 사용자 피드백 개선
+
+### 7. Firebase 초기화 및 설정 개선
+- Firestore 설정 방식 업데이트 (settings() → enableIndexedDbPersistence)
+- Firebase 초기화 완료 이벤트 시스템 도입
+- 오프라인 지속성 지원 추가
+- 초기화 대기 로직 개선
+
+### 8. JavaScript 모듈 시스템 적용
+- 모든 JavaScript 파일을 ES 모듈 형식으로 변환
+- script 태그에 type="module" 속성 추가
+- Firebase SDK 모듈 import 방식 개선
+- 인증 관련 코드 모듈화 및 재구성
+
+### 9. 모든 Firebase SDK 버전을 11.5.0으로 통일
+- 모듈 import 방식 개선
+- Firebase 초기화 로직 개선
+
+### 10. 네비게이션 바 수정
+- 네비게이션 바 컨테이너 ID 불일치 수정 (navbar-container → navbar-placeholder)
+- 네비게이션 바 초기화 로직 개선
+- 모바일 프로필 섹션 동적 업데이트 기능 추가
+
+### 11. 인증 로직 개선
+- 로그인 오류 분석
+- 인증 프로세스 개선
+- 세션 관리 강화
+
+## 최근 변경사항 (2025-05-08)
+- request.html 지도 기능 복구:
+  - 카카오맵 초기화 코드 개선
+    - 불필요한 인터벌 체크 제거
+    - SDK 로드 확인 로직 단순화
+    - 중복 선언된 변수 제거
+  - 지도 컨테이너 스타일 최적화
+  - 결과: 지도가 정상적으로 표시됨
+
+## 최근 변경사항 (2025-05-05)
+- 네비게이션과 푸터 구조 명확화:
+  - 네비게이션 구조:
+    - HTML 컨테이너: `<div id="navbar-placeholder"></div>`
+    - 스크립트: `scripts/navbar.js`
+    - 로드 방식: 동적 로드 (스크립트에서 HTML 내용 삽입)
+  - 푸터 구조:
+    - HTML 컨테이너: `<div id="footer-placeholder"></div>`
+    - HTML 파일: `components/footer.html`
+    - CSS 파일: `components/footer.css`
+    - 스크립트: `components/footer.js`
+    - 로드 방식: 동적 로드 (스크립트에서 HTML 내용 삽입)
+  - 경로 참조 규칙:
+    - HTML 파일에서: 상대 경로 사용 (예: `components/footer.js`)
+    - 스크립트 내에서: 상대 경로 사용 (예: `components/footer.html`)
+    - Firebase 호스팅: legacy 폴더가 루트로 배포됨을 고려한 경로 설정
+
+## 최근 변경사항 (2025-05-04)
+- 네비게이션 업데이트: 요금 안내 메뉴(pircing.html) 제거 및 관련 링크 정리
+
+## 최근 변경사항 (2025-05-03)
+- footer 디자인 개선:
+  - App Store/Google Play 다운로드 로고 제거
+  - 밝은색 스타일 적용(배경 #ffffff, 텍스트 #343a40, 상단 테두리 #e9ecef, 섀도우 추가)
+  - 링크 기본 색상 변경(#007bff), 호버 색상 변경(#0056b3)
+  - SNS 아이콘 테두리 스타일 적용, 크기 조정 및 호버 시 배경 변경
+
+## 최근 변경사항 (2025-04-18)
+- 파일 경로 참조 방식 수정 및 통일
+  - Firebase 호스팅 설정에서 legacy 폴더가 루트로 배포되는 점 고려하여 경로 수정
+  - 절대 경로(`/legacy/components/...`) 대신 상대 경로(`components/...`) 사용으로 변경
+  - 주요 수정 파일:
+    - `login.html`: 네비게이션과 푸터 스크립트 경로 수정
+      - `/legacy/scripts/navbar.js` → `scripts/navbar.js`
+      - `/legacy/components/footer.js` → `components/footer.js`
+    - `components/footer.js`: HTML 및 CSS 참조 경로 수정
+      - `/legacy/components/footer.html` → `components/footer.html`
+      - `/legacy/components/footer.css` → `components/footer.css`
+  - 루트 디렉토리의 components 폴더 삭제 및 통합
+  - 불필요한 중복 파일(scripts/footer.js) 정리
+  - 결과: 로그인 페이지에서 네비게이션과 푸터가 정상적으로 표시됨
+- 경로 참조 규칙 확립
+  - 모든 HTML 파일에서 스크립트/스타일 참조 시 상대 경로 사용
+  - 스크립트 내에서 리소스 로드 시에도 상대 경로 사용
+  - 모든 푸터 관련 파일은 legacy/components 디렉토리에서 일원화하여 관리
+
+## 최근 변경사항 (2025-04-17)
+- 푸터 관련 파일 통합 및 정리
+  - 루트 폴더의 components/footer.* 파일들을 legacy/components/ 디렉토리로 통합
+  - 푸터 CSS 파일 통합 (두 개의 스타일 파일을 하나로 병합)
+  - 푸터 JS 파일 기능 개선 (카테고리 토글 기능 추가)
+  - 경로 참조 일원화 (/legacy/components/footer.html)
+  - 코드 모듈화 및 재사용성 향상
+
+## 최근 변경사항 (2025-04-16)
 - request.html 지도 기능 개선
   - 지도 컨테이너 스타일 수정 (전체 영역 차지하도록)
   - 지도 초기화 코드 개선
@@ -57,11 +207,49 @@
     - login.html
   - 네비게이션 로드 실패 시 임시 메시지 표시 기능 추가
 
+## 최근 변경사항 (2025-05-06)
+- 카카오맵 기능 개선:
+  - SDK 로딩 방식 개선
+    - 비동기 로딩 적용
+    - 에러 핸들링 추가
+  - 지도 초기화 로직 개선
+    - 컨테이너 스타일 최적화
+    - 지도 타입 및 컨트롤 설정
+    - 윈도우 리사이즈 대응
+  - 주소 검색 기능 강화
+    - 자동 중심 이동
+    - 마커 및 인포윈도우 표시
+    - 드래그 기능 추가
+  - 서비스 타입 선택 로직 개선
+    - 필수 필드 검증
+    - 에러 메시지 표시
+    - 폼 제출 처리 개선
+
+## 최근 변경사항 (2025-05-07)
+- 마이페이지 서비스 신청 내역 표시 개선:
+  - 실제 데이터베이스 구조에 맞게 표시 필드 수정
+  - 신청자 정보, 면적, 묘 정보 등 상세 정보 표시
+  - 묘 유형 한글 표시 기능 추가
+  - 결과: 서비스 신청 내역이 정상적으로 표시됨
+- 마이페이지 스크립트 로드 순서 수정:
+  - Bootstrap JS 추가
+  - 스크립트 로드 순서 최적화
+  - 결과: 서비스 신청 내역이 정상적으로 표시됨
+
+## 최근 변경사항 (2025-03-21)
+- 뉴스 페이지 SEO 최적화
+  - 메인 키워드: "벌초", "예초", "벌초대행"
+  - 지역 키워드: 시/군/구 단위로 확장 (예: "서울 강남구", "부산 해운대구")
+  - 조합 키워드: "서울 강남구 벌초", "부산 해운대구 예초" 등
+  - 카테고리 재구성: 트렌드, 전문가 팁, 지역 뉴스
+  - 구조화된 데이터 개선
+  - 결과: 구글 검색에서 벌초/예초 관련 키워드 검색 시 노출 개선
+
 ### 푸터 컴포넌트 수정
 - 고객센터 정보 업데이트:
-  - 전화번호: 02-1234-5678
+  - 전화번호: 1555-1487
   - 운영시간: 평일 09:00 - 18:00 (점심시간 12:00 - 13:00 제외 · 주말/공휴일 제외)
-  - 이메일: support@onestopbeolcho.com
+  - 이메일: metaim@naver.com
 - 서비스 메뉴 구조 개선:
   - 홈
   - 서비스 신청
@@ -69,13 +257,15 @@
   - 뉴스
   - 문의하기
 - 회사 정보 업데이트:
-  - 회사명: 원스톱 벌초
-  - 대표: 홍길동
-  - 사업자등록번호: 123-45-67890
-  - 주소: 서울특별시 강남구 테헤란로 123
-  - 전화: 02-1234-5678
+  - 회사명: 메타아이엠
+  - 서비스명: 원스톱 벌초
+  - 대표: 주명호
+  - 사업자등록번호: 812-87-03681
+  - 통신판매업 신고번호: 제 2025-4450149-30-2-00021호
+  - 주소: 충청북도 진천군 덕산읍 예지1길 3-1 3층
+  - 전화: 1555-1487
 - 저작권 정보 업데이트:
-  - © 2024 원스톱 벌초. All rights reserved.
+  - © 2025 메타아이엠. All rights reserved.
 
 ### 페이지 복구 및 구조 개선
 - request.html 복구 완료
@@ -118,8 +308,9 @@
   - HTML (components/nav.html)
   - JavaScript (components/nav.js)
 - 푸터
-  - HTML (components/footer.html)
-  - JavaScript (components/footer.js)
+  - HTML (legacy/components/footer.html)
+  - CSS (legacy/components/footer.css)
+  - JavaScript (legacy/components/footer.js)
 
 ### 7. 스타일시트
 - 공통 스타일 (styles/common.css)
@@ -144,6 +335,25 @@
 - 웹앱을 기반으로 하여 안드로이드, iOS 앱을 개발하여 플랫폼 확장
 - 모든 플랫폼에서 일관된 사용자 경험 제공
 - 콘텐츠 자동화 시스템 구축으로 운영 효율성 향상
+
+## 플랫폼 구조 요약
+- 페이지 (legacy 디렉토리)
+  - index.html: 메인 페이지
+  - service_info.html, request.html, rerequest.html, pricing.html, portfolio.html: 서비스 관련
+  - login.html, signup.html, mypage.html: 사용자 관련
+  - worker.html, worker-signup.html, worker-list.html, worker-detail.html: 작업자 관련
+  - admin.html, admin-dashboard.html, admin-workers.html, admin-requests.html, admin-settings.html: 관리자 관련
+  - news.html, contact.html, terms.html, privacy.html: 기타
+- 공통 컴포넌트
+  - scripts/navbar.js: 네비게이션 로드
+  - legacy/components/footer.html, legacy/components/footer.css, legacy/components/footer.js: 푸터
+- 스크립트 (scripts 디렉토리)
+  - firebase-config.js, auth.js, index.js 등 공통 로직
+- 스타일 (styles 디렉토리)
+  - common.css, guide.css, styles.css
+- 이미지 (images 디렉토리)
+- 백엔드 (functions 디렉토리)
+- 문서 (docs 디렉토리)
 
 ## 0. 작업 상태 추적
 ### 중요: 모든 개발 작업은 다음 규칙을 따라야 합니다
@@ -382,6 +592,29 @@
 ## 10. 공통 기능
 - [x] 다크모드 기능 제외 (현재 사이트 디자인과의 일관성 유지)
 
+## 페이지 간 연결 및 공유 기능
+- 공통 컴포넌트
+  - 네비게이션 (scripts/navbar.js): 모든 페이지 상단에 로드
+  - 푸터 (components/footer.html, footer.css, footer.js): 모든 페이지 하단에 로드
+  - 인증 스크립트 (scripts/auth.js): 로그인/회원가입/마이페이지 기능 공유
+  - Firebase 초기화 (scripts/firebase-config.js): 모든 페이지 데이터 연동 설정
+- 페이지 연결 구조
+  - index.html → login.html, signup.html, request.html, service_info.html, portfolio.html, news.html, contact.html
+  - login.html 성공 시 mypage.html, 실패 시 login.html
+  - signup.html 성공 시 login.html
+  - request.html 성공 시 mypage.html
+  - mypage.html 요청 목록 클릭 시 request.html 또는 worker.html
+  - worker-signup.html 성공 시 worker.html
+  - worker.html 요청 클릭 시 request.html
+  - admin.html → admin-dashboard.html
+  - 서비스 관련 페이지 → request.html 링크 포함
+  - 기타 페이지(news.html, contact.html, terms.html, privacy.html) → index.html 및 footer 링크
+- 공유 기능
+  - 공통 스타일 (styles/common.css)
+  - 전화번호 자동 하이픈 입력, 입력 검증(form.js)
+  - SNS 로그인 기능 공통 로직
+  - 이미지 업로드 및 미리보기 컴포넌트
+
 ## 1. 페이지별 상세 개발 계획
 
 ### 1.1 서비스 요청 페이지 (request.html)
@@ -430,7 +663,35 @@
 }
 ```
 
-### 1.2 작업자 페이지 (worker.html)
+### 1.2 작업자 회원가입 페이지 (worker-signup.html)
+#### 현재 기능
+- 회원가입 유형 선택(개인/사업자)
+- 기본 정보 입력(이름, 이메일, 비밀번호, 전화번호)
+- 사업자 정보 입력(사업자등록번호, 대표자명, 사업장 소재지, 세금계산서용 이메일)
+- 작업 정보 입력(작업 가능 지역, 서비스 유형 선택)
+#### 개선 필요 사항
+- [ ] 입력값 유효성 검사 및 실시간 피드백
+- [ ] 프로필 사진 업로드 기능
+- [ ] SNS 로그인 연동
+- [ ] 주소 자동완성 및 지도 연동 개선
+#### 데이터 구조 예시
+```javascript
+{
+  registrationType: string, // individual or business
+  name: string,
+  email: string,
+  password: string,
+  phone: string,
+  businessNumber?: string,
+  representative?: string,
+  businessAddress?: string,
+  taxEmail?: string,
+  regions: string[],
+  services: string[]
+}
+```
+
+### 1.3 작업자 페이지 (worker.html)
 #### 현재 기능
 - 작업 목록 표시
 - 작업 상태 관리
@@ -449,7 +710,7 @@
 - 작업 상태 변경 이력 추적
 - 작업자 평가 시스템 연동
 
-### 1.3 마이페이지 (mypage.html)
+### 1.4 마이페이지 (mypage.html)
 #### 현재 기능
 - 서비스 요청 목록
 - 작업 상태 확인
@@ -514,7 +775,7 @@
 }
 ```
 
-### 1.4 관리자 페이지 (admin.html)
+### 1.5 관리자 페이지 (admin.html)
 #### 현재 기능
 - 사용자 관리
 - 작업 관리
@@ -730,8 +991,8 @@
 ### 2. 문서화
 - API 문서 작성
 - 사용자 매뉴얼 작성
-- 관리자 매뉴얼 작성
-- 개발 문서 작성
+- 개발 가이드라인 작성
+- 배포 프로세스
 
 ### 3. 배포 준비
 - 환경 설정
@@ -857,3 +1118,230 @@ firebase emulators:start
   - `footer-container` ID 사용
   - `footer.js`를 통한 동적 로드
   - 푸터의 기본 레이아웃 구조 
+
+## 회원가입 및 로그인 플로우
+```mermaid
+flowchart TD
+    A[사용자] --> B{로그인 유형 선택}
+    B -->|일반 로그인| C[이메일/비밀번호 입력]
+    B -->|SNS 로그인| D{SNS 선택}
+    
+    C --> E[인증 확인]
+    E -->|성공| F[메인 페이지]
+    E -->|실패| G[로그인 오류]
+    G --> C
+    
+    D -->|카카오| H[카카오 OAuth 인증]
+    D -->|네이버| I[네이버 OAuth 인증]
+    D -->|구글| J[구글 OAuth 인증]
+    D -->|애플| K[애플 OAuth 인증]
+    
+    H & I & J & K --> L[SNS 인증 확인]
+    L -->|성공 + 기존 회원| F
+    L -->|성공 + 신규 회원| M[회원가입 추가 정보 입력]
+    L -->|실패| N[SNS 로그인 오류]
+    N --> B
+    
+    M --> O[회원 정보 저장]
+    O --> F
+    
+    P[회원가입] --> Q[회원가입 폼 작성]
+    Q --> R[이메일 인증]
+    R --> S[회원 정보 저장]
+    S --> F
+``` 
+
+## 세부 기능 명세: 로그인/회원가입 시스템
+- 일반 로그인 (이메일/비밀번호)
+  - 입력값 검증(이메일 형식, 비밀번호 길이)
+  - Firebase Auth 연동(signInWithEmailAndPassword)
+  - 세션 관리(로컬 스토리지/쿠키)
+  - 실패 시 에러 메시지 처리(auth/user-not-found, auth/wrong-password 등)
+- 회원가입 (이메일/비밀번호)
+  - 입력폼(이름, 전화번호, 이메일, 비밀번호, 비밀번호 확인)
+  - 이메일 인증(sendEmailVerification)
+  - 사용자 정보 저장(Firestore users 컬렉션)
+  - 중복 이메일 처리(auth/email-already-in-use)
+- SNS 로그인
+  - 카카오, 네이버, 구글, 애플 OAuth 2.0
+  - 인증 토큰 교환(Functions HTTPS Callable)
+  - 신규/기존 사용자 구분 후 추가 정보 입력
+- 비밀번호 재설정
+  - 이메일 발송(sendPasswordResetEmail)
+  - 성공/실패 피드백 처리
+- 계정 찾기
+  - 이름+전화번호로 Firestore 조회
+  - 결과 피드백(가입 정보 또는 실패 메시지)
+- UI/UX
+  - 네비게이션 및 푸터 포함 공통 컴포넌트
+  - 단계별 Form/모달 디자인
+  - 로딩/에러 상태 표시
+
+## 구현 로드맵: 단계별 계획
+1. 환경 설정
+   - Firebase 프로젝트 및 SDK 초기화
+   - 공통 컴포넌트(navbar/footer) 로드 구조 점검
+2. 이메일/비밀번호 회원가입 & 로그인
+   - signup.html/signup.js, login.html/auth.js 구현
+   - Firestore users 컬렉션 연동 및 UI 검증
+3. 비밀번호 재설정 및 계정 찾기
+   - reset-password, find-account 모달/폼 구현
+   - 이메일 발송 및 Firestore 조회 로직
+4. SNS 로그인 통합
+   - 카카오/네이버/구글 OAuth 설정 및 redirect 핸들러 구현
+   - Functions 토큰 교환 및 Firebase Auth signInWithCustomToken
+5. 신규 사용자 추가 정보 입력
+   - SNS 신규 회원 flow에 맞춘 추가 정보 폼
+6. 보안 및 세션 관리 강화
+   - CSRF/XSS 방어, 쿠키 정책 준수
+   - 로그인 유지(세션 지속성) 최적화
+7. 테스트 및 배포
+   - 유닛/통합 테스트 작성
+   - Firebase Hosting 배포 및 모니터링 설정 
+
+## 원스톱 벌초 플랫폼 설계 계획
+### 플로우차트
+```mermaid
+flowchart TD
+    %% 사용자 시작
+    A[사용자] --> B{메인 페이지}
+
+    %% 메인 페이지에서 선택
+    B -->|로그인| C{로그인 페이지}
+    B -->|회원가입| D{회원가입 페이지}
+    B -->|서비스 신청| E[서비스 신청 페이지]
+    B -->|이용안내| F[서비스 이용안내 페이지]
+    B -->|포트폴리오| G[포트폴리오 페이지]
+    B -->|뉴스| H[뉴스 페이지]
+    B -->|문의하기| I[문의하기 페이지]
+
+    %% 로그인 페이지
+    C -->|일반 로그인| J[이메일/비밀번호 입력]
+    C -->|SNS 로그인| K{SNS 선택}
+    
+    J --> L[인증 확인]
+    L -->|성공| M[마이페이지]
+    L -->|실패| N[로그인 오류]
+    N --> J
+    
+    K -->|카카오| O[카카오 OAuth 인증]
+    K -->|네이버| P[네이버 OAuth 인증]
+    K -->|구글| Q[구글 OAuth 인증]
+    K -->|애플| R[애플 OAuth 인증]
+    
+    O & P & Q & R --> S[SNS 인증 확인]
+    S -->|성공 + 기존 회원| M
+    S -->|성공 + 신규 회원| T[추가 정보 입력]
+    S -->|실패| U[SNS 로그인 오류]
+    U --> B
+    
+    T --> V[회원 정보 저장]
+    V --> M
+
+    %% 회원가입 페이지
+    D --> W[회원가입 폼 작성]
+    W --> X[이메일 인증]
+    X --> Y[회원 정보 저장]
+    Y --> M
+
+    %% 마이페이지 (세부 기능 추가)
+    M -->|서비스 요청 관리| Z[서비스 요청 목록]
+    Z --> ZA[상태별 필터링<br>접수완료/작업중/작업완료]
+    Z --> ZB[상태 변경 알림<br>푸시 알림]
+    Z --> ZC[상세 정보 확인<br>지도/사진/타임라인]
+    M -->|작업자 소통| AA[작업자 상세 페이지]
+    AA --> AAA[실시간 채팅<br>추가 견적 제안/승인]
+    AA --> AAB[작업 현황 업데이트<br>사진 업로드]
+    M -->|알림 설정| AB[알림 설정<br>푸시 알림 ON/OFF]
+    M -->|서비스 장소 관리| AC[장소 관리<br>등록/수정/삭제]
+    AC --> ACA[AR/VR 스캔<br>장소별 서비스 이력]
+
+    %% 서비스 신청 페이지 (세부 기능 추가)
+    E --> EA[서비스 유형 선택<br>벌초/예초/태양광 관리]
+    EA --> EB[위치 입력<br>지도 연동/주소 검색]
+    EB --> EC[정보 입력<br>면적/난이도/특별 요청]
+    EC --> ED[이미지 업로드<br>미리보기 기능]
+    ED --> EE[견적 확인<br>자동 계산/상세 내역]
+    EE --> EF[요청 저장<br>Firestore 저장]
+    EF --> Z
+
+    %% 작업자 관련 페이지 (세부 기능 추가)
+    AA --> AG[작업자 대시보드]
+    AG --> AGA[작업 목록<br>서비스 유형별 필터링]
+    AGA --> AGB[작업 상태 관리<br>상태 업데이트/난이도 표시]
+    AGB --> AGC[캘린더 뷰<br>작업 시간 추정]
+    AGC --> AGD[지도 뷰<br>실시간 위치 공유]
+    AGD --> AGE[이동 경로 최적화<br>최단 경로 계산]
+    AG --> AH[사용자와 소통]
+    AH --> AHA[실시간 채팅<br>긴급 연락 요청]
+    AH --> AHB[추가 견적 제안<br>승인/거절 처리]
+
+    %% 관리자 관련 페이지 (세부 기능 추가)
+    AI[관리자] --> AJ[관리자 대시보드]
+    AJ --> AJA[통계 대시보드<br>신청 건수/작업자 상태]
+    AJA --> AJB[실시간 모니터링<br>작업 진행 상황]
+    AJ --> AK[작업 관리]
+    AK --> AKA[작업 요청 관리<br>승인/취소]
+    AK --> AKB[작업자 매칭<br>위치 기반 매칭]
+    AJ --> AL[작업자 관리]
+    AL --> ALA[작업자 목록<br>등록/수정/삭제]
+    AL --> ALB[작업자 평가<br>평점/리뷰 확인]
+    AJ --> AM[시스템 설정]
+    AM --> AMA[알림 설정<br>자동 알림 템플릿]
+    AM --> AMB[백업 설정<br>수동/자동 백업]
+
+    %% 기타 페이지
+    F -->|서비스 신청으로 이동| E
+    G -->|메인으로 돌아가기| B
+    H -->|메인으로 돌아가기| B
+    I -->|문의 접수| AN[문의 완료]
+    AN --> B
+``` 
+### 설계 계획 요약
+- 로그인/회원가입: 기존 흐름도를 반영하여 사용자 인증 처리.
+- 서비스 신청 페이지: 지도 연동, 이미지 업로드, 견적 계산 등 세부 기능 포함.
+- 마이페이지: 요청 관리, 작업자 소통, 알림 설정, 장소 관리 기능 상세화.
+- 작업자 페이지: 작업 관리 및 사용자 소통 기능 구체화.
+- 어드민 페이지: 통계, 모니터링, 작업/작업자 관리, 시스템 설정 포함.
+
+## 1. 프로젝트 개요
+원스톱 플랫폼은 다양한 서비스를 제공하는 통합 플랫폼입니다.
+
+## 주요 기능
+1. 사용자 인증 및 권한 관리
+2. 서비스 요청 및 관리
+3. 리뷰 시스템
+4. 뉴스 수집 및 표시
+
+## 2024-03-15 업데이트
+- 서비스 신청 페이지 개선
+  - 비회원 서비스 신청 기능 추가
+  - 로그인 체크 로직 완전 제거
+  - 인증 상태 확인 스크립트 제거
+  - 고객 정보 직접 입력 방식으로 변경
+  - 관리자 알림 기능 개선
+  - 비로그인 필수 페이지 목록에 request.html 추가
+  - 단계별 폼 구조 유지
+  - 카카오맵 SDK 로드 방식 개선
+  - 푸터 로드 오류 수정
+  - 단계별 폼 처리 로직 개선
+  - 다음/이전 버튼 이벤트 핸들러 추가
+  - 단계별 유효성 검사 추가
+  - 진행률 표시 기능 개선
+  - 카카오맵 기능 개선
+    - 위성사진 모드로 초기화
+    - 주소 검색 기능 개선
+    - 마커 드래그 기능 추가
+    - 좌표값 자동 저장
+    - 지도 표시 영역 개선
+    - 지도 리사이즈 이벤트 추가
+    - 지도 초기화 로직 개선
+    - 브라우저 배율 변경 이벤트 추가
+
+## 최근 변경사항
+
+### 2024-04-XX
+- 푸터 개선
+  - 회사 정보 섹션에 개인정보 처리방침과 이용약관 링크 추가
+  - 링크 스타일 적용 (호버 효과, 구분자 등)
+  - 모바일 환경에서의 레이아웃 최적화
